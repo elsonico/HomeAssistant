@@ -288,10 +288,10 @@ sensor:
     unit_of_measurement: "EUR"
     unique_id: "currency_cad_eur"
 
-  - name: "USD in EUR"
+  - name: EUR in USD"
     state_topic: "currency/usd_eur"
     value_template: "{{ value | float }}"
-    unit_of_measurement: "EUR"
+    unit_of_measurement: "USD"
     unique_id: "currency_usd_eur"
 
   - name: "EUR in CAD"
@@ -300,9 +300,9 @@ sensor:
     unit_of_measurement: "CAD"
     unique_id: "currency_eur_cad"
 
-  - name: "EUR in USD"
+  - name: "USD in EUR"
     state_topic: "currency/eur_usd"
     value_template: "{{ value | float }}"
-    unit_of_measurement: "USD"
+    unit_of_measurement: "EUR"
     unique_id: "currency_eur_usd"
 
