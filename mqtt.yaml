@@ -288,7 +288,7 @@ sensor:
     unit_of_measurement: "EUR"
     unique_id: "currency_cad_eur"
 
-  - name: EUR in USD"
+  - name: "EUR in USD"
     state_topic: "currency/usd_eur"
     value_template: "{{ value | float }}"
     unit_of_measurement: "USD"
