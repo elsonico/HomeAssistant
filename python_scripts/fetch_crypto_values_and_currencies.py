@@ -99,10 +99,10 @@ def fetch_exchange_rates():
         }
 
         if "usd_eur" in rates and "usd_cad" in rates:
-            usd_eur = rates["usd_eur"]
+            eur_usd = rates["usd_eur"]
             usd_cad = rates["usd_cad"]
-            eur_usd = round(1 / usd_eur, 8)
-            eur_cad = round(usd_cad * usd_eur, 8)
+            usd_eur = round(1 / usd_eur, 8)
+            eur_cad = round(usd_cad / usd_eur, 8)
             cad_eur = round(1 / eur_cad, 8)
 
             rates.update({"eur_usd": eur_usd, "eur_cad": eur_cad, "cad_eur": cad_eur})

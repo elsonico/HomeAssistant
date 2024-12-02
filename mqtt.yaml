@@ -292,7 +292,7 @@ sensor:
     state_topic: "currency/usd_eur"
     value_template: "{{ value | float }}"
     unit_of_measurement: "USD"
-    unique_id: "currency_usd_eur"
+    unique_id: "currency_eur_usd"
 
   - name: "EUR in CAD"
     state_topic: "currency/eur_cad"
@@ -304,5 +304,5 @@ sensor:
     state_topic: "currency/eur_usd"
     value_template: "{{ value | float }}"
     unit_of_measurement: "EUR"
-    unique_id: "currency_eur_usd"
+    unique_id: "currency_usd_eur"
 
