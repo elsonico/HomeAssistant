@@ -543,69 +543,79 @@
            and rate not in ['unknown', 'unavailable'] %}
           {{ (balance | float(0) * price | float(0) / rate | float(1)) | round(2) }}
         {% else %}
-          {% if balance in ['unknown', 'unavailable'] %}
-            {{ 'Balance unknown' }}
-          {% elif price in ['unknown', 'unavailable'] %}
-            {{ 'Price unknown' }}
-          {% elif rate in ['unknown', 'unavailable'] %}
-            {{ 'Rate unknown' }}
-          {% else %}
-            {{ '0' }}
-          {% endif %}
+          {{ 0 }}
         {% endif %}
+      attribute_templates:
+        error_message: >-
+          {% if balance in ['unknown', 'unavailable'] %}
+            Balance unavailable
+          {% elif price in ['unknown', 'unavailable'] %}
+            Price unavailable
+          {% elif rate in ['unknown', 'unavailable'] %}
+            Rate unavailable
+          {% else %}
+            No error
+          {% endif %}
+        balance: "{{ balance }}"
+        price: "{{ price }}"
+        rate: "{{ rate }}"
 
     ltc_balance_in_eur:
       friendly_name: "LTC Balance in EUR"
       unit_of_measurement: '€'
       value_template: >-
-        {% if states('sensor.balance_total_ltc') != 'unknown' 
-           and states('sensor.cryptocoin_value_ltc') != 'unknown'
-           and states('sensor.eur_usd') != 'unknown' %}
-          {{ (states('sensor.balance_total_ltc') | float(0) * 
-              states('sensor.cryptocoin_value_ltc') | float(0) * 
-              states('sensor.eur_usd') | float(1)) | round(2) }}
+        {% set balance = states('sensor.balance_total_ltc') %}
+        {% set price = states('sensor.cryptocoin_value_ltc') %}
+        {% set rate = states('sensor.eur_usd') %}
+        {% if balance not in ['unknown', 'unavailable'] 
+           and price not in ['unknown', 'unavailable']
+           and rate not in ['unknown', 'unavailable'] %}
+          {{ (balance | float(0) * price | float(0) / rate | float(1)) | round(2) }}
         {% else %}
-          0
+          {{ 0 }}
         {% endif %}
 
     doge_balance_in_eur:
       friendly_name: "DOGE Balance in EUR"
       unit_of_measurement: '€'
       value_template: >-
-        {% if states('sensor.balance_total_doge') != 'unknown' 
-           and states('sensor.cryptocoin_value_doge') != 'unknown'
-           and states('sensor.eur_usd') != 'unknown' %}
-          {{ (states('sensor.balance_total_doge') | float(0) * 
-              states('sensor.cryptocoin_value_doge') | float(0) * 
-              states('sensor.eur_usd') | float(1)) | round(2) }}
+        {% set balance = states('sensor.balance_total_doge') %}
+        {% set price = states('sensor.cryptocoin_value_doge') %}
+        {% set rate = states('sensor.eur_usd') %}
+        {% if balance not in ['unknown', 'unavailable'] 
+           and price not in ['unknown', 'unavailable']
+           and rate not in ['unknown', 'unavailable'] %}
+          {{ (balance | float(0) * price | float(0) / rate | float(1)) | round(2) }}
         {% else %}
-          0
+          {{ 0 }}
         {% endif %}
 
     btc_balance_in_eur:
       friendly_name: "BTC Balance in EUR"
       unit_of_measurement: '€'
       value_template: >-
-        {% if states('sensor.balance_total_btc') != 'unknown' 
-           and states('sensor.cryptocoin_value_btc') != 'unknown'
-           and states('sensor.eur_usd') != 'unknown' %}
-          {{ (states('sensor.balance_total_btc') | float(0) * 
-              states('sensor.cryptocoin_value_btc') | float(0) * 
-              states('sensor.eur_usd') | float(1)) | round(2) }}
+        {% set balance = states('sensor.balance_total_btc') %}
+        {% set price = states('sensor.cryptocoin_value_btc') %}
+        {% set rate = states('sensor.eur_usd') %}
+        {% if balance not in ['unknown', 'unavailable'] 
+           and price not in ['unknown', 'unavailable']
+           and rate not in ['unknown', 'unavailable'] %}
+          {{ (balance | float(0) * price | float(0) / rate | float(1)) | round(2) }}
         {% else %}
-          0
+          {{ 0 }}
         {% endif %}
 
     xrp_balance_in_eur:
       friendly_name: "XRP Balance in EUR"
       unit_of_measurement: '€'
       value_template: >-
-        {% if states('sensor.balance_total_xrp') != 'unknown' 
-           and states('sensor.cryptocoin_value_xrp') != 'unknown'
-           and states('sensor.eur_usd') != 'unknown' %}
-          {{ (states('sensor.balance_total_xrp') | float(0) * 
-              states('sensor.cryptocoin_value_xrp') | float(0) * 
-              states('sensor.eur_usd') | float(1)) | round(2) }}
+        {% set balance = states('sensor.balance_total_xrp') %}
+        {% set price = states('sensor.cryptocoin_value_xrp') %}
+        {% set rate = states('sensor.eur_usd') %}
+        {% if balance not in ['unknown', 'unavailable'] 
+           and price not in ['unknown', 'unavailable']
+           and rate not in ['unknown', 'unavailable'] %}
+          {{ (balance | float(0) * price | float(0) / rate | float(1)) | round(2) }}
         {% else %}
-          0
+          {{ 0 }}
         {% endif %}
