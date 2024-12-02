@@ -8,11 +8,8 @@ frontend:
     - /local/community/custom-brand-icons/custom-brand-icons.js
     - /local/hass-crypto-icons.js
 
-
 logger:
   default: info
-# logs:
- #    homeassistant.components.mqtt: debug
 
 # Text to speech
 tts:
@@ -29,7 +26,6 @@ input_datetime:
     has_time: true
     has_date: false
 
-
 automation: !include automations.yaml
 script: !include scripts.yaml
 scene: !include scenes.yaml
@@ -37,7 +33,6 @@ mqtt: !include mqtt.yaml
 influxdb: !include influxdb.yaml
 notify: !include notify.yaml
 shell_command: !include shell.yaml
-
 
 light:
   - platform: group
@@ -51,19 +46,10 @@ python_script:
 
 sensor: !include sensors.yaml
 
-# TLS with letsencrypt add-on
-#http:
-#  server_port: 8143
-#  ssl_certificate: /home/tav/HomeAssistant/ssl/fullchain1.pem
-#  ssl_key: /home/tav/HomeAssistant/ssl/privkey1.pem
-
 http:
   ssl_certificate: /etc/letsencrypt/live/ha.auroranrunner.com/fullchain.pem
   ssl_key: /etc/letsencrypt/live/ha.auroranrunner.com/privkey.pem
-  #base_url: https://ha.auroranrunner.com:8123
-  
-homeassistant:
-  external_url: https://ha.auroranrunner.com:8123
+  external_url: !secret external_url
 
 recorder:
   db_url: !secret db_url
