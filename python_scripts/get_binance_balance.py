@@ -68,19 +68,19 @@ def get_binance_balance(asset):
         "X-MBX-APIKEY": API_KEY
     }
 
-    logging.debug(f"Requesting Binance balance with URL: {url}")
+    logging.debug("Requesting Binance balance with URL: %s", url)
     response = requests.get(url, headers=headers)
 
     if response.status_code == 200:
         data = response.json()
-        logging.debug(f"Received response: {data}")
+        logging.debug("Received response: %s", data)
         for balance in data["balances"]:
             if balance["asset"] == asset:
-                logging.info(f"{asset} Balance: {balance['free']}")
+                logging.info("%s Balance: %s", asset, balance['free'])
                 return float(balance["free"])
-        logging.warning(f"{asset} balance not found in response.")
+        logging.warning("%s balance not found in response.", asset)
     else:
-        logging.error(f"Error {response.status_code}: {response.text}")
+        logging.error("Error %s: %s", response.status_code, response.text)
     return None
 
 def get_conversion_rates():
@@ -98,7 +98,7 @@ def get_conversion_rates():
                 "X-CMC_PRO_API_KEY": COINMARKETCAP_API_KEY
             }
             response = requests.get(COINMARKETCAP_API_URL, headers=headers, params=params)
-            logging.debug(f"Response content for {currency}: {response.content.decode('utf-8')}")
+            logging.debug("Response content for %s: %s", currency, response.content.decode('utf-8'))
             response.raise_for_status()
 
             data = response.json().get("data", {})
@@ -108,11 +108,11 @@ def get_conversion_rates():
             conversion_rates["XRP"][currency.lower()] = data["XRP"]["quote"][currency]["price"]
             conversion_rates["PEPE"][currency.lower()] = data["PEPE"]["quote"][currency]["price"]
 
-        logging.info(f"Retrieved conversion rates: {conversion_rates}")
+        logging.info("Retrieved conversion rates: %s", conversion_rates)
         return conversion_rates
 
     except requests.exceptions.RequestException as e:
-        logging.error(f"Error fetching conversion rates from CoinMarketCap: {e}")
+        logging.error("Error fetching conversion rates from CoinMarketCap: %s", e)
         return None
 
 
@@ -122,10 +122,10 @@ def publish_to_mqtt(topic, message):
         client.username_pw_set(MQTT_USERNAME, MQTT_PASSWORD)
         client.connect(MQTT_BROKER, MQTT_PORT, 60)
         client.publish(topic, message)
-        logging.info(f"Published {message} to MQTT topic {topic}")
+        logging.info("Published %s to MQTT topic %s", message, topic)
         client.disconnect()
     except Exception as e:
-        logging.error(f"An error occurred while publishing to MQTT: {e}")
+        logging.error("An error occurred while publishing to MQTT: %s", e)
 
 if __name__ == "__main__":
     logging.info("Starting Binance balance retrieval and publish script.")
