@@ -38,6 +38,7 @@ Python Scripts:
   - `exodus_mqtt.py` - Exodus wallet tracking
   - `litewallet_balance.py` - Litewallet tracking
   - `fetch_crypto_values_and_currencies.py` - Price updates
+  - `ipv_ha.py ` - DNS management on AWS Route53
 
 ## Security
 
