@@ -535,14 +535,23 @@
       friendly_name: "PEPE Balance in EUR"
       unit_of_measurement: '€'
       value_template: >-
-        {% if states('sensor.balance_total_pepe') != 'unknown' 
-           and states('sensor.cryptocoin_value_pepe') != 'unknown'
-           and states('sensor.eur_usd') != 'unknown' %}
-          {{ (states('sensor.balance_total_pepe') | float(0) * 
-              states('sensor.cryptocoin_value_pepe') | float(0) * 
-              states('sensor.eur_usd') | float(1)) | round(2) }}
+        {% set balance = states('sensor.balance_total_pepe') %}
+        {% set price = states('sensor.cryptocoin_value_pepe') %}
+        {% set rate = states('sensor.eur_usd') %}
+        {% if balance not in ['unknown', 'unavailable'] 
+           and price not in ['unknown', 'unavailable']
+           and rate not in ['unknown', 'unavailable'] %}
+          {{ (balance | float(0) * price | float(0) / rate | float(1)) | round(2) }}
         {% else %}
-          0
+          {% if balance in ['unknown', 'unavailable'] %}
+            {{ 'Balance unknown' }}
+          {% elif price in ['unknown', 'unavailable'] %}
+            {{ 'Price unknown' }}
+          {% elif rate in ['unknown', 'unavailable'] %}
+            {{ 'Rate unknown' }}
+          {% else %}
+            {{ '0' }}
+          {% endif %}
         {% endif %}
 
     ltc_balance_in_eur:
