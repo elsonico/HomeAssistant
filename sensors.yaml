@@ -534,24 +534,69 @@
     pepe_balance_in_eur:
       friendly_name: "PEPE Balance in EUR"
       unit_of_measurement: '€'
-      value_template: "{{ (states('sensor.balance_total_pepe') | float * states('sensor.cryptocoin_value_pepe') | float * states('sensor.currency_usd_eur') | float) | round(2) }}"
+      value_template: >-
+        {% if states('sensor.balance_total_pepe') != 'unknown' 
+           and states('sensor.cryptocoin_value_pepe') != 'unknown'
+           and states('sensor.currency_usd_eur') != 'unknown' %}
+          {{ (states('sensor.balance_total_pepe') | float(0) * 
+              states('sensor.cryptocoin_value_pepe') | float(0) * 
+              states('sensor.currency_usd_eur') | float(0)) | round(2) }}
+        {% else %}
+          0
+        {% endif %}
 
     ltc_balance_in_eur:
       friendly_name: "LTC Balance in EUR"
       unit_of_measurement: '€'
-      value_template: "{{ (states('sensor.balance_total_ltc') | float * states('sensor.cryptocoin_value_ltc') | float * states('sensor.currency_usd_eur') | float) | round(2) }}"
+      value_template: >-
+        {% if states('sensor.balance_total_ltc') != 'unknown' 
+           and states('sensor.cryptocoin_value_ltc') != 'unknown'
+           and states('sensor.currency_usd_eur') != 'unknown' %}
+          {{ (states('sensor.balance_total_ltc') | float(0) * 
+              states('sensor.cryptocoin_value_ltc') | float(0) * 
+              states('sensor.currency_usd_eur') | float(0)) | round(2) }}
+        {% else %}
+          0
+        {% endif %}
 
     doge_balance_in_eur:
       friendly_name: "DOGE Balance in EUR"
       unit_of_measurement: '€'
-      value_template: "{{ (states('sensor.balance_total_doge') | float * states('sensor.cryptocoin_value_doge') | float * states('sensor.currency_usd_eur') | float) | round(2) }}"
+      value_template: >-
+        {% if states('sensor.balance_total_doge') != 'unknown' 
+           and states('sensor.cryptocoin_value_doge') != 'unknown'
+           and states('sensor.currency_usd_eur') != 'unknown' %}
+          {{ (states('sensor.balance_total_doge') | float(0) * 
+              states('sensor.cryptocoin_value_doge') | float(0) * 
+              states('sensor.currency_usd_eur') | float(0)) | round(2) }}
+        {% else %}
+          0
+        {% endif %}
 
     btc_balance_in_eur:
       friendly_name: "BTC Balance in EUR"
       unit_of_measurement: '€'
-      value_template: "{{ (states('sensor.balance_total_btc') | float * states('sensor.cryptocoin_value_btc') | float * states('sensor.currency_usd_eur') | float) | round(2) }}"
+      value_template: >-
+        {% if states('sensor.balance_total_btc') != 'unknown' 
+           and states('sensor.cryptocoin_value_btc') != 'unknown'
+           and states('sensor.currency_usd_eur') != 'unknown' %}
+          {{ (states('sensor.balance_total_btc') | float(0) * 
+              states('sensor.cryptocoin_value_btc') | float(0) * 
+              states('sensor.currency_usd_eur') | float(0)) | round(2) }}
+        {% else %}
+          0
+        {% endif %}
 
     xrp_balance_in_eur:
       friendly_name: "XRP Balance in EUR"
       unit_of_measurement: '€'
-      value_template: "{{ (states('sensor.balance_total_xrp') | float * states('sensor.cryptocoin_value_xrp') | float * states('sensor.currency_usd_eur') | float) | round(2) }}"
+      value_template: >-
+        {% if states('sensor.balance_total_xrp') != 'unknown' 
+           and states('sensor.cryptocoin_value_xrp') != 'unknown'
+           and states('sensor.currency_usd_eur') != 'unknown' %}
+          {{ (states('sensor.balance_total_xrp') | float(0) * 
+              states('sensor.cryptocoin_value_xrp') | float(0) * 
+              states('sensor.currency_usd_eur') | float(0)) | round(2) }}
+        {% else %}
+          0
+        {% endif %}
