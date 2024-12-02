@@ -13,6 +13,8 @@
 !scripts.yaml
 !sensors.yaml
 !shell.yaml
+!README.md
+!LICENSE
 
 # Python scripts directory
 !python_scripts/
