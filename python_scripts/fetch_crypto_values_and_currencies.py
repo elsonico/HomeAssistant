@@ -99,9 +99,9 @@ def fetch_exchange_rates():
         }
 
         if "usd_eur" in rates and "usd_cad" in rates:
-            eur_usd = rates["usd_eur"]
+            usd_eur = rates["usd_eur"]
             usd_cad = rates["usd_cad"]
-            usd_eur = round(1 / eur_usd, 8)
+            eur_usd = round(1 / usd_eur, 8)
             eur_cad = round(usd_cad / usd_eur, 8)
             cad_eur = round(1 / eur_cad, 8)
 
