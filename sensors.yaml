@@ -537,10 +537,10 @@
       value_template: >-
         {% if states('sensor.balance_total_pepe') != 'unknown' 
            and states('sensor.cryptocoin_value_pepe') != 'unknown'
-           and states('sensor.currency_usd_eur') != 'unknown' %}
+           and states('sensor.eur_usd') != 'unknown' %}
           {{ (states('sensor.balance_total_pepe') | float(0) * 
-              states('sensor.cryptocoin_value_pepe') | float(0) / 
-              states('sensor.currency_eur_usd') | float(1)) | round(2) }}
+              states('sensor.cryptocoin_value_pepe') | float(0) * 
+              states('sensor.eur_usd') | float(1)) | round(2) }}
         {% else %}
           0
         {% endif %}
@@ -551,10 +551,10 @@
       value_template: >-
         {% if states('sensor.balance_total_ltc') != 'unknown' 
            and states('sensor.cryptocoin_value_ltc') != 'unknown'
-           and states('sensor.currency_eur_usd') != 'unknown' %}
+           and states('sensor.eur_usd') != 'unknown' %}
           {{ (states('sensor.balance_total_ltc') | float(0) * 
-              states('sensor.cryptocoin_value_ltc') | float(0) / 
-              states('sensor.currency_eur_usd') | float(1)) | round(2) }}
+              states('sensor.cryptocoin_value_ltc') | float(0) * 
+              states('sensor.eur_usd') | float(1)) | round(2) }}
         {% else %}
           0
         {% endif %}
@@ -565,10 +565,10 @@
       value_template: >-
         {% if states('sensor.balance_total_doge') != 'unknown' 
            and states('sensor.cryptocoin_value_doge') != 'unknown'
-           and states('sensor.currency_eur_usd') != 'unknown' %}
+           and states('sensor.eur_usd') != 'unknown' %}
           {{ (states('sensor.balance_total_doge') | float(0) * 
-              states('sensor.cryptocoin_value_doge') | float(0) / 
-              states('sensor.currency_eur_usd') | float(1)) | round(2) }}
+              states('sensor.cryptocoin_value_doge') | float(0) * 
+              states('sensor.eur_usd') | float(1)) | round(2) }}
         {% else %}
           0
         {% endif %}
@@ -579,10 +579,10 @@
       value_template: >-
         {% if states('sensor.balance_total_btc') != 'unknown' 
            and states('sensor.cryptocoin_value_btc') != 'unknown'
-           and states('sensor.currency_eur_usd') != 'unknown' %}
+           and states('sensor.eur_usd') != 'unknown' %}
           {{ (states('sensor.balance_total_btc') | float(0) * 
-              states('sensor.cryptocoin_value_btc') | float(0) / 
-              states('sensor.currency_eur_usd') | float(1)) | round(2) }}
+              states('sensor.cryptocoin_value_btc') | float(0) * 
+              states('sensor.eur_usd') | float(1)) | round(2) }}
         {% else %}
           0
         {% endif %}
@@ -593,10 +593,10 @@
       value_template: >-
         {% if states('sensor.balance_total_xrp') != 'unknown' 
            and states('sensor.cryptocoin_value_xrp') != 'unknown'
-           and states('sensor.currency_eur_usd') != 'unknown' %}
+           and states('sensor.eur_usd') != 'unknown' %}
           {{ (states('sensor.balance_total_xrp') | float(0) * 
-              states('sensor.cryptocoin_value_xrp') | float(0) / 
-              states('sensor.currency_eur_usd') | float(1)) | round(2) }}
+              states('sensor.cryptocoin_value_xrp') | float(0) * 
+              states('sensor.eur_usd') | float(1)) | round(2) }}
         {% else %}
           0
         {% endif %}
