@@ -49,6 +49,8 @@ sensor: !include sensors.yaml
 http:
   ssl_certificate: /etc/letsencrypt/live/ha.auroranrunner.com/fullchain.pem
   ssl_key: /etc/letsencrypt/live/ha.auroranrunner.com/privkey.pem
+
+homeassistant:
   external_url: !secret external_url
 
 recorder:
