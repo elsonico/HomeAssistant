@@ -524,4 +524,8 @@
       value_template: >
         {{ (states('sensor.binance_balance_xrp')) | float(0) | round(8) }}
       unit_of_measurement: "XRP"
+    balance_total_pepe:
+      value_template: >
+        {{ (states('sensor.binance_balance_pepe') | float(0)) | round(8) }}
+      unit_of_measurement: "PEPE"
 
