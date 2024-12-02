@@ -1,0 +1,477 @@
+- id: '1663398489357'
+  alias: Set device start time
+  description: ''
+  trigger:
+  - platform: time
+    at: '23:10:00'
+  condition:
+  - condition: not
+    conditions:
+    - condition: state
+      entity_id: sensor.cheapest_hours_energy_tomorrow
+      state: unknown
+  action:
+  - service: input_datetime.set_datetime
+    data:
+      time: '{{ as_timestamp(states(''sensor.cheapest_hours_energy_tomorrow'')) |
+        timestamp_custom(''%H:%M'') }}'
+    target:
+      entity_id: input_datetime.device_start_time
+- id: '1663398489358'
+  alias: Set device end time
+  description: ''
+  trigger:
+  - platform: time
+    at: '23:15:00'
+  condition:
+  - condition: not
+    conditions:
+    - condition: state
+      entity_id: sensor.cheapest_hours_energy_tomorrow
+      state: unknown
+  action:
+  - service: input_datetime.set_datetime
+    data:
+      time: '{{ ((as_timestamp(states(''sensor.cheapest_hours_energy_tomorrow''))
+        + (3600*2)) | timestamp_custom(''%H:%M'')) }}'
+    target:
+      entity_id: input_datetime.device_end_time
+  mode: single
+- id: '1663399614817'
+  alias: Turn on Hallway AC
+  description: Cheap energy time turn on hallway AC
+  trigger:
+  - platform: time
+    at: input_datetime.device_start_time
+  condition:
+    condition: and
+    conditions:
+    - condition: time
+      after: 00:00
+      before: 04:00
+  action:
+  - service: climate.turn_on
+    target:
+      entity_id: climate.ac_12494102
+  mode: single
+- id: '1663399614818'
+  alias: Increase heating
+  description: Cheap energy time set heating to 24C
+  trigger:
+  - platform: time
+    at: input_datetime.device_start_time
+  condition:
+    condition: and
+    conditions:
+    - condition: time
+      after: 00:00
+      before: 04:00
+  action:
+  - service: climate.set_temperature
+    data:
+      temperature: 24
+    target:
+      entity_id: climate.ac_12494102
+  mode: single
+- id: '1663399614819'
+  alias: Hallway AC fan to high
+  description: Cheap energy time set fan to high
+  trigger:
+  - platform: time
+    at: input_datetime.device_start_time
+  condition:
+    condition: and
+    conditions:
+    - condition: time
+      after: 00:00
+      before: 04:00
+  action:
+  - service: climate.set_fan_mode
+    data:
+      fan_mode: High
+    target:
+      entity_id: climate.ac_12494102
+  mode: single
+- id: '1663399614820'
+  alias: Hallway AC fan to Auto
+  description: Cheap energy end time set fan to Auto
+  trigger:
+  - platform: time
+    at: input_datetime.device_end_time
+  condition:
+    condition: and
+    conditions:
+    - condition: time
+      after: 01:59
+      before: 06:00
+  action:
+  - service: climate.set_fan_mode
+    data:
+      fan_mode: Auto
+    target:
+      entity_id: climate.ac_12494102
+  mode: single
+- id: '1663399614821'
+  alias: Hallway AC temp to 20
+  description: Cheap energy end time set temp to 20
+  trigger:
+  - platform: time
+    at: input_datetime.device_end_time
+  condition:
+    condition: and
+    conditions:
+    - condition: time
+      after: 01:59
+      before: 06:00
+  action:
+  - service: climate.set_temperature
+    data:
+      temperature: 20
+    target:
+      entity_id: climate.ac_12494102
+  mode: single
+- id: bedroom_ac_off_630pm
+  alias: Bedroom heating off
+  description: Set off beddroom heating 6:30PM
+  trigger:
+  - platform: time
+    at: '18:30:00'
+  action:
+  - service: climate.turn_off
+    target:
+      entity_id: climate.ac_12488762
+- id: bedroom_ac_on
+  alias: Bedroom heating on
+  description: Set on bedroom heating
+  trigger:
+  - platform: time
+    at: 09:00:00
+  condition:
+    condition: or
+    conditions:
+    - condition: numeric_state
+      entity_id: sensor.nordpool_kwh_fi_eur_3_10_0255
+      below: sensor.energy_spot_average_price
+    - condition: numeric_state
+      entity_id: sensor.shellyht_707c09_temperature
+      below: 22
+  action:
+  - service: climate.turn_on
+    target:
+      entity_id: climate.ac_12488762
+- id: bedroom_ac_temp20_09am
+  alias: Bedroom heating 19 9AM
+  description: Set bedroom heating to 20
+  trigger:
+  - platform: time
+    at: 09:00:00
+  action:
+  - service: climate.set_temperature
+    data:
+      temperature: 20
+    target:
+      entity_id: climate.ac_12488762
+- id: hallway_ac_temp17_10pm
+  alias: Hallway heating 17
+  description: Set hallway heating to 17 10PM
+  trigger:
+  - platform: time
+    at: '22:00:00'
+  action:
+  - service: climate.set_temperature
+    data:
+      temperature: 17
+    target:
+      entity_id: climate.ac_12494102
+- id: hallway_ac_fan_low_spot
+  alias: If spot price below average increase heat
+  description: With low price increase heat by 1
+  trigger:
+  - platform: numeric_state
+    entity_id: sensor.nordpool_kwh_fi_eur_3_10_0255
+    below: sensor.energy_spot_average_price
+  condition:
+    condition: and
+    conditions:
+    - condition: time
+      after: 08:00
+      before: '17:00'
+  action:
+  - service: climate.set_temperature
+    data:
+      temperature: '{{ state_attr(''climate.ac_12494102'', ''temperature'') + 1 }}'
+    target:
+      entity_id: climate.ac_12494102
+  mode: single
+- id: hallway_ac_fan_expensive_spot
+  alias: If spot price above average cents set heat 1C lower
+  description: ''
+  trigger:
+  - platform: numeric_state
+    entity_id: sensor.nordpool_kwh_fi_eur_3_10_0255
+    above: sensor.energy_spot_average_price
+  condition:
+    condition: and
+    conditions:
+    - condition: time
+      after: 08:00
+      before: '22:00'
+  action:
+  - service: climate.set_temperature
+    data:
+      temperature: '{{ state_attr(''climate.ac_12494102'', ''temperature'') - 1 }}'
+    target:
+      entity_id: climate.ac_12494102
+  mode: single
+- id: bedroom_ac_fan_expensive_spot
+  alias: If spot price above average turn off bedroom heating
+  description: ''
+  trigger:
+  - platform: numeric_state
+    entity_id: sensor.nordpool_kwh_fi_eur_3_10_0255
+    above: sensor.energy_spot_average_price
+  condition:
+    condition: and
+    conditions:
+    - condition: time
+      after: 09:00
+      before: '18:30'
+    - condition: numeric_state
+      entity_id: sensor.ac_12488762_outdoor_temperature
+      above: 0
+  action:
+  - service: climate.turn_off
+    target:
+      entity_id: climate.ac_12488762
+  mode: single
+- id: bedroom_ac_fan_affordable_spot
+  alias: If spot price below average turn on bedroom heating
+  description: ''
+  trigger:
+  - platform: numeric_state
+    entity_id: sensor.nordpool_kwh_fi_eur_3_10_0255
+    below: sensor.energy_spot_average_price
+  condition:
+    condition: and
+    conditions:
+    - condition: time
+      after: 09:00
+      before: '18:30'
+  action:
+  - service: climate.turn_on
+    target:
+      entity_id: climate.ac_12488762
+  mode: single
+- id: hallway_ac_fan_on_low_temp
+  alias: If temp below 2 set on
+  description: ''
+  trigger:
+  - platform: numeric_state
+    entity_id: sensor.ac_12488762_outdoor_temperature
+    below: 2
+  condition: []
+  action:
+  - service: climate.turn_on
+    target:
+      entity_id: climate.ac_12494102
+  mode: single
+- id: if_cold_at_morning_heating_high
+  alias: Hallway AC fan to high if cold
+  description: morning heating on if cold
+  trigger:
+  - platform: time
+    at: 04:00:00
+  condition:
+    condition: and
+    conditions:
+    - condition: time
+      before: input_datetime.device_start_time
+    - condition: numeric_state
+      entity_id: sensor.shellyht_707c09_temperature
+      below: 22
+  action:
+  - service: climate.set_fan_mode
+    data:
+      fan_mode: High
+    target:
+      entity_id: climate.ac_12494102
+  mode: single
+- id: if_cold_at_morning_heating_on
+  alias: Hallway AC to 20 if cold
+  description: morning heating to on if cold
+  trigger:
+  - platform: time
+    at: 04:00:00
+  condition:
+    condition: and
+    conditions:
+    - condition: time
+      before: input_datetime.device_start_time
+    - condition: numeric_state
+      entity_id: sensor.shellyht_707c09_temperature
+      below: 22
+  action:
+  - service: climate.turn_on
+    target:
+      entity_id: climate.ac_12494102
+  mode: single
+- id: if_cold_at_morning_heating_22
+  alias: Hallway AC to 20 if cold
+  description: morning heating to 22 if cold
+  trigger:
+  - platform: time
+    at: 04:00:00
+  condition:
+    condition: and
+    conditions:
+    - condition: time
+      before: input_datetime.device_start_time
+    - condition: numeric_state
+      entity_id: sensor.shellyht_707c09_temperature
+      below: 22
+  action:
+  - service: climate.set_temperature
+    data:
+      temperature: 22
+    target:
+      entity_id: climate.ac_12494102
+  mode: single
+- id: Fan to Auto on cold morning
+  alias: Hallway AC fan to Auto on cold morning
+  description: Cold morning set fan to Auto
+  trigger:
+  - platform: time
+    at: 05:00:00
+  condition:
+    condition: and
+    conditions:
+    - condition: time
+      before: input_datetime.device_end_time
+  action:
+  - service: climate.set_fan_mode
+    data:
+      fan_mode: Auto
+    target:
+      entity_id: climate.ac_12494102
+  mode: single
+- id: AC to 20 on cold morning
+  alias: Hallway AC to 20 on cold morning
+  description: Cold morning set fan to 20
+  trigger:
+  - platform: time
+    at: 05:00:00
+  condition:
+    condition: and
+    conditions:
+    - condition: time
+      before: input_datetime.device_end_time
+  action:
+  - service: climate.set_temperature
+    data:
+      temperature: 20
+    target:
+      entity_id: climate.ac_12494102
+  mode: single
+- id: vacuum_downstairs
+  alias: Vacuum Downstairs
+  description: Vacuum Downstairs at Midnight
+  triggers:
+  - at: '11:20:00'
+    trigger: time
+  actions:
+  - data:
+      entity_id: vacuum.dreambot
+      segments:
+      - 2
+      - 4
+      - 5
+      - 1
+      - 3
+      suction_level: 3
+    action: dreame_vacuum.vacuum_clean_segment
+  mode: single
+- id: notify_external_ip_change_update_dns
+  alias: Notify and Update DNS when external IP changes
+  initial_state: true
+  trigger:
+    platform: state
+    entity_id: sensor.myip
+  action:
+  - service: shell_command.update_dns
+- id: notify_external_ip_change_by_email
+  alias: Notify when external ip changes
+  initial_state: true
+  trigger:
+    platform: state
+    entity_id: sensor.myip
+  action:
+    service: notify.email_notify
+    data_template:
+      message: New external IP address is {{ states('sensor.myip') }}
+- id: notify_external_ip_change_with_whats_app
+  alias: Notify when external ip changes with whats app
+  initial_state: true
+  trigger:
+    platform: state
+    entity_id: sensor.myip
+  action:
+    service: notify.whatsapp
+    data_template:
+      message: New external IP address is {{ states('sensor.myip') }}
+      title: External IP address changed
+      target: 14164327184@c.us
+- alias: Publish Binance Balance
+  trigger:
+  - platform: time_pattern
+    minutes: '0'
+  - platform: homeassistant
+    event: start
+  action:
+  - service: shell_command.publish_ltc_balance
+  - delay:
+      seconds: 5
+  id: a40913a23f354c1aac3758b17e9b03f0
+- alias: Publish Exodus Balance
+  trigger:
+  - platform: time_pattern
+    minutes: '0'
+  - platform: homeassistant
+    event: start
+  action:
+  - service: shell_command.publish_exodus_balance
+  - delay:
+      seconds: 5
+  id: 91828ba988a444d881d5e2ea7343955f
+- alias: Publish Kraken Balance
+  trigger:
+  - platform: time_pattern
+    minutes: '0'
+  - platform: homeassistant
+    event: start
+  action:
+  - service: shell_command.publish_kraken_balance
+  - delay:
+      seconds: 5
+  id: 8d76223474a64fd9b1fa1fcf32bdccf5
+- alias: Publish Litewallet Balance
+  trigger:
+  - platform: time_pattern
+    minutes: '0'
+  - platform: homeassistant
+    event: start
+  action:
+  - service: shell_command.publish_litewallet_balance
+  - delay:
+      seconds: 5
+  id: 9315a4cde0fb4eda89d920463ff30e0f
+- alias: Fetch Crypto Values
+  trigger:
+  - platform: time_pattern
+    minutes: /10
+  - platform: homeassistant
+    event: start
+  action:
+  - service: shell_command.publish_fetch_crypto_currency
+  - delay:
+      seconds: 5
+  id: 6c36ff4b838d4a9dba444d4de4d5f9b6

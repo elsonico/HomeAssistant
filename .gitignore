@@ -1,0 +1,24 @@
+# Ignore everything by default
+*
+
+# Then explicitly allow the files we want to track
+!.gitignore
+!configuration.yaml
+!automations.yaml
+!docker-compose.yaml
+!influxdb.yaml
+!mqtt.yaml
+!notify.yaml
+!scenes.yaml
+!scripts.yaml
+!sensors.yaml
+!shell.yaml
+
+# Python scripts directory
+!python_scripts/
+!python_scripts/*.py
+!python_scripts/requirements.txt
+
+# Always ignore secrets, regardless of location
+secrets.yaml
+**/secrets.yaml

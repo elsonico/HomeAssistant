@@ -1,0 +1,18 @@
+- name: email_notify
+  platform: smtp
+  server: !secret mail_server
+  port: 587
+  timeout: 15
+  sender: !secret mail_sender
+  encryption: starttls
+  username: !secret mail_user
+  password: !secret mail_pass
+  recipient:
+    - !secret rcpt
+  sender_name: !secret sender_name
+
+- name: whatsapp
+  platform: wapi
+  session: HomeAssistant #Set your own session
+  url: ${WAURL} #Set the url configured in the whatsapp-api docker
+  #token: #Optional - This token shoukd be equel to the token you set in the whatsapp-api configuration.

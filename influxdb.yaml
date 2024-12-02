@@ -1,0 +1,80 @@
+api_version: 2
+ssl: false
+host: !secret influx_host
+port: !secret influx_port
+token: !secret influx_token
+organization: !secret influx_org
+bucket: !secret influx_bucket
+tags:
+  source: HA
+tags_attributes:
+  - friendly_name
+default_measurement: "sensor_data"  # Fallback measurement name
+measurement_attr: "domain__device_class"    # Use "domain__device_class" as measurement name
+exclude:
+  entities:
+    - zone.home
+include:
+  entities:
+    - sensor.nordpool_kwh_fi_eur_3_10_0255
+    - sensor.speedtest_download
+    - sensor.speedtest_upload
+    - sensor.speedtest_ping
+    - sensor.system_monitor_processor_temperature
+    - sensor.system_monitor_processor_use
+    - sensor.system_monitor_memory_free
+    - sensor.system_monitor_memory_use
+    - sensor.system_monitor_memory_usage
+    - sensor.system_monitor_disk_free
+    - sensor.system_monitor_disk_usage
+    - sensor.system_monitor_network
+    - sensor.system_monitor_network_throughput_out_enp2s0
+    - sensor.system_monitor_network_throughput_in_enp2s0
+    - sensor.system_monitor_network_in_enp2s0
+    - sensor.system_monitor_network_out_enp2s0
+    - sensor.system_monitor_network_throughput_out_wlo1
+    - sensor.system_monitor_network_throughput_in_wlo1
+    - sensor.system_monitor_load_1m
+    - sensor.system_monitor_load_5m
+    - sensor.system_monitor_load_15m
+    - sensor.uptime
+    - sensor.temperature_tapio_s_office
+    - sensor.ac_12488762_outdoor_temperature
+    - sensor.openweathermap_temperature
+    - ensor.energy_spot_average_price
+    - sensor.shellyplug_288323_power
+    - sensor.wind_power_estimate
+    - sensor.wind_power_today
+    - sensor.litecoin_price_eur
+    - sensor.litecoin_price_usd
+    - sensor.litecoin_price
+    - sensor.dogecoin_price_eur
+    - sensor.dogecoin_price_usd
+    - sensor.dogecoin_price
+    - sensor.exodus_ltc_balance
+    - sensor.exodus_doge_balance
+    - sensor.binance_ltc_balance
+    - sensor.exodus_ltc_balance
+    - sensor.cryptoinfo_btc_price
+    - sensor.cryptoinfo_btc_price_eur
+    - sensor.litewallet_balance_total_eur
+    - sensor.litewallet_balance_total_usd
+    - sensor.litewallet_balance_total_cad
+    - sensor.balance_total_eur
+    - sensor.balance_total_usd
+    - sensor.balance_total_cad
+    - sensor.crypto_coin_value_ltc
+    - sensor.crypto_coin_value_doge
+    - sensor.crypto_coin_value_btc
+    - sensor.crypto_coin_value_eth
+    - sensor.crypto_coin_value_xrp
+    - sensor.crypto_coin_value_xpm
+    - sensor.crypto_coin_value_sol
+    - sensor.crypto_coin_value_shib
+    - sensor.crypto_coin_value_pepe
+    - sensor.ac_12494102_outdoor_temperature
+    - sensor.openweathermap_temperature
+    - sensor.eur_usd
+    - sensor.eur_cad
+    - sensor.cad_eur
+    - sensor.cad_usd

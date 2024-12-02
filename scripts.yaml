@@ -1,0 +1,82 @@
+clean_kitchen:
+  alias: Clean Kitchen
+  sequence:
+    - service: dreame_vacuum.vacuum_clean_segment
+      data:
+        entity_id: vacuum.dreambot
+        segments:
+          - 1
+  mode: single
+
+clean_dining_room:
+  alias: Clean Dining Room
+  sequence:
+    - service: dreame_vacuum.vacuum_clean_segment
+      data:
+        entity_id: vacuum.dreambot
+        segments:
+          - 2
+  mode: single
+
+clean_living_room:
+  alias: Clean Living Room
+  sequence:
+    - service: dreame_vacuum.vacuum_clean_segment
+      data:
+        entity_id: vacuum.dreambot
+        segments:
+          - 3
+  mode: single
+
+
+clean_corridor:
+  alias: Clean Corridor
+  sequence:
+    - service: dreame_vacuum.vacuum_clean_segment
+      data:
+        entity_id: vacuum.dreambot
+        segments:
+          - 4
+  mode: single
+
+
+clean_hallway:
+  alias: Clean Hallway
+  sequence:
+    - service: dreame_vacuum.vacuum_clean_segment
+      data:
+        entity_id: vacuum.dreambot
+        segments:
+          - 5
+  mode: single
+
+
+switch_to_first_floor:
+  alias: Switch to First Floor Map
+  sequence:
+    - service: dreame_vacuum.vacuum_select_map
+      data:
+        entity_id: vacuum.dreambot
+        map_id: 16
+  mode: single
+
+
+switch_to_bedroom:
+  alias: Switch to Bedroom Map
+  sequence:
+    - service: dreame_vacuum.vacuum_select_map
+      data:
+        entity_id: vacuum.dreambot
+        map_id: 32
+  mode: single
+
+
+switch_to_hall:
+  alias: Switch to Hall Map
+  sequence:
+    - service: dreame_vacuum.vacuum_select_map
+      data:
+        entity_id: vacuum.dreambot
+        map_id: 44
+  mode: single
+

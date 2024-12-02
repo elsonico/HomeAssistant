@@ -1,0 +1,29 @@
+version: '3'
+services:
+  homeassistant:
+    container_name: home-assistant
+    image: homeassistant/home-assistant:latest
+    volumes:
+      - /home/tav/HomeAssistant/:/config
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/letsencrypt:/etc/letsencrypt
+      - /var/log/ipv64:/config/ipv64
+      - /home/tav/.aws:/root/.aws
+    devices:
+      - /dev/ttyACM0:/dev/ttyACM0
+      - dev/serial/by-id/usb-dresden_elektronik_ingenieurtechnik_GmbH_ConBee_II_DE2656015-if00:dev/serial/by-id/usb-dresden_elektronik_ingenieurtechnik_GmbH_ConBee_II_DE2656015-if00
+    environment:
+      - TZ=Europe/Helsinki
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_HOST=${POSTGRES_HOST}
+      - POSTGRES_DB=${POSTGRES_DB}
+      - MAILUSER=${MAILUSER}
+      - MAILPASS=${MAILPASS}
+      - RCPT=${RCPT}
+      - MAILSENDER=${MAILSENDER}
+      - SENDERNAME=${SENDERNAME}
+      - MAILSERVER=${MAILSERVER}
+      - WAURL=${WAURL}
+    restart: unless-stopped
+    network_mode: host

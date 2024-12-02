@@ -1,0 +1,527 @@
+- platform: rest
+  resource_template: >-
+    https://data.fingrid.fi/api/datasets/245/data?format=xml&pageSize=1000&startTime={{(utcnow() - timedelta(hours = -1)).strftime('%Y-%m-%dT%H:00:00Z')}}&endTime={{ (utcnow() - timedelta(days = -1)).strftime('%Y-%m-%dT%H:00:00Z')}}
+  name: Wind power estimate
+  icon: mdi:wind-power
+  value_template: 'OK'
+  headers:
+    x-api-key: !secret fingrid_api_key
+  json_attributes:
+    - "events"
+  scan_interval: 3600
+
+- platform: rest
+  resource_template: >-
+    https://data.fingrid.fi/api/datasets/245/data?format=xml&pageSize=1000&startTime={{ (utcnow() - timedelta(hours=0)).strftime('%Y-%m-%dT00:00:00Z') }}&endTime={{ (utcnow()).strftime('%Y-%m-%dT%H:%M:%SZ') }}
+  name: Wind power today
+  icon: mdi:wind-turbine
+  value_template: 'OK'
+  headers:
+    x-api-key: !secret fingrid_api_key
+  json_attributes:
+    - "events"
+  scan_interval: 3600
+
+
+- platform: template
+  sensors:
+    energy_spot_price:
+      friendly_name: "Nordpool Spot Price"
+      unit_of_measurement: 'c/kWh'
+      value_template: "{{ ('sensor.nordpool_kwh_fi_eur_3_10_0255')  }}"
+    energy_helen:
+      friendly_name: "Helen Spot Price €/kWh"
+      unit_of_measurement: '€/kWh'
+      value_template: "{{ (states('sensor.nordpool_kwh_fi_eur_3_10_0255')  | float / 100  ) | round(4) + 0.0034 }}"
+
+    energy_helen_alv10c:
+      friendly_name: "Helen Spot Price c/kWh alv. 24%"
+      unit_of_measurement: 'c/kWh'
+      value_template: "{{ (states('sensor.nordpool_kwh_fi_eur_3_10_0255')  |  float + 0.34 ) }}" 
+
+    energy_spot_average_price:
+      friendly_name: "Nordpool Average Spot Price"
+      unit_of_measurement: 'c/kWh'
+      #value_template: "{{ (state_attr('sensor.nordpool_kwh_fi_eur_3_10_0255', 'average') | float | round(2)) }}"
+      value_template: "{{ state_attr('sensor.nordpool_kwh_fi_eur_3_10_0255', 'average') | float | round(2) }}"
+      #value_template: "{{ state_attr('sensor.nordpool_kwh_fi_eur_3_10_0255', 'average') | int(0) }}"
+
+    cheapest_hours_energy_tomorrow:
+      device_class: timestamp
+      friendly_name: Cheapest sequential electricity hours
+      value_template: >
+        {%- set numberOfSequentialHours = 3 -%}
+        {%- set lastHour = 23 -%}
+        {%- set firstHour = 0 -%}
+
+        {%- if state_attr('sensor.nordpool_kwh_fi_eur_3_10_0255', 'tomorrow_valid') == true -%}
+          {%- set ns = namespace(counter=0, list=[], cheapestHour=today_at("00:00") + timedelta( hours = (24)), cheapestPrice=999.00) -%}
+          {%- for i in range(firstHour + numberOfSequentialHours, lastHour+1) -%}
+            {%- set ns.counter = 0.0 -%}
+            {%- for j in range(i-numberOfSequentialHours, i) -%}
+              {%- set ns.counter = ns.counter + state_attr('sensor.nordpool_kwh_fi_eur_3_10_0255', 'tomorrow')[j] -%}
+            {%- endfor -%}
+            {%- set ns.list = ns.list + [ns.counter] -%}
+            {%- if ns.counter < ns.cheapestPrice -%}
+              {%- set ns.cheapestPrice = ns.counter -%}
+              {%- set ns.cheapestHour = today_at("00:00") + timedelta( hours = (24 + i - numberOfSequentialHours)) -%}
+            {%- endif -%}
+          {%- endfor -%}
+          {{ ns.cheapestHour }}
+          {%- set ns.cheapestPrice = ns.cheapestPrice / numberOfSequentialHours -%}
+        {%- endif -%}
+
+    nordpool:
+      friendly_name: "Nordpool"
+      unit_of_measurement: 'c/kWh'
+      value_template: "{{ states('sensor.nordpool_kwh_fi_eur_3_10_0255') }}"
+      availability_template: "{{ states('sensor.nordpool_kwh_fi_eur_3_10_0255') not in ['unknown', 'unavailable'] }}"
+      attribute_templates:
+        raw_today: "{{ state_attr('sensor.nordpool_kwh_fi_eur_3_10_0255', 'raw_today') }}"
+        raw_tomorrow: "{{ state_attr('sensor.nordpool_kwh_fi_eur_3_10_0255', 'raw_tomorrow') }}"
+
+- platform: rest
+  resource: http://ip.jsontest.com
+  name: External IP
+  value_template: '{{ value_json.ip }}'
+
+# BTC Price USD
+- platform: cryptoinfo_advanced
+  id: "BTC Price"
+  cryptocurrency_name: "bitcoin"
+  currency_name: "usd"
+  unit_of_measurement: "$"
+  update_frequency: 0.5
+  extra_sensors:
+    - property: "all_time_high"
+      unit_of_measurement: "$"
+    - property: "all_time_high_distance"
+      unit_of_measurement: "$"
+# BTC Price GBP
+- platform: cryptoinfo_advanced
+  id: "BTC Price EUR"
+  cryptocurrency_name: "bitcoin"
+  currency_name: "eur"
+  unit_of_measurement: "€"
+  update_frequency: 0.5
+# BTC Dom
+- platform: cryptoinfo_advanced
+  id: "BTC Dominance"
+  cryptocurrency_name: "btc"
+  unit_of_measurement: "%"
+
+- platform: cryptoinfo
+  id: "main wallet"
+  cryptocurrency_name: "ethereum"
+  currency_name: "eur"
+  unit_of_measurement: "€"
+  multiplier: 1.05
+  update_frequency: 1
+
+- platform: template
+  sensors:
+    cryptoinfo_main_wallet_ethereum_eur_24h_volume:
+      value_template: "{{ state_attr('sensor.cryptoinfo_main_wallet_ethereum_eur', 'volume') | round(0) }}"
+      unit_of_measurement: "€"
+
+- platform: template
+  sensors:
+    crypto_bitcoin_owned:
+      friendly_name: "Bitcoin Owned"
+      unit_of_measurement: '$'
+      value_template: >-
+        {% if not is_state('sensor.cryptoinfo_bitcoin_usd', 'unknown') %}
+          {{ (states('sensor.cryptoinfo_bitcoin_usd')|float *0.12345) | round(2) }}
+        {%endif %}
+
+- platform: cryptoinfo
+  id: "dougecoin wallet"
+  cryptocurrency_name: "douge"
+  currency_name: "eur"
+  unit_of_measurement: "€"
+  multiplier: 1.5
+  update_frequency: 1
+
+# BTC Price USD
+- platform: cryptoinfo_advanced
+  id: "BTC Price"
+  cryptocurrency_name: "bitcoin"
+  currency_name: "usd"
+  unit_of_measurement: "$"
+  update_frequency: 0.5
+  extra_sensors:
+    - property: "all_time_high"
+      unit_of_measurement: "$"
+    - property: "all_time_high_distance"
+      unit_of_measurement: "$"
+# BTC Price GBP
+- platform: cryptoinfo_advanced
+  id: "BTC Price GBP"
+  cryptocurrency_name: "bitcoin"
+  currency_name: "gbp"
+  unit_of_measurement: "£"
+  update_frequency: 0.5
+# BTC Dom
+- platform: cryptoinfo_advanced
+  id: "BTC Dominance"
+  cryptocurrency_name: "btc"
+  unit_of_measurement: "%"
+  update_frequency: 0.5
+  api_mode: "dominance"
+# ETH Dom
+- platform: cryptoinfo_advanced
+  id: "ETH Dominance"
+  cryptocurrency_name: "eth"
+  unit_of_measurement: "%"
+  update_frequency: 0.5
+  api_mode: "dominance"
+# BTC Chain Summary
+- platform: cryptoinfo_advanced
+  id: "BTC Height"
+  cryptocurrency_name: "btc"
+  unit_of_measurement: "Blks"
+  update_frequency: 2
+  api_mode: "chain_summary"
+  extra_sensors:
+    - property: hashrate_calc
+      id: "BTC Hashrate EH"
+      unit_of_measurement: EH
+    - property: difficulty_block_progress
+      id: "BTC Difficulty Block Progress"
+      unit_of_measurement: "Blks"
+      state_class: total_increasing
+    - property: difficulty_retarget_height
+      id: "BTC Difficulty Retarget Height"
+      unit_of_measurement: "Blks"
+    - property: block_time_in_seconds
+      id: "BTC Block Time In Seconds"
+      unit_of_measurement: "seconds"
+    - property: difficulty_retarget_seconds
+      id: "BTC Difficulty Retarget Seconds"
+      unit_of_measurement: "seconds"
+    - property: difficulty_retarget_percent_change
+      id: "BTC Difficulty Retarget Percent Change"
+      unit_of_measurement: "%"
+    - property: difficulty_retarget_estimated_diff
+      id: "BTC Difficulty Retarget Estimated Diff"
+      unit_of_measurement: ""
+    - property: halving_block_progress
+      id: "BTC Halving Block Progress"
+      unit_of_measurement: "Blks"
+    - property: next_halving_height
+      id: "BTC Next Halving Height"
+      unit_of_measurement: "Blks"
+    - property: total_halvings_to_date
+      id: "BTC Total Halvings To Date"
+      unit_of_measurement: "Halvings"
+# BTC Hash Control
+- platform: cryptoinfo_advanced
+  id: "BTC Foundry USA Hash Control 100 Blocks"
+  unique_id: "btc_cco_bc1qxh"
+  cryptocurrency_name: "btc"
+  unit_of_measurement: "%"
+  update_frequency: 1
+  api_mode: "chain_control"
+  pool_prefix:
+    - "FoundryUSA"
+    - "bc1qxh"
+- platform: cryptoinfo_advanced
+  id: "BTC F2Pool Hash Control 100 Blocks"
+  unique_id: "btc_cco_1KFHE7"
+  cryptocurrency_name: "btc"
+  unit_of_measurement: "%"
+  update_frequency: 1
+  api_mode: "chain_control"
+  pool_prefix:
+    - "F2Pool"
+    - "1KFHE7"
+- platform: cryptoinfo_advanced
+  id: "BTC Binance Hash Control 100 Blocks"
+  unique_id: "btc_cco_1Q8QR5"
+  cryptocurrency_name: "btc"
+  unit_of_measurement: "%"
+  update_frequency: 1
+  api_mode: "chain_control"
+  pool_prefix:
+    - "Binance"
+    - "1Q8QR5"
+    - "3L8Ck6"
+- platform: cryptoinfo_advanced
+  id: "BTC AntPool Hash Control 100 Blocks"
+  unique_id: "btc_cco_AntPool38XnPv"
+  cryptocurrency_name: "btc"
+  unit_of_measurement: "%"
+  update_frequency: 1
+  api_mode: "chain_control"
+  pool_prefix:
+    - "AntPool"
+    - "38XnPv"
+- platform: cryptoinfo_advanced
+  id: "BTC ViaBTC Hash Control 100 Blocks"
+  unique_id: "btc_cco_ViaBTC"
+  cryptocurrency_name: "btc"
+  unit_of_measurement: "%"
+  update_frequency: 1
+  api_mode: "chain_control"
+  pool_prefix:
+    - "ViaBTC"
+    - "18cBEM"
+- platform: cryptoinfo_advanced
+  id: "BTC BTC.Com Hash Control 100 Blocks"
+  unique_id: "btc_cco_36cWgj"
+  cryptocurrency_name: "btc"
+  unit_of_measurement: "%"
+  update_frequency: 1
+  api_mode: "chain_control"
+  pool_prefix:
+    - "BTC.Com"
+    - "36cWgj"
+- platform: cryptoinfo_advanced
+  id: "BTC MaraPool Hash Control 100 Blocks"
+  unique_id: "btc_cco_15MdAH"
+  cryptocurrency_name: "btc"
+  unit_of_measurement: "%"
+  update_frequency: 1
+  api_mode: "chain_control"
+  pool_prefix:
+    - "MaraPool"
+    - "15MdAH"
+- platform: cryptoinfo_advanced
+  id: "BTC Poolin Hash Control 100 Blocks"
+  unique_id: "btc_cco_poolin"
+  cryptocurrency_name: "btc"
+  unit_of_measurement: "%"
+  update_frequency: 1
+  api_mode: "chain_control"
+  pool_prefix:
+    - "Poolin"
+    - "33TbzA"
+- platform: cryptoinfo_advanced
+  id: "BTC Pegapool Hash Control 100 Blocks"
+  unique_id: "btc_cco_pegapool"
+  cryptocurrency_name: "btc"
+  unit_of_measurement: "%"
+  update_frequency: 1
+  api_mode: "chain_control"
+  pool_prefix:
+    - "3GRKUV"
+- platform: cryptoinfo_advanced
+  id: "BTC Luxor Hash Control 100 Blocks"
+  unique_id: "btc_cco_luxor"
+  cryptocurrency_name: "btc"
+  unit_of_measurement: "%"
+  update_frequency: 1
+  api_mode: "chain_control"
+  pool_prefix:
+    - "39bitU"
+- platform: cryptoinfo_advanced
+  id: "BTC EMCD.io Hash Control 100 Blocks"
+  unique_id: "btc_cco_emcdio"
+  cryptocurrency_name: "btc"
+  unit_of_measurement: "%"
+  update_frequency: 1
+  api_mode: "chain_control"
+  pool_prefix:
+    - "3LwoXD"
+- platform: cryptoinfo_advanced
+  id: "BTC Slushpool Hash Control 100 Blocks"
+  unique_id: "btc_cco_slush"
+  cryptocurrency_name: "btc"
+  unit_of_measurement: "%"
+  update_frequency: 1
+  api_mode: "chain_control"
+  pool_prefix:
+    - "1CK6KH"
+- platform: cryptoinfo_advanced
+  id: "BTC CarbonNegative Hash Control 100 Blocks"
+  unique_id: "btc_cco_carbonnegative"
+  cryptocurrency_name: "btc"
+  unit_of_measurement: "%"
+  update_frequency: 1
+  api_mode: "chain_control"
+  pool_prefix:
+    - "3KZDwm"
+- platform: cryptoinfo_advanced
+  id: "BTC SBICrypto Hash Control 100 Blocks"
+  unique_id: "btc_cco_sbicrypto"
+  cryptocurrency_name: "btc"
+  unit_of_measurement: "%"
+  update_frequency: 1
+  api_mode: "chain_control"
+  pool_prefix:
+    - "bc1qte"
+- platform: cryptoinfo_advanced
+  id: "BTC Ultimus Hash Control 100 Blocks"
+  unique_id: "btc_cco_ultimus"
+  cryptocurrency_name: "btc"
+  unit_of_measurement: "%"
+  update_frequency: 1
+  api_mode: "chain_control"
+  pool_prefix:
+    - "3C9sAK"
+- platform: cryptoinfo_advanced
+  id: "BTC Terrapool Hash Control 100 Blocks"
+  unique_id: "btc_cco_terrapool"
+  cryptocurrency_name: "btc"
+  unit_of_measurement: "%"
+  update_frequency: 1
+  api_mode: "chain_control"
+  pool_prefix:
+    - "bc1q39"
+# BTC Last Diff
+- platform: cryptoinfo_advanced
+  id: "BTC Last Diff Timestamp"
+  cryptocurrency_name: "btc"
+  unit_of_measurement: "s"
+  update_frequency: 1
+  api_mode: "chain_block_time"
+# BTC Orphans
+- platform: cryptoinfo_advanced
+  id: "BTC Orphans Today"
+  cryptocurrency_name: "btc"
+  unit_of_measurement: "Blks"
+  update_frequency: 1
+  api_mode: "chain_orphans"
+# BTC Mempool
+- platform: cryptoinfo_advanced
+  id: "BTC Mempool Size"
+  cryptocurrency_name: "btc"
+  unit_of_measurement: "vB"
+  update_frequency: 1
+  api_mode: "mempool_stats"
+  extra_sensors:
+    - property: mempool_tx_count
+      id: "BTC Mempool TX Count"
+      unit_of_measurement: "tx"
+    - property: mempool_total_fee
+      id: "BTC Mempool Total Fees"
+      unit_of_measurement: "satoshis"
+    - property: mempool_size_calc
+      id: "BTC Mempool Size MB"
+      unit_of_measurement: "MB"
+
+- platform: rest
+  name: Dogecoin Price
+  resource: https://api.coingecko.com/api/v3/simple/price?ids=dogecoin&vs_currencies=usd
+  value_template: "{{ value_json.dogecoin.usd | float | round(3) }}"
+  unit_of_measurement: 'USD'
+  scan_interval: 3600  # Update every hour
+
+- platform: rest
+  name: Litecoin Price
+  resource: https://api.coingecko.com/api/v3/simple/price?ids=litecoin&vs_currencies=usd
+  value_template: "{{ value_json.litecoin.usd | float | round(3) }}"
+  unit_of_measurement: 'USD'
+  scan_interval: 3600  # Update every hour
+
+
+- platform: rest
+  name: Dogecoin Price USD
+  resource: https://pro-api.coinmarketcap.com/v1/cryptocurrency/quotes/latest?id=74&convert=USD
+  headers:
+    X-CMC_PRO_API_KEY: !secret coinmarketcap_api_key
+  value_template: "{{ value_json.data['74'].quote.USD.price | float | round(3) }}"
+  unit_of_measurement: 'USD'
+  scan_interval: 3600  # Update every hour
+
+- platform: rest
+  name: Litecoin Price USD
+  resource: https://pro-api.coinmarketcap.com/v1/cryptocurrency/quotes/latest?id=2&convert=USD
+  headers:
+    X-CMC_PRO_API_KEY: !secret coinmarketcap_api_key
+  value_template: "{{ value_json.data['2'].quote.USD.price | float | round(3) }}"
+  unit_of_measurement: 'USD'
+  scan_interval: 3600  # Update every hour
+
+- platform: rest
+  name: Dogecoin Price EUR
+  resource: https://pro-api.coinmarketcap.com/v1/cryptocurrency/quotes/latest?id=74&convert=EUR
+  headers:
+    X-CMC_PRO_API_KEY: !secret coinmarketcap_api_key
+  value_template: "{{ value_json.data['74'].quote.EUR.price | float | round(3) }}"
+  unit_of_measurement: 'EUR'
+  scan_interval: 3600  # Update every hour
+
+- platform: rest
+  name: Litecoin Price EUR
+  resource: https://pro-api.coinmarketcap.com/v1/cryptocurrency/quotes/latest?id=2&convert=EUR
+  headers:
+    X-CMC_PRO_API_KEY: !secret coinmarketcap_api_key
+  value_template: "{{ value_json.data['2'].quote.EUR.price | float | round(3) }}"
+  unit_of_measurement: 'EUR'
+  scan_interval: 3600  # Update every hour
+
+- platform: template
+  sensors:
+    eur_in_doge:
+      friendly_name: "EUR in DOGE"
+      value_template: "{{ (1 / states('sensor.dogecoin_price_eur') | float) | round(7) }}"
+      unit_of_measurement: 'DOGE'
+
+    eur_in_ltc:
+      friendly_name: "EUR in LTC"
+      value_template: "{{ (1 / states('sensor.litecoin_price_eur') | float) | round(7) }}"
+      unit_of_measurement: 'LTC'
+
+# Binance LTC Price in USD
+#- platform: rest
+#  name: Binance LTC Price in USD
+#  resource: https://api.binance.com/api/v3/ticker/price?symbol=LTCUSDT
+#  value_template: "{{ value_json['price'] | float }}"
+#  unit_of_measurement: 'USD'
+#  scan_interval: 3600
+
+# Binance LTC Balance
+#- platform: command_line
+#  name: Binance LTC Balance
+#  command: "/usr/local/bin/python3 /config/python_scripts/get_binance_balance.py > /config/command_output.log 2>&1"
+#  unit_of_measurement: 'LTC'
+#  scan_interval: 3600
+
+#- platform: mqtt
+#  name: "Binance LTC Balance"
+#  state_topic: "binance/ltc_balance"
+#  unit_of_measurement: "LTC"
+
+- platform: template
+  sensors:
+    balance_total_eur:
+      value_template: >
+        {{ (states('sensor.exodus_balance_total_eur') | float(0) +
+            states('sensor.kraken_balance_total_eur') | float(0) +
+            states('sensor.binance_balance_total_eur') | float(0)) | round(2) }}
+      unit_of_measurement: "EUR"
+    balance_total_usd:
+      value_template: >
+        {{ (states('sensor.exodus_balance_total_usd') | float(0) +
+            states('sensor.kraken_balance_total_usd') | float(0) +
+            states('sensor.binance_balance_total_usd') | float(0)) | round(2) }}
+      unit_of_measurement: "USD"
+    balance_total_cad:
+      value_template: >
+        {{ (states('sensor.exodus_balance_total_cad') | float(0) +
+            states('sensor.kraken_balance_total_cad') | float(0) +
+            states('sensor.binance_balance_total_cad') | float(0)) | round(2) }}
+      unit_of_measurement: "CAD"
+    balance_total_ltc:
+      value_template: >
+        {{ (states('sensor.exodus_balance_ltc') | float(0) +
+            states('sensor.kraken_balance_ltc') | float(0) +
+            states('sensor.binance_balance_ltc') | float(0)) | round(8) }}
+      unit_of_measurement: "LTC"
+    balance_total_doge:
+      value_template: >
+        {{ (states('sensor.exodus_balance_doge') | float(0) +
+            states('sensor.kraken_balance_doge') | float(0) +
+            states('sensor.binance_balance_doge') | float(0)) | round(8) }}
+      unit_of_measurement: "DOGE"
+    balance_total_btc:
+      value_template: >
+        {{ (states('sensor.exodus_balance_btc') | float(0) +
+            states('sensor.binance_balance_btc') | float(0)) | round(8) }}
+      unit_of_measurement: "BTC"
+    balance_total_xrp:
+      value_template: >
+        {{ (states('sensor.binance_balance_xrp')) | float(0) | round(8) }}
+      unit_of_measurement: "XRP"
+

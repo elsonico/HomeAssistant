@@ -1,0 +1,4 @@
+requests
+paho-mqtt
+krakenex
+PyYAML
