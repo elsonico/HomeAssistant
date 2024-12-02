@@ -20,14 +20,24 @@ This repository contains my personal Home Assistant configuration, focusing on c
   - SSL/TLS support
 
 ## Structure
-├── configuration.yaml # Main configuration
-├── automations.yaml # Automation rules
-├── docker-compose.yaml # Docker configuration
-├── python_scripts/ # Custom cryptocurrency scripts
-│ ├── get_binance_balance.py
-│ ├── kraken_balance.py
-│ └── ...
-└── ...
+
+Key configuration files:
+- `configuration.yaml` - Main configuration
+- `automations.yaml` - Automation rules
+- `docker-compose.yaml` - Docker configuration
+- `influxdb.yaml` - InfluxDB configuration
+- `mqtt.yaml` - MQTT settings
+- `notify.yaml` - Notification settings
+- `sensors.yaml` - Sensor configurations
+- `shell.yaml` - Shell commands
+
+Python Scripts:
+- `python_scripts/`
+  - `get_binance_balance.py` - Binance balance tracking
+  - `kraken_balance.py` - Kraken balance tracking
+  - `exodus_mqtt.py` - Exodus wallet tracking
+  - `litewallet_balance.py` - Litewallet tracking
+  - `fetch_crypto_values_and_currencies.py` - Price updates
 
 ## Security
 
