@@ -39,7 +39,7 @@ COINMARKETCAP_API_KEY = secrets["coinmarketcap_api_key"]
 COINMARKETCAP_API_URL = "https://pro-api.coinmarketcap.com/v1/cryptocurrency/quotes/latest"
 
 # MQTT broker details
-MQTT_BROKER = "mqtt.ampiainen.net"
+MQTT_BROKER = secrets["mqtt_broker"]
 MQTT_PORT = 1883
 MQTT_USERNAME = secrets["mqtt_username"]
 MQTT_PASSWORD = secrets["mqtt_password"]
