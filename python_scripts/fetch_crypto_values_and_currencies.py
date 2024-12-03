@@ -76,7 +76,7 @@ def fetch_crypto_prices():
         response = api.query_public('Ticker', {'pair': ','.join(KRAKEN_SYMBOLS.values())})
         if response.get('error'):
             logging.error(f"Error fetching crypto data: {response['error']}")
-            return None
+            return {}
 
         prices = {
             symbol: round(float(response['result'][KRAKEN_SYMBOLS[symbol]]['c'][0]), 8)
@@ -85,7 +85,7 @@ def fetch_crypto_prices():
         return prices
     except Exception as e:
         logging.error(f"Error fetching cryptocurrency prices: {e}")
-        return None
+        return {}
 
 # Function to fetch exchange rates
 def fetch_exchange_rates():
@@ -138,8 +138,10 @@ def publish_exchange_rates(rates):
 if __name__ == "__main__":
     logging.info("Fetching cryptocurrency prices...")
     crypto_data = fetch_crypto_prices()
+    
+    # Add XPM price separately
     xpm_price = get_xpm_price_in_usd()
-    if xpm_price:
+    if xpm_price is not None:
         crypto_data["XPM"] = xpm_price
         
     if crypto_data:
