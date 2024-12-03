@@ -27,7 +27,7 @@ api.key = secrets["kraken_api_key"]
 api.secret = secrets["kraken_api_secret"]
 
 # Cryptocurrency symbols to fetch
-CRYPTO_SYMBOLS = ["LTC", "DOGE", "BTC", "ETH", "XRP", "SOL", "SHIB", "PEPE"]
+CRYPTO_SYMBOLS = ["LTC", "DOGE", "BTC", "ETH", "XRP", "SOL", "SHIB", "PEPE", "BNB"]
 
 # Fiat currency pairs to fetch
 FIAT_PAIRS = {
@@ -54,6 +54,7 @@ KRAKEN_SYMBOLS = {
     "SOL": "SOLUSD",
     "SHIB": "SHIBUSD",
     "PEPE": "PEPEUSD",
+    "BNB": "BNBUSD",
 }
 
 def get_xpm_price_in_usd():

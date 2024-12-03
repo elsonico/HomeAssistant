@@ -312,3 +312,9 @@ sensor:
     unit_of_measurement: "BNB"
     unique_id: "binance_balance_bnb"
 
+  - name: "Crypto Coin Value BNB"
+    state_topic: "cryptocoin/value_bnb"
+    value_template: "{{ value | float }}"
+    unit_of_measurement: "USD"
+    unique_id: "cryptocoin_value_bnb"
+
