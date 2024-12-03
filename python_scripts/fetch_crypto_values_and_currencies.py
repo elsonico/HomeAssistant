@@ -70,6 +70,20 @@ def get_xpm_price_in_usd():
     except Exception as err:
         print(f'Other error occurred: {err}')
 
+def get_bnb_price_in_usd():
+    url = 'https://api.coincap.io/v2/assets/binance-coin'
+    try:
+        response = requests.get(url)
+        response.raise_for_status()
+        data = response.json()
+        price_usd = data['data']['priceUsd']
+        return float(price_usd)
+    except requests.exceptions.HTTPError as http_err:
+        logging.error(f'HTTP error occurred: {http_err}')
+    except Exception as err:
+        logging.error(f'Other error occurred: {err}')
+    return None
+
 # Function to fetch cryptocurrency prices
 def fetch_crypto_prices():
     try:
@@ -143,6 +157,11 @@ if __name__ == "__main__":
     xpm_price = get_xpm_price_in_usd()
     if xpm_price is not None:
         crypto_data["XPM"] = xpm_price
+
+    # Add BNB price separately
+    bnb_price = get_bnb_price_in_usd()
+    if bnb_price is not None:
+        crypto_data["BNB"] = bnb_price
         
     if crypto_data:
         publish_crypto_prices(crypto_data)
