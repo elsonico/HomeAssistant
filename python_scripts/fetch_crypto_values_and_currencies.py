@@ -54,7 +54,7 @@ KRAKEN_SYMBOLS = {
     "SOL": "SOLUSD",
     "SHIB": "SHIBUSD",
     "PEPE": "PEPEUSD",
-    "BNB": "BNBUSD",
+    "BNB": "BNBUSD"
 }
 
 def get_xpm_price_in_usd():
@@ -74,9 +74,10 @@ def get_xpm_price_in_usd():
 def fetch_crypto_prices():
     try:
         response = api.query_public('Ticker', {'pair': ','.join(KRAKEN_SYMBOLS.values())})
-        if response['error']:
+        if response.get('error'):
             logging.error(f"Error fetching crypto data: {response['error']}")
             return None
+
         prices = {
             symbol: round(float(response['result'][KRAKEN_SYMBOLS[symbol]]['c'][0]), 8)
             for symbol in CRYPTO_SYMBOLS if KRAKEN_SYMBOLS[symbol] in response['result']
@@ -140,8 +141,11 @@ if __name__ == "__main__":
     xpm_price = get_xpm_price_in_usd()
     if xpm_price:
         crypto_data["XPM"] = xpm_price
+        
     if crypto_data:
         publish_crypto_prices(crypto_data)
+    else:
+        logging.error("No cryptocurrency prices were fetched")
 
     logging.info("Fetching exchange rates...")
     exchange_rates = fetch_exchange_rates()
