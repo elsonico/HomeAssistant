@@ -475,3 +475,72 @@
   - delay:
       seconds: 5
   id: 6c36ff4b838d4a9dba444d4de4d5f9b6
+- id: asic_miner_profitable_operation
+  alias: Start ASIC miner when profitable
+  description: "Start miner when electricity price is low and conditions are favorable"
+  trigger:
+    - platform: state
+      entity_id: sensor.nordpool_kwh_fi_eur_3_10_0255
+    - platform: numeric_state
+      entity_id: sensor.crypto_coin_value_ltc
+      above: 80  # LTC price above $80
+  condition:
+    condition: and
+    conditions:
+      - condition: numeric_state
+        entity_id: sensor.nordpool_kwh_fi_eur_3_10_0255
+        below: 5  # Electricity price below 5 cents
+      - condition: numeric_state
+        entity_id: sensor.ac_12488762_outdoor_temperature
+        below: 20  # Outdoor temperature below 20°C
+      - condition: numeric_state
+        entity_id: sensor.shellyht_707c09_temperature
+        below: 25  # Room temperature below 25°C
+  action:
+    - service: switch.turn_on
+      target:
+        entity_id: switch.shellyplug_s_3ce90ee04b97
+- id: asic_miner_stop_high_temp
+  alias: Stop ASIC miner on high temperature
+  description: "Stop miner when room gets too hot"
+  trigger:
+    - platform: numeric_state
+      entity_id: sensor.shellyht_707c09_temperature
+      above: 28  # Room temperature above 28°C
+  condition:
+    - condition: state
+      entity_id: switch.shellyplug_s_3ce90ee04b97
+      state: "on"
+  action:
+    - service: switch.turn_off
+      target:
+        entity_id: switch.shellyplug_s_3ce90ee04b97
+    - service: notify.whatsapp
+      data:
+        message: "ASIC miner stopped due to high room temperature: {{ states('sensor.shellyht_707c09_temperature') }}°C"
+        target: 14164327184@c.us
+- id: asic_miner_stop_unprofitable
+  alias: Stop ASIC miner when unprofitable
+  description: "Stop miner when electricity cost is too high or crypto price too low"
+  trigger:
+    - platform: numeric_state
+      entity_id: sensor.nordpool_kwh_fi_eur_3_10_0255
+      above: 10  # Electricity price above 10 cents
+    - platform: numeric_state
+      entity_id: sensor.crypto_coin_value_ltc
+      below: 60  # LTC price below $60
+  condition:
+    - condition: state
+      entity_id: switch.shellyplug_s_3ce90ee04b97
+      state: "on"
+  action:
+    - service: switch.turn_off
+      target:
+        entity_id: switch.shellyplug_s_3ce90ee04b97
+    - service: notify.whatsapp
+      data:
+        message: >
+          ASIC miner stopped due to unfavorable conditions:
+          Electricity: {{ states('sensor.nordpool_kwh_fi_eur_3_10_0255') }}c/kWh
+          LTC: ${{ states('sensor.crypto_coin_value_ltc') }}
+        target: 14164327184@c.us
