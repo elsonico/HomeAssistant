@@ -88,11 +88,11 @@ def get_conversion_rates():
     try:
         logging.info("Fetching conversion rates from CoinMarketCap...")
         currencies = ["USD", "CAD", "EUR"]
-        conversion_rates = {"LTC": {}, "DOGE": {}, "BTC": {}, "XRP": {}, "PEPE": {}}
+        conversion_rates = {"LTC": {}, "DOGE": {}, "BTC": {}, "XRP": {}, "PEPE": {}, "BNB": {}}
 
         for currency in currencies:
             params = {
-                "symbol": "LTC,DOGE,BTC,XRP,PEPE",
+                "symbol": "LTC,DOGE,BTC,XRP,PEPE,BNB",
                 "convert": currency
             }
             headers = {
@@ -108,6 +108,7 @@ def get_conversion_rates():
             conversion_rates["BTC"][currency.lower()] = data["BTC"]["quote"][currency]["price"]
             conversion_rates["XRP"][currency.lower()] = data["XRP"]["quote"][currency]["price"]
             conversion_rates["PEPE"][currency.lower()] = data["PEPE"]["quote"][currency]["price"]
+            conversion_rates["BNB"][currency.lower()] = data["BNB"]["quote"][currency]["price"]
 
         logging.info("Retrieved conversion rates: %s", conversion_rates)
         return conversion_rates

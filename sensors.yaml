@@ -528,6 +528,10 @@
       value_template: >
         {{ (states('sensor.binance_balance_pepe') | float(0)) | round(8) }}
       unit_of_measurement: "PEPE"
+    balance_total_bnb:
+      value_template: >
+        {{ (states('sensor.binance_balance_bnb') | float(0)) | round(8) }}
+      unit_of_measurement: "BNB"
 
 - platform: template
   sensors:
@@ -597,6 +601,21 @@
       value_template: >-
         {% set balance = states('sensor.balance_total_doge') %}
         {% set price = states('sensor.crypto_coin_value_doge') %}
+        {% set rate = states('sensor.usd_eur') %}
+        {% if balance not in ['unknown', 'unavailable'] 
+           and price not in ['unknown', 'unavailable']
+           and rate not in ['unknown', 'unavailable'] %}
+          {{ (balance | float(0) * price | float(0) * rate | float(1)) | round(2) }}
+        {% else %}
+          {{ 0 }}
+        {% endif %}
+
+    bnb_balance_in_eur:
+      friendly_name: "BNB Balance (EUR)"
+      unit_of_measurement: '€'
+      value_template: >-
+        {% set balance = states('sensor.balance_total_bnb') %}
+        {% set price = states('sensor.crypto_coin_value_bnb') %}
         {% set rate = states('sensor.usd_eur') %}
         {% if balance not in ['unknown', 'unavailable'] 
            and price not in ['unknown', 'unavailable']
