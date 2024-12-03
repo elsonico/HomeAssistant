@@ -306,3 +306,9 @@ sensor:
     unit_of_measurement: "EUR"
     unique_id: "currency_usd_eur"
 
+  - name: "Binance BNB Balance"
+    state_topic: "binance/balance_bnb"
+    value_template: "{{ value | float }}" 
+    unit_of_measurement: "BNB"
+    unique_id: "binance_balance_bnb"
+

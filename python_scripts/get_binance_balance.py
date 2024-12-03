@@ -49,6 +49,7 @@ MQTT_TOPICS = {
     "BTC": "binance/balance_btc",
     "XRP": "binance/balance_xrp",
     "PEPE": "binance/balance_pepe",
+    "BNB": "binance/balance_bnb",
     "TOTAL_USD": "binance/balance_total_usd",
     "TOTAL_CAD": "binance/balance_total_cad",
     "TOTAL_EUR": "binance/balance_total_eur",
@@ -130,7 +131,7 @@ def publish_to_mqtt(topic, message):
 if __name__ == "__main__":
     logging.info("Starting Binance balance retrieval and publish script.")
     balances = {asset: get_binance_balance(asset) for asset in \
-                MQTT_TOPICS.keys() if asset in ["LTC", "DOGE", "BTC", "XRP", "PEPE"]}
+                MQTT_TOPICS.keys() if asset in ["LTC", "DOGE", "BTC", "XRP", "PEPE", "BNB"]}
     rates = get_conversion_rates()
 
     if balances and rates:
