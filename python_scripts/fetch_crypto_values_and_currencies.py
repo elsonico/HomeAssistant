@@ -53,8 +53,7 @@ KRAKEN_SYMBOLS = {
     "XRP": "XXRPZUSD",
     "SOL": "SOLUSD",
     "SHIB": "SHIBUSD",
-    "PEPE": "PEPEUSD",
-    "BNB": "BNBUSD"
+    "PEPE": "PEPEUSD"
 }
 
 def get_xpm_price_in_usd():
