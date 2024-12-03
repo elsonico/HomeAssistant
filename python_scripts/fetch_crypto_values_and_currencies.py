@@ -26,8 +26,8 @@ api = krakenex.API()
 api.key = secrets["kraken_api_key"]
 api.secret = secrets["kraken_api_secret"]
 
-# Cryptocurrency symbols to fetch
-CRYPTO_SYMBOLS = ["LTC", "DOGE", "BTC", "ETH", "XRP", "SOL", "SHIB", "PEPE", "BNB"]
+# Cryptocurrency symbols to fetch from Kraken
+CRYPTO_SYMBOLS = ["LTC", "DOGE", "BTC", "ETH", "XRP", "SOL", "SHIB", "PEPE"]
 
 # Fiat currency pairs to fetch
 FIAT_PAIRS = {
