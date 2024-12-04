@@ -360,8 +360,14 @@ sensor:
     unit_of_measurement: "CAD"
     unique_id: "binance2_balance_total_cad"
 
-  - name: "Binance BNB 2nd  Balance"
+  - neame: "Binance BNB 2nd  Balance"
     state_topic: "binance2/balance_bnb"
     value_template: "{{ value | float }}" 
     unit_of_measurement: "BNB"
     unique_id: "binance2_balance_bnb"
+
+  - neame: "Binance ETH 2nd  Balance"
+    state_topic: "binance2/balance_eth"
+    value_template: "{{ value | float }}" 
+    unit_of_measurement: "ETH"
+    unique_id: "binance2_balance_eth"
