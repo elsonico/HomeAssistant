@@ -427,10 +427,21 @@
   - platform: homeassistant
     event: start
   action:
-  - service: shell_command.publish_ltc_balance
+  - service: shell_command.publish_binance_balance
   - delay:
       seconds: 5
   id: a40913a23f354c1aac3758b17e9b03f0
+- alias: Publish Binance 2nd Balance
+  trigger:
+  - platform: time_pattern
+    minutes: '0'
+  - platform: homeassistant
+    event: start
+  action:
+  - service: shell_command.publish_binance2_balance
+  - delay:
+      seconds: 5
+  id: a40913a23f354c1887a758b17e9b03f0
 - alias: Publish Exodus Balance
   trigger:
   - platform: time_pattern

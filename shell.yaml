@@ -1,5 +1,6 @@
 update_dns: "/usr/local/bin/python3 /config/python_scripts/ipv_ha.py"
-publish_ltc_balance: "/usr/local/bin/python3 /config/python_scripts/get_binance_balance.py"
+publish_binance_balance: "/usr/local/bin/python3 /config/python_scripts/get_binance_balance.py"
+publish_binance2_balance: "/usr/local/bin/python3 /config/python_scripts/get_binance_2nd.py"
 publish_exodus_balance: "/usr/local/bin/python3 /config/python_scripts/exodus_mqtt.py"
 publish_kraken_balance: "/usr/local/bin/python3 /config/python_scripts/kraken_balance.py"
 publish_litewallet_balance: "/usr/local/bin/python3 /config/python_scripts/litewallet_balance.py"

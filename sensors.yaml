@@ -624,3 +624,42 @@
         {% else %}
           {{ 0 }}
         {% endif %}
+
+- platform: template
+  sensors:
+    binance_btc_2nd_balance_in_eur:
+      friendly_name: "Binance BTC 2nd Balance in EUR"
+      unit_of_measurement: "€"
+      value_template: >
+        {{ (states('sensor.binance_btc_2nd_balance') | float * 
+            states('sensor.crypto_coin_value_btc') | float * 
+            states('sensor.usd_eur') | float) | round(2) }}
+    binance_doge_2nd_balance_in_eur:
+      friendly_name: "Binance DOGE 2nd Balance in EUR"
+      unit_of_measurement: "€"
+      value_template: >
+        {{ (states('sensor.binance_doge_2nd_balance') | float * 
+            states('sensor.crypto_coin_value_doge') | float * 
+            states('sensor.usd_eur') | float) | round(2) }}
+    binance_ltc_2nd_balance_in_eur:
+      friendly_name: "Binance LTC 2nd Balance in EUR"
+      unit_of_measurement: "€"
+      value_template: >
+        {{ (states('sensor.binance_ltc_2nd_balance') | float * 
+            states('sensor.crypto_coin_value_ltc') | float * 
+            states('sensor.usd_eur') | float) | round(2) }}
+    binance_bnb_2nd_balance_in_eur:
+      friendly_name: "Binance BNB 2nd Balance in EUR"
+      unit_of_measurement: "€"
+      value_template: >
+        {{ (states('sensor.binance_bnb_2nd_balance') | float * 
+            states('sensor.crypto_coin_value_bnb') | float * 
+            states('sensor.usd_eur') | float) | round(2) }}
+    binance_eth_2nd_balance_in_eur:
+      friendly_name: "Binance ETH 2nd Balance in EUR"
+      unit_of_measurement: "€"
+      value_template: >
+        {{ (states('sensor.binance_eth_2nd_balance') | float * 
+            states('sensor.crypto_coin_value_eth') | float * 
+            states('sensor.usd_eur') | float) | round(2) }}
+
