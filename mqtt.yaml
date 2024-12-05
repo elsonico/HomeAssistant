@@ -377,3 +377,9 @@ sensor:
     value_template: "{{ value | float }}" 
     unit_of_measurement: "ETH"
     unique_id: "binance2_balance_eth"
+
+  - name: "Binance ETH Balance"
+    state_topic: "binance/balance_eth"
+    value_template: "{{ value | float }}" 
+    unit_of_measurement: "ETH"
+    unique_id: "binance_balance_eth"
