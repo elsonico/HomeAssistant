@@ -282,6 +282,12 @@ sensor:
     unit_of_measurement: "USD"
     unique_id: "cryptocoin_value_pepe"
 
+  - name: "Crypto Coin Value BNB"
+    state_topic: "cryptocoin/value_bnb"
+    value_template: "{{ value | float }}"
+    unit_of_measurement: "USD"
+    unique_id: "cryptocoin_value_bnb"
+
   - name: "CAD in EUR"
     state_topic: "currency/cad_eur"
     value_template: "{{ value | float }}"
@@ -365,3 +371,9 @@ sensor:
     value_template: "{{ value | float }}" 
     unit_of_measurement: "BNB"
     unique_id: "binance2_balance_bnb"
+
+  - name: "Binance ETH 2nd  Balance"
+    state_topic: "binance2/balance_eth"
+    value_template: "{{ value | float }}" 
+    unit_of_measurement: "ETH"
+    unique_id: "binance2_balance_eth"
