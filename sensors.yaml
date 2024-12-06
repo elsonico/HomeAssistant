@@ -511,9 +511,15 @@
       unit_of_measurement: "USD"
     balance_total_cad:
       value_template: >
-        {{ (states('sensor.exodus_balance_total_cad') | float(0) +
-            states('sensor.kraken_balance_total_cad') | float(0) +
-            states('sensor.binance_balance_total_cad') | float(0)) | round(2) }}
+        {% if states('sensor.exodus_balance_total_cad') not in ['unknown', 'unavailable'] and 
+              states('sensor.kraken_balance_total_cad') not in ['unknown', 'unavailable'] and 
+              states('sensor.binance_balance_total_cad') not in ['unknown', 'unavailable'] %}
+          {{ (states('sensor.exodus_balance_total_cad') | float +
+              states('sensor.kraken_balance_total_cad') | float +
+              states('sensor.binance_balance_total_cad') | float) | round(2) }}
+        {% else %}
+          {{ states('sensor.balance_total_cad') }}
+        {% endif %}
       unit_of_measurement: "CAD"
     balance_total_ltc:
       value_template: >
