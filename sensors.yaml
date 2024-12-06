@@ -556,12 +556,8 @@
       unit_of_measurement: "XRP"
     balance_total_pepe:
       value_template: >
-        {% if states('sensor.exodus_balance_pepe') not in ['unknown', 'unavailable'] and 
-              states('sensor.kraken_balance_pepe') not in ['unknown', 'unavailable'] and 
-              states('sensor.binance_balance_pepe') not in ['unknown', 'unavailable'] %}
-          {{ (states('sensor.exodus_balance_pepe') | float +
-              states('sensor.kraken_balance_pepe') | float +
-              states('sensor.binance_balance_pepe') | float) | round(8) }}
+        {% if states('sensor.binance_balance_pepe') not in ['unknown', 'unavailable'] %}
+          {{ states('sensor.binance_balance_pepe') | float }}
         {% else %}
           {{ states('sensor.balance_total_pepe') }}
         {% endif %}
@@ -578,9 +574,15 @@
       unit_of_measurement: "BNB"
     balance_total_eth:
       value_template: >
-        {{ (states('sensor.exodus_balance_eth') | float(0) +
-            states('sensor.kraken_balance_eth') | float(0) +
-            states('sensor.binance_balance_eth') | float(0)) | round(8) }}
+        {% if states('sensor.exodus_balance_eth') not in ['unknown', 'unavailable'] and 
+              states('sensor.kraken_balance_eth') not in ['unknown', 'unavailable'] and 
+              states('sensor.binance_balance_eth') not in ['unknown', 'unavailable'] %}
+          {{ (states('sensor.exodus_balance_eth') | float +
+              states('sensor.kraken_balance_eth') | float +
+              states('sensor.binance_balance_eth') | float) | round(8) }}
+        {% else %}
+          {{ states('sensor.balance_total_eth') }}
+        {% endif %}
       unit_of_measurement: "ETH"
 
 - platform: template
@@ -619,13 +621,12 @@
       friendly_name: "LTC Balance (EUR)"
       unit_of_measurement: '€'
       value_template: >-
-        {% set balance = states('sensor.balance_total_ltc') %}
-        {% set price = states('sensor.crypto_coin_value_ltc') %}
-        {% set rate = states('sensor.usd_eur') %}
-        {% if balance not in ['unknown', 'unavailable'] 
-           and price not in ['unknown', 'unavailable']
-           and rate not in ['unknown', 'unavailable'] %}
-          {{ (balance | float(0) * price | float(0) * rate | float(1)) | round(2) }}
+        {% if states('sensor.balance_total_ltc') not in ['unknown', 'unavailable'] 
+           and states('sensor.crypto_coin_value_ltc') not in ['unknown', 'unavailable']
+           and states('sensor.usd_eur') not in ['unknown', 'unavailable'] %}
+          {{ (states('sensor.balance_total_ltc') | float * 
+              states('sensor.crypto_coin_value_ltc') | float * 
+              states('sensor.usd_eur') | float) | round(2) }}
         {% else %}
           {{ 0 }}
         {% endif %}
@@ -649,13 +650,12 @@
       friendly_name: "DOGE Balance (EUR)"
       unit_of_measurement: '€'
       value_template: >-
-        {% set balance = states('sensor.balance_total_doge') %}
-        {% set price = states('sensor.crypto_coin_value_doge') %}
-        {% set rate = states('sensor.usd_eur') %}
-        {% if balance not in ['unknown', 'unavailable'] 
-           and price not in ['unknown', 'unavailable']
-           and rate not in ['unknown', 'unavailable'] %}
-          {{ (balance | float(0) * price | float(0) * rate | float(1)) | round(2) }}
+        {% if states('sensor.balance_total_doge') not in ['unknown', 'unavailable'] 
+           and states('sensor.crypto_coin_value_doge') not in ['unknown', 'unavailable']
+           and states('sensor.usd_eur') not in ['unknown', 'unavailable'] %}
+          {{ (states('sensor.balance_total_doge') | float * 
+              states('sensor.crypto_coin_value_doge') | float * 
+              states('sensor.usd_eur') | float) | round(2) }}
         {% else %}
           {{ 0 }}
         {% endif %}
