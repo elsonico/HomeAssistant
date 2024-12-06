@@ -487,15 +487,27 @@
   sensors:
     balance_total_eur:
       value_template: >
-        {{ (states('sensor.exodus_balance_total_eur') | float(0) +
-            states('sensor.kraken_balance_total_eur') | float(0) +
-            states('sensor.binance_balance_total_eur') | float(0)) | round(2) }}
+        {% if states('sensor.exodus_balance_total_eur') not in ['unknown', 'unavailable'] and 
+              states('sensor.kraken_balance_total_eur') not in ['unknown', 'unavailable'] and 
+              states('sensor.binance_balance_total_eur') not in ['unknown', 'unavailable'] %}
+          {{ (states('sensor.exodus_balance_total_eur') | float +
+              states('sensor.kraken_balance_total_eur') | float +
+              states('sensor.binance_balance_total_eur') | float) | round(2) }}
+        {% else %}
+          {{ states('sensor.balance_total_eur') }}
+        {% endif %}
       unit_of_measurement: "EUR"
     balance_total_usd:
       value_template: >
-        {{ (states('sensor.exodus_balance_total_usd') | float(0) +
-            states('sensor.kraken_balance_total_usd') | float(0) +
-            states('sensor.binance_balance_total_usd') | float(0)) | round(2) }}
+        {% if states('sensor.exodus_balance_total_usd') not in ['unknown', 'unavailable'] and 
+              states('sensor.kraken_balance_total_usd') not in ['unknown', 'unavailable'] and 
+              states('sensor.binance_balance_total_usd') not in ['unknown', 'unavailable'] %}
+          {{ (states('sensor.exodus_balance_total_usd') | float +
+              states('sensor.kraken_balance_total_usd') | float +
+              states('sensor.binance_balance_total_usd') | float) | round(2) }}
+        {% else %}
+          {{ states('sensor.balance_total_usd') }}
+        {% endif %}
       unit_of_measurement: "USD"
     balance_total_cad:
       value_template: >
@@ -505,9 +517,15 @@
       unit_of_measurement: "CAD"
     balance_total_ltc:
       value_template: >
-        {{ (states('sensor.exodus_balance_ltc') | float(0) +
-            states('sensor.kraken_balance_ltc') | float(0) +
-            states('sensor.binance_balance_ltc') | float(0)) | round(8) }}
+        {% if states('sensor.exodus_balance_ltc') not in ['unknown', 'unavailable'] and 
+              states('sensor.kraken_balance_ltc') not in ['unknown', 'unavailable'] and 
+              states('sensor.binance_balance_ltc') not in ['unknown', 'unavailable'] %}
+          {{ (states('sensor.exodus_balance_ltc') | float +
+              states('sensor.kraken_balance_ltc') | float +
+              states('sensor.binance_balance_ltc') | float) | round(8) }}
+        {% else %}
+          {{ states('sensor.balance_total_ltc') }}
+        {% endif %}
       unit_of_measurement: "LTC"
     balance_total_doge:
       value_template: >
