@@ -564,22 +564,16 @@
       unit_of_measurement: "PEPE"
     balance_total_bnb:
       value_template: >
-        {% if states('sensor.exodus_balance_bnb') not in ['unknown', 'unavailable'] and 
-              states('sensor.binance_balance_bnb') not in ['unknown', 'unavailable'] %}
-          {{ (states('sensor.exodus_balance_bnb') | float +
-              states('sensor.binance_balance_bnb') | float) | round(8) }}
+        {% if states('sensor.binance_balance_bnb') not in ['unknown', 'unavailable'] %}
+          {{ states('sensor.binance_balance_bnb') | float | round(8) }}
         {% else %}
           {{ states('sensor.balance_total_bnb') }}
         {% endif %}
       unit_of_measurement: "BNB"
     balance_total_eth:
       value_template: >
-        {% if states('sensor.binance_balance_eth') not in ['unknown', 'unavailable'] and 
-              states('sensor.exodus_balance_eth') not in ['unknown', 'unavailable'] and 
-              states('sensor.kraken_balance_eth') not in ['unknown', 'unavailable'] %}
-          {{ (states('sensor.binance_balance_eth') | float + 
-              states('sensor.exodus_balance_eth') | float + 
-              states('sensor.kraken_balance_eth') | float) | round(8) }}
+        {% if states('sensor.binance_balance_eth') not in ['unknown', 'unavailable'] %}
+          {{ states('sensor.binance_balance_eth') | float | round(8) }}
         {% else %}
           {{ states('sensor.balance_total_eth') }}
         {% endif %}
