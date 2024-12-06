@@ -50,6 +50,7 @@ MQTT_TOPICS = {
     "XRP": "binance/balance_xrp",
     "PEPE": "binance/balance_pepe",
     "BNB": "binance/balance_bnb",
+    "ETH": "binance/balance_eth",
     "TOTAL_USD": "binance/balance_total_usd",
     "TOTAL_CAD": "binance/balance_total_cad",
     "TOTAL_EUR": "binance/balance_total_eur",
@@ -88,11 +89,11 @@ def get_conversion_rates():
     try:
         logging.info("Fetching conversion rates from CoinMarketCap...")
         currencies = ["USD", "CAD", "EUR"]
-        conversion_rates = {"LTC": {}, "DOGE": {}, "BTC": {}, "XRP": {}, "PEPE": {}, "BNB": {}}
+        conversion_rates = {"LTC": {}, "DOGE": {}, "BTC": {}, "XRP": {}, "PEPE": {}, "BNB": {}, "ETH": {}}
 
         for currency in currencies:
             params = {
-                "symbol": "LTC,DOGE,BTC,XRP,PEPE,BNB",
+                "symbol": "LTC,DOGE,BTC,XRP,PEPE,BNB,ETH",
                 "convert": currency
             }
             headers = {
@@ -109,6 +110,7 @@ def get_conversion_rates():
             conversion_rates["XRP"][currency.lower()] = data["XRP"]["quote"][currency]["price"]
             conversion_rates["PEPE"][currency.lower()] = data["PEPE"]["quote"][currency]["price"]
             conversion_rates["BNB"][currency.lower()] = data["BNB"]["quote"][currency]["price"]
+            conversion_rates["ETH"][currency.lower()] = data["ETH"]["quote"][currency]["price"]
 
         logging.info("Retrieved conversion rates: %s", conversion_rates)
         return conversion_rates
@@ -132,7 +134,7 @@ def publish_to_mqtt(topic, message):
 if __name__ == "__main__":
     logging.info("Starting Binance balance retrieval and publish script.")
     balances = {asset: get_binance_balance(asset) for asset in \
-                MQTT_TOPICS.keys() if asset in ["LTC", "DOGE", "BTC", "XRP", "PEPE", "BNB"]}
+                MQTT_TOPICS.keys() if asset in ["LTC", "DOGE", "BTC", "XRP", "PEPE", "BNB", "ETH"]}
     rates = get_conversion_rates()
 
     if balances and rates:
