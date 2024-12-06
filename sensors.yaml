@@ -535,9 +535,15 @@
       unit_of_measurement: "LTC"
     balance_total_doge:
       value_template: >
-        {{ (states('sensor.exodus_balance_doge') | float(0) +
-            states('sensor.kraken_balance_doge') | float(0) +
-            states('sensor.binance_balance_doge') | float(0)) | round(8) }}
+        {% if states('sensor.exodus_balance_doge') not in ['unknown', 'unavailable'] and 
+              states('sensor.kraken_balance_doge') not in ['unknown', 'unavailable'] and 
+              states('sensor.binance_balance_doge') not in ['unknown', 'unavailable'] %}
+          {{ (states('sensor.exodus_balance_doge') | float +
+              states('sensor.kraken_balance_doge') | float +
+              states('sensor.binance_balance_doge') | float) | round(8) }}
+        {% else %}
+          {{ states('sensor.balance_total_doge') }}
+        {% endif %}
       unit_of_measurement: "DOGE"
     balance_total_btc:
       value_template: >
@@ -550,15 +556,31 @@
       unit_of_measurement: "XRP"
     balance_total_pepe:
       value_template: >
-        {{ (states('sensor.binance_balance_pepe') | float(0)) | round(8) }}
+        {% if states('sensor.exodus_balance_pepe') not in ['unknown', 'unavailable'] and 
+              states('sensor.kraken_balance_pepe') not in ['unknown', 'unavailable'] and 
+              states('sensor.binance_balance_pepe') not in ['unknown', 'unavailable'] %}
+          {{ (states('sensor.exodus_balance_pepe') | float +
+              states('sensor.kraken_balance_pepe') | float +
+              states('sensor.binance_balance_pepe') | float) | round(8) }}
+        {% else %}
+          {{ states('sensor.balance_total_pepe') }}
+        {% endif %}
       unit_of_measurement: "PEPE"
     balance_total_bnb:
       value_template: >
-        {{ (states('sensor.binance_balance_bnb') | float(0)) | round(8) }}
+        {% if states('sensor.exodus_balance_bnb') not in ['unknown', 'unavailable'] and 
+              states('sensor.binance_balance_bnb') not in ['unknown', 'unavailable'] %}
+          {{ (states('sensor.exodus_balance_bnb') | float +
+              states('sensor.binance_balance_bnb') | float) | round(8) }}
+        {% else %}
+          {{ states('sensor.balance_total_bnb') }}
+        {% endif %}
       unit_of_measurement: "BNB"
     balance_total_eth:
       value_template: >
-        {{ (states('sensor.binance_balance_eth') | float(0)) | round(8) }}
+        {{ (states('sensor.exodus_balance_eth') | float(0) +
+            states('sensor.kraken_balance_eth') | float(0) +
+            states('sensor.binance_balance_eth') | float(0)) | round(8) }}
       unit_of_measurement: "ETH"
 
 - platform: template
