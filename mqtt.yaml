@@ -383,3 +383,15 @@ sensor:
     value_template: "{{ value | float }}" 
     unit_of_measurement: "ETH"
     unique_id: "binance_balance_eth"
+
+  - name: "Exodus ETH Balance"
+    state_topic: "exodus/balance_eth"
+    value_template: "{{ value | float }}"
+    unit_of_measurement: "ETH"
+    unique_id: "exodus_balance_eth"
+
+  - name: "Kraken ETH Balance"
+    state_topic: "kraken/balance_eth"
+    value_template: "{{ value | float }}"
+    unit_of_measurement: "ETH"
+    unique_id: "kraken_balance_eth"
