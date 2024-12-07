@@ -629,8 +629,6 @@
           {{ (states('sensor.balance_total_ltc') | float * 
               states('sensor.crypto_coin_value_ltc') | float * 
               states('sensor.usd_eur') | float) | round(2) }}
-        {% else %}
-          {{ states.sensor.ltc_balance_in_eur.last_known_state | default(0) | float }}
         {% endif %}
 
     btc_balance_in_eur:
