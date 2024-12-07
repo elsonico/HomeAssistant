@@ -748,7 +748,7 @@
       friendly_name: "Binance ADA 2nd Balance in EUR"
       unit_of_measurement: "€"
       value_template: >
-        {{ (states('sensor.binance2_balance_ada') | float * 
+        {{ (states('sensor.binance_ada_2nd_balance') | float * 
             states('sensor.crypto_coin_value_ada') | float * 
             states('sensor.usd_eur') | float) | round(2) }}
     binance_total_2nd_balance_in_eur:
