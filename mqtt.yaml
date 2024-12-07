@@ -401,3 +401,9 @@ sensor:
     value_template: "{{ value | float }}" 
     unit_of_measurement: "ADA"
     unique_id: "binance2_balance_ada"
+
+  - name: "Crypto Coin Value ADA"
+    state_topic: "cryptocoin/value_ada"
+    value_template: "{{ value | float }}"
+    unit_of_measurement: "USD"
+    unique_id: "cryptocoin_value_ada"
