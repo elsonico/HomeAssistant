@@ -395,3 +395,9 @@ sensor:
     value_template: "{{ value | float }}"
     unit_of_measurement: "ETH"
     unique_id: "kraken_balance_eth"
+
+  - name: "Binance ADA 2nd Balance"
+    state_topic: "binance2/balance_ada"
+    value_template: "{{ value | float }}" 
+    unit_of_measurement: "ADA"
+    unique_id: "binance2_balance_ada"
