@@ -586,6 +586,17 @@
           {{ states('sensor.balance_total_ada') }}
         {% endif %}
       unit_of_measurement: "ADA"
+    ltc_balance_in_eur:
+      friendly_name: "LTC Balance (EUR)"
+      unit_of_measurement: '€'
+      value_template: >-
+        {% if states('sensor.balance_total_ltc') not in ['unknown', 'unavailable'] 
+           and states('sensor.crypto_coin_value_ltc') not in ['unknown', 'unavailable']
+           and states('sensor.usd_eur') not in ['unknown', 'unavailable'] %}
+          {{ (states('sensor.balance_total_ltc') | float * 
+              states('sensor.crypto_coin_value_ltc') | float * 
+              states('sensor.usd_eur') | float) | round(2) }}
+        {% endif %}
 
 - platform: template
   sensors:
