@@ -744,22 +744,22 @@
         {{ (states('sensor.binance_eth_2nd_balance') | float * 
             states('sensor.crypto_coin_value_eth') | float * 
             states('sensor.usd_eur') | float) | round(2) }}
-    binance_total_2nd_balance_in_eur:
-      friendly_name: "Binance Total 2nd Balance in EUR"
-      unit_of_measurement: "€"
-      value_template: >
-        {% set btc = states('sensor.binance_btc_2nd_balance_in_eur') | float(0) %}
-        {% set doge = states('sensor.binance_doge_2nd_balance_in_eur') | float(0) %}
-        {% set ltc = states('sensor.binance_ltc_2nd_balance_in_eur') | float(0) %}
-        {% set bnb = states('sensor.binance_bnb_2nd_balance_in_eur') | float(0) %}
-        {% set eth = states('sensor.binance_eth_2nd_balance_in_eur') | float(0) %}
-        {% set ada = states('sensor.binance_ada_2nd_balance_in_eur') | float(0) %}
-        {{ (btc + doge + ltc + bnb + eth + ada) | round(2) }}
     binance_ada_2nd_balance_in_eur:
       friendly_name: "Binance ADA 2nd Balance in EUR"
       unit_of_measurement: "€"
       value_template: >
-        {{ (states('sensor.binance_ada_2nd_balance') | float * 
+        {{ (states('sensor.binance2_balance_ada') | float * 
             states('sensor.crypto_coin_value_ada') | float * 
             states('sensor.usd_eur') | float) | round(2) }}
+    binance_total_2nd_balance_in_eur:
+      friendly_name: "Binance Total 2nd Balance in EUR"
+      unit_of_measurement: "€"
+      value_template: >
+        {% set btc = states('sensor.binance2_balance_btc') | float(0) * states('sensor.crypto_coin_value_btc') | float(0) * states('sensor.usd_eur') | float(0) %}
+        {% set doge = states('sensor.binance2_balance_doge') | float(0) * states('sensor.crypto_coin_value_doge') | float(0) * states('sensor.usd_eur') | float(0) %}
+        {% set ltc = states('sensor.binance2_balance_ltc') | float(0) * states('sensor.crypto_coin_value_ltc') | float(0) * states('sensor.usd_eur') | float(0) %}
+        {% set bnb = states('sensor.binance2_balance_bnb') | float(0) * states('sensor.crypto_coin_value_bnb') | float(0) * states('sensor.usd_eur') | float(0) %}
+        {% set eth = states('sensor.binance2_balance_eth') | float(0) * states('sensor.crypto_coin_value_eth') | float(0) * states('sensor.usd_eur') | float(0) %}
+        {% set ada = states('sensor.binance2_balance_ada') | float(0) * states('sensor.crypto_coin_value_ada') | float(0) * states('sensor.usd_eur') | float(0) %}
+        {{ (btc + doge + ltc + bnb + eth + ada) | round(2) }}
 
