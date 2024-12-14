@@ -10,6 +10,9 @@ frontend:
 
 logger:
   default: info
+  logs:
+    custom_components.cryptoinfo_advanced: debug
+
 
 # Text to speech
 tts:

@@ -129,11 +129,11 @@ if __name__ == "__main__":
         publish_to_mqtt(MQTT_TOPICS["doge_balance"], f"{doge_balance:.8f}")
     if btc_balance is not None:
         publish_to_mqtt(MQTT_TOPICS["btc_balance"], f"{btc_balance:.8f}")
-    if total_usd > 0:
+    if total_usd is not None:
         publish_to_mqtt(MQTT_TOPICS["total_usd"], f"{total_usd:.2f}")
-    if total_cad > 0:
+    if total_cad is not None:
         publish_to_mqtt(MQTT_TOPICS["total_cad"], f"{total_cad:.2f}")
-    if total_eur > 0:
+    if total_eur is not None:
         publish_to_mqtt(MQTT_TOPICS["total_eur"], f"{total_eur:.2f}")
 
     logging.info("Exodus balance script finished.")

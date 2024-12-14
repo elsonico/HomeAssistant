@@ -47,9 +47,10 @@ def get_account_balances():
         balances = response.get('result', {})
         ltc_balance = float(balances.get('XLTC', 0))
         doge_balance = float(balances.get('XXDG', 0))
+        btc_balance = float(balances.get('XXBT', 0))
 
-        logging.info(f"Retrieved balances: LTC={ltc_balance}, DOGE={doge_balance}")
-        return ltc_balance, doge_balance
+        logging.info(f"Retrieved balances: LTC={ltc_balance}, DOGE={doge_balance}, BTC={btc_balance}")
+        return ltc_balance, doge_balance, btc_balance
     except Exception as e:
         logging.exception(f"An error occurred while fetching balances: {str(e)}")
         return None
@@ -57,7 +58,7 @@ def get_account_balances():
 def get_asset_prices():
     logging.info("Querying asset prices...")
     try:
-        response = api.query_public('Ticker', {'pair': 'XLTCZUSD,XDGUSD'})
+        response = api.query_public('Ticker', {'pair': 'XLTCZUSD,XDGUSD,XXBTZUSD'})
         if response.get('error'):
             logging.error(f"Error fetching asset prices: {response['error']}")
             return None
@@ -65,9 +66,10 @@ def get_asset_prices():
         prices = response.get('result', {})
         ltc_price_usd = float(prices.get('XLTCZUSD', {}).get('c', [0])[0])
         doge_price_usd = float(prices.get('XDGUSD', {}).get('c', [0])[0])
+        btc_price_usd = float(prices.get('XXBTZUSD', {}).get('c', [0])[0])
 
-        logging.info(f"Retrieved prices: LTC/USD={ltc_price_usd}, DOGE/USD={doge_price_usd}")
-        return ltc_price_usd, doge_price_usd
+        logging.info(f"Retrieved prices: LTC/USD={ltc_price_usd}, DOGE/USD={doge_price_usd}, BTC/USD={btc_price_usd}")
+        return ltc_price_usd, doge_price_usd, btc_price_usd
     except Exception as e:
         logging.exception(f"An error occurred while fetching asset prices: {str(e)}")
         return None
@@ -107,17 +109,19 @@ def main():
     rates = get_conversion_rates()
 
     if balances and prices and rates:
-        ltc_balance, doge_balance = balances
-        ltc_price_usd, doge_price_usd = prices
+        logging.debug(f"Balances: {balances}")
+        ltc_balance, doge_balance, btc_balance = balances
+        ltc_price_usd, doge_price_usd, btc_price_usd = prices
         usd_to_cad, usd_to_eur = rates
 
         # Log raw values
-        logging.debug(f"LTC Balance: {ltc_balance}, DOGE Balance: {doge_balance}")
+        logging.debug(f"LTC Balance: {ltc_balance}, DOGE Balance: \
+                      {doge_balance}, BTC Balance: {btc_balance}")
         logging.debug(f"LTC/USD Price: {ltc_price_usd}, DOGE/USD Price: {doge_price_usd}")
         logging.debug(f"USD/CAD Rate: {usd_to_cad}, USD/EUR Rate: {usd_to_eur}")
 
         # Calculate total balance in USD
-        total_usd = (ltc_balance * ltc_price_usd) + (doge_balance * doge_price_usd)
+        total_usd = (ltc_balance * ltc_price_usd) + (doge_balance * doge_price_usd) + (btc_balance * btc_price_usd)
         logging.debug(f"Total USD: {total_usd}")
 
         # Calculate total balance in CAD and EUR
@@ -128,6 +132,7 @@ def main():
         # Publish balances to MQTT
         publish_to_mqtt('kraken/balance_ltc', round(ltc_balance, 8))
         publish_to_mqtt('kraken/balance_doge', round(doge_balance, 8))
+        publish_to_mqtt('kraken/balance_btc', round(btc_balance, 8))
         publish_to_mqtt('kraken/balance_total_usd', round(total_usd, 2))
         publish_to_mqtt('kraken/balance_total_cad', round(total_cad, 2))
         publish_to_mqtt('kraken/balance_total_eur', round(total_eur, 2))

@@ -180,6 +180,12 @@ sensor:
     unit_of_measurement: "DOGE"
     unique_id: "kraken_balance_doge"
 
+  - name: "Kraken BTC Balance"
+    state_topic: "kraken/balance_btc"
+    value_template: "{{ value | float }}"
+    unit_of_measurement: "BTC"
+    unique_id: "kraken_balance_btc"
+
   - name: "Kraken PEPE Balance"
     state_topic: "kraken/balance_pepe"
     value_template: "{{ value | float }}"
