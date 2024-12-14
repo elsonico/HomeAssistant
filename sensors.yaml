@@ -548,6 +548,7 @@
     balance_total_btc:
       value_template: >
         {{ (states('sensor.exodus_balance_btc') | float(0) +
+            states('sensor.kraken_balance_btc') | float(0) +
             states('sensor.binance_balance_btc') | float(0)) | round(8) }}
       unit_of_measurement: "BTC"
     balance_total_xrp:
