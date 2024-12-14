@@ -547,9 +547,15 @@
       unit_of_measurement: "DOGE"
     balance_total_btc:
       value_template: >
-        {{ (states('sensor.exodus_balance_btc') | float(0) +
-            states('sensor.kraken_balance_btc') | float(0) +
-            states('sensor.binance_balance_btc') | float(0)) | round(8) }}
+        {% if states('sensor.exodus_balance_btc') not in ['unknown', 'unavailable'] and 
+              states('sensor.kraken_balance_btc') not in ['unknown', 'unavailable'] and 
+              states('sensor.binance_balance_btc') not in ['unknown', 'unavailable'] %}
+          {{ (states('sensor.exodus_balance_btc') | float +
+            states('sensor.kraken_balance_btc') | float +
+            states('sensor.binance_balance_btc') | float) | round(8) }}
+        {% else %}
+          {{ states('sensor.balance_total_btc') }}
+        {% endif %}
       unit_of_measurement: "BTC"
     balance_total_xrp:
       value_template: >
