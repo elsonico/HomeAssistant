@@ -785,3 +785,141 @@
           {{ (btc + doge + ltc + bnb + eth + ada) | round(2) }}
         {% endif %}
 
+- platform: rest
+  name: Litecoinpool Hashrate
+  resource: https://www.litecoinpool.org/api?api_key=d758233b2df7ab0916f8150955fcc649
+  value_template: "{{ value_json.user.hash_rate | float / 1000 }}"
+  unit_of_measurement: "MH/s"
+
+- platform: rest
+  name: Litecoinpool LTC Balance
+  resource: https://www.litecoinpool.org/api?api_key=d758233b2df7ab0916f8150955fcc649
+  value_template: "{{ value_json.user.unpaid_rewards | float }}"
+  unit_of_measurement: "LTC"
+
+- platform: rest
+  name: Litecoinpool DOGE Balance
+  resource: https://www.litecoinpool.org/api?api_key=d758233b2df7ab0916f8150955fcc649
+  value_template: "{{ value_json.user.unpaid_rewards_doge | float }}"
+  unit_of_measurement: "DOGE"
+
+- platform: template
+  sensors:
+    electricity_cost_per_kwh:
+      friendly_name: "Electricity Cost Per kWh"
+      unit_of_measurement: "€/kWh"
+      value_template: >
+        {% set spot_price = (states('sensor.nordpool_kwh_fi_eur_3_10_0255') | float(0)) / 100 %}
+        {% set electricity_tax = 0.0283 %}
+        {% set transfer_day = 0.0262 %}
+        {% set transfer_night = 0.0137 %}
+        {% set now = now() %}
+        {% set transfer_cost = transfer_night if now.hour >= 22 or now.hour < 7 else transfer_day %}
+        {{ (spot_price + electricity_tax + transfer_cost) | round(4) }}
+    electricity_cost_in_cents_per_kwh:
+      friendly_name: "Electricity Cost in Cents Per kWh"
+      unit_of_measurement: "c/kWh"
+      value_template: >
+        {% set spot_price = (states('sensor.nordpool_kwh_fi_eur_3_10_0255') | float(0)) %}
+        {% set electricity_tax = 2.83 %}
+        {% set transfer_day = 2.62 %}
+        {% set transfer_night = 1.37 %}
+        {% set now = now() %}
+        {% set transfer_cost = transfer_night if now.hour >= 22 or now.hour < 7 else transfer_day %}
+        {{ (spot_price + electricity_tax + transfer_cost) | round(4) }}
+
+- platform: rest
+  name: Litecoinpool Market Data
+  resource: https://www.litecoinpool.org/api?api_key=d758233b2df7ab0916f8150955fcc649
+  method: GET
+  scan_interval: 300
+  value_template: "OK"
+  json_attributes:
+    - user
+    - market
+
+- platform: template
+  sensors:
+    litecoin_rewards_eur:
+      friendly_name: "Litecoin Rewards EUR"
+      unit_of_measurement: "€"
+      value_template: >
+        {% set ltc_balance = states('sensor.litecoinpool_ltc_balance') | float(0) %}
+        {% set ltc_price_eur = state_attr('sensor.litecoinpool_market_data', 'ltc_eur') | float(0) %}
+        {{ (ltc_balance * ltc_price_eur) | round(2) }}
+
+    dogecoin_rewards_eur:
+      friendly_name: "Dogecoin Rewards EUR"
+      unit_of_measurement: "€"
+      value_template: >
+        {% set doge_balance = states('sensor.litecoinpool_doge_balance') | float(0) %}
+        {% set doge_price_eur = state_attr('sensor.litecoinpool_market_data', 'doge_eur') | float(0) %}
+        {{ (doge_balance * doge_price_eur) | round(2) }}
+
+    total_rewards_eur:
+      friendly_name: "Total Rewards EUR"
+      unit_of_measurement: "€"
+      value_template: >
+        {% set total_rewards = state_attr('sensor.litecoinpool_market_data', 'user')['total_rewards'] | float(0) %}
+        {% set ltc_price_eur = state_attr('sensor.litecoinpool_market_data', 'market')['ltc_eur'] | float(0) %}
+        {{ (total_rewards * ltc_price_eur) | round(4) }}
+
+
+- platform: template
+  sensors:
+    shellyplug_s_3ce90ee04b97_energy_cost_hourly:
+      friendly_name: "Shelly Plug Hourly Cost"
+      unit_of_measurement: "€"
+      value_template: >
+        {% set power = states('sensor.shellyplug_s_3ce90ee04b97_power') | float(0) %}
+        {% set cost_per_kwh = states('sensor.electricity_cost_per_kwh') | float(0) %}
+        {{ ((power / 1000) * cost_per_kwh) | round(4) }}
+    shellyplug_s_3ce90ee04b97_energy_cost_daily:
+      friendly_name: "Shelly Plug Daily Cost"
+      unit_of_measurement: "€"
+      value_template: >
+        {% set energy = states('sensor.shellyplug_s_3ce90ee04b97_energy') | float(0) %}
+        {% set cost_per_kwh = states('sensor.electricity_cost_per_kwh') | float(0) %}
+        {{ (energy * cost_per_kwh) | round(2) }}
+    shellyplug_s_3ce90ee04b97_energy_cost_weekly:
+      friendly_name: "Shelly Plug Weekly Cost"
+      unit_of_measurement: "€"
+      value_template: >
+        {% set energy = states('sensor.shellyplug_s_3ce90ee04b97_energy') | float(0) %}
+        {% set cost_per_kwh = states('sensor.electricity_cost_per_kwh') | float(0) %}
+        {{ ((energy * cost_per_kwh) * 7) | round(2) }}
+
+- platform: template
+  sensors:
+    miner_rewards_hourly:
+      friendly_name: "Miner Rewards Hourly"
+      unit_of_measurement: "€"
+      value_template: >
+        {% set expected_24h_rewards = state_attr('sensor.litecoinpool_market_data', 'user')['expected_24h_rewards'] | float(0) %}
+        {% set ltc_price_eur = (state_attr('sensor.litecoinpool_market_data', 'market')['ltc_eur'] | float(0)) * 10 %}
+        {{ ((expected_24h_rewards * ltc_price_eur) / 24) | round(4) }}
+    miner_rewards_daily:
+      friendly_name: "Miner Rewards Daily"
+      unit_of_measurement: "€"
+      value_template: >
+        {% set expected_24h_rewards = state_attr('sensor.litecoinpool_market_data', 'user')['expected_24h_rewards'] | float(0) %}
+        {% set ltc_price_eur = (state_attr('sensor.litecoinpool_market_data', 'market')['ltc_eur'] | float(0)) * 10 %}
+        {{ (expected_24h_rewards * ltc_price_eur) | round(4) }}
+    miner_profitability:
+      friendly_name: "Miner Profitability"
+      unit_of_measurement: "€"
+      value_template: >
+        {% set daily_rewards = states('sensor.miner_rewards_daily') | float(0) %}
+        {% set daily_costs = states('sensor.shellyplug_s_3ce90ee04b97_energy_cost_daily') | float(0) %}
+        {{ (daily_rewards - daily_costs) | round(2) }}
+
+- platform: template
+  sensors:
+    accumulated_rewards_eur:
+      friendly_name: "Accumulated Rewards EUR"
+      unit_of_measurement: "€"
+      value_template: >
+        {% set current_rewards = states('sensor.litecoin_rewards_eur') | float(0) %}
+        {% set total_rewards = states('sensor.accumulated_rewards_eur') | float(0) %}
+        {{ (total_rewards + current_rewards) | round(2) }}
+
