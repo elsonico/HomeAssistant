@@ -511,3 +511,25 @@
         entity_id: switch.shellyplug_s_3ce90ee04b97
   mode: single
 
+- alias: Turn Off Miner When Electricity Price Is High
+  description: "Turns off the miner when electricity price goes above 33c/kWh"
+  trigger:
+    - platform: numeric_state
+      entity_id: sensor.electricity_cost_in_cents_per_kwh
+      above: 33
+  action:
+    - service: switch.turn_off
+      target:
+        entity_id: switch.shellyplug_s_3ce90ee04b97
+
+- alias: Turn On Miner When Electricity Price Is Low
+  description: "Turns on the miner when electricity price goes below 33c/kWh"
+  trigger:
+    - platform: numeric_state
+      entity_id: sensor.electricity_cost_in_cents_per_kwh
+      below: 33
+  action:
+    - service: switch.turn_on
+      target:
+        entity_id: switch.shellyplug_s_3ce90ee04b97
+

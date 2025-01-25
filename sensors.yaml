@@ -860,6 +860,16 @@
       friendly_name: "Total Rewards EUR"
       unit_of_measurement: "€"
       value_template: >
+        {% set total_rewards_ltc = state_attr('sensor.litecoinpool_market_data', 'user')['total_rewards'] | float(0) %}
+        {% set total_rewards_doge = state_attr('sensor.litecoinpool_market_data', 'user')['total_rewards_doge'] | float(0) %}
+        {% set ltc_price_eur = state_attr('sensor.litecoinpool_market_data', 'market')['ltc_eur'] | float(0) %}
+        {% set doge_price_eur = state_attr('sensor.litecoinpool_market_data', 'market')['doge_eur'] | float(0) %}
+        {{ ((total_rewards_ltc * ltc_price_eur) + (total_rewards_doge * doge_price_eur)) | round(2) }}
+
+    total_rewards_ltc_eur:
+      friendly_name: "Total Rewards LTC EUR"
+      unit_of_measurement: "€" 
+      value_template: >
         {% set total_rewards = state_attr('sensor.litecoinpool_market_data', 'user')['total_rewards'] | float(0) %}
         {% set ltc_price_eur = state_attr('sensor.litecoinpool_market_data', 'market')['ltc_eur'] | float(0) %}
         {{ (total_rewards * ltc_price_eur) | round(4) }}
