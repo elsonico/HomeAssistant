@@ -869,25 +869,28 @@
   sensors:
     shellyplug_s_3ce90ee04b97_energy_cost_hourly:
       friendly_name: "Shelly Plug Hourly Cost"
-      unit_of_measurement: "€"
+      unit_of_measurement: "€" 
       value_template: >
         {% set power = states('sensor.shellyplug_s_3ce90ee04b97_power') | float(0) %}
         {% set cost_per_kwh = states('sensor.electricity_cost_per_kwh') | float(0) %}
-        {{ ((power / 1000) * cost_per_kwh) | round(4) }}
+        {{ ((power / 1000) * cost_per_kwh) | round(2) }}
+
     shellyplug_s_3ce90ee04b97_energy_cost_daily:
       friendly_name: "Shelly Plug Daily Cost"
-      unit_of_measurement: "€"
+      unit_of_measurement: "€" 
       value_template: >
-        {% set energy = states('sensor.shellyplug_s_3ce90ee04b97_energy') | float(0) %}
+        {% set power = states('sensor.shellyplug_s_3ce90ee04b97_power') | float(0) %}
         {% set cost_per_kwh = states('sensor.electricity_cost_per_kwh') | float(0) %}
-        {{ (energy * cost_per_kwh) | round(2) }}
+        {{ ((power / 1000) * cost_per_kwh * 24) | round(2) }}
+
     shellyplug_s_3ce90ee04b97_energy_cost_weekly:
       friendly_name: "Shelly Plug Weekly Cost"
-      unit_of_measurement: "€"
+      unit_of_measurement: "€" 
       value_template: >
-        {% set energy = states('sensor.shellyplug_s_3ce90ee04b97_energy') | float(0) %}
+        {% set power = states('sensor.shellyplug_s_3ce90ee04b97_power') | float(0) %}
         {% set cost_per_kwh = states('sensor.electricity_cost_per_kwh') | float(0) %}
-        {{ ((energy * cost_per_kwh) * 7) | round(2) }}
+        {{ ((power / 1000) * cost_per_kwh * 24 * 7) | round(2) }}
+
 
 - platform: template
   sensors:
@@ -922,4 +925,30 @@
         {% set current_rewards = states('sensor.litecoin_rewards_eur') | float(0) %}
         {% set total_rewards = states('sensor.accumulated_rewards_eur') | float(0) %}
         {{ (total_rewards + current_rewards) | round(2) }}
+
+- platform: template
+  sensors:
+    miner_paid_rewards_eur:
+      friendly_name: "Miner Paid Rewards EUR"
+      unit_of_measurement: "€"
+      value_template: >
+        {% set paid_rewards_ltc = state_attr('sensor.litecoinpool_market_data', 'user')['paid_rewards'] | float(0) %}
+        {% set paid_rewards_doge = state_attr('sensor.litecoinpool_market_data', 'user')['paid_rewards_doge'] | float(0) %}
+        {% set ltc_price_eur = state_attr('sensor.litecoinpool_market_data', 'ltc_eur') | float(0) %}
+        {% set doge_price_eur = state_attr('sensor.litecoinpool_market_data', 'doge_eur') | float(0) %}
+        {{ ((paid_rewards_ltc * ltc_price_eur) + (paid_rewards_doge * doge_price_eur)) | round(2) }}
+    worker_rewards_eur:
+      friendly_name: "Worker Rewards EUR"
+      unit_of_measurement: "€"
+      value_template: >
+        {% set workers = state_attr('sensor.litecoinpool_market_data', 'workers') %}
+        {% if workers and 'elsonico.dg1' in workers %}
+          {% set worker_rewards_ltc = workers['elsonico.dg1'].get('rewards', 0) | float(0) %}
+          {% set worker_rewards_doge = workers['elsonico.dg1'].get('rewards_doge', 0) | float(0) %}
+          {% set ltc_price_eur = state_attr('sensor.litecoinpool_market_data', 'ltc_eur') | float(0) %}
+          {% set doge_price_eur = state_attr('sensor.litecoinpool_market_data', 'doge_eur') | float(0) %}
+          {{ ((worker_rewards_ltc * ltc_price_eur) + (worker_rewards_doge * doge_price_eur)) | round(2) }}
+        {% else %}
+          0.00
+        {% endif %}
 
