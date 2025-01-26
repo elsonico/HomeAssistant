@@ -787,19 +787,19 @@
 
 - platform: rest
   name: Litecoinpool Hashrate
-  resource: https://www.litecoinpool.org/api?api_key=d758233b2df7ab0916f8150955fcc649
+  resource: !secret litecoinpool_api_url
   value_template: "{{ value_json.user.hash_rate | float / 1000 }}"
   unit_of_measurement: "MH/s"
 
 - platform: rest
   name: Litecoinpool LTC Balance
-  resource: https://www.litecoinpool.org/api?api_key=d758233b2df7ab0916f8150955fcc649
+  resource: !secret litecoinpool_api_url
   value_template: "{{ value_json.user.unpaid_rewards | float }}"
   unit_of_measurement: "LTC"
 
 - platform: rest
   name: Litecoinpool DOGE Balance
-  resource: https://www.litecoinpool.org/api?api_key=d758233b2df7ab0916f8150955fcc649
+  resource: !secret litecoinpool_api_url
   value_template: "{{ value_json.user.unpaid_rewards_doge | float }}"
   unit_of_measurement: "DOGE"
 
@@ -830,7 +830,7 @@
 
 - platform: rest
   name: Litecoinpool Market Data
-  resource: https://www.litecoinpool.org/api?api_key=d758233b2df7ab0916f8150955fcc649
+  resource: !secret litecoinpool_api_url
   method: GET
   scan_interval: 300
   value_template: "OK"
