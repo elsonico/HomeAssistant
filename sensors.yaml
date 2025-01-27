@@ -962,113 +962,35 @@
           0.00
         {% endif %}
 
-# PowerPool REST sensors
+# PowerPool REST sensor
 - platform: rest
   name: "PowerPool User Data"
   resource: !secret powerpool_user_api_url
   value_template: "{{ value_json is not none }}"
-  json_attributes_path: "$.data"
   scan_interval: 300
 
-# PowerPool template sensors
+# Debug sensors
 - platform: template
   sensors:
-    powerpool_scrypt_hashrate:
-      friendly_name: "PowerPool Scrypt Hashrate"
-      unit_of_measurement: "GH/s"
+    debug_powerpool_raw:
+      friendly_name: "Debug PowerPool Raw"
       value_template: >
-        {% set data = state_attr('sensor.powerpool_user_data', 'hashrate') %}
-        {% if data and data.scrypt %}
-          {{ data.scrypt.hashrate | float | round(2) }}
-        {% else %}
-          0
-        {% endif %}
-
-    powerpool_rejection_rate:
-      friendly_name: "PowerPool Rejection Rate"
-      unit_of_measurement: "%"
-      value_template: >
-        {% set data = state_attr('sensor.powerpool_user_data', 'workers') %}
-        {% if data and data[0] %}
-          {{ data[0].rejectedPercentage | float | round(2) }}
-        {% else %}
-          0
-        {% endif %}
-
-    powerpool_btc_balance:
-      friendly_name: "PowerPool BTC Balance"
-      unit_of_measurement: "BTC"
-      value_template: >
-        {% set data = state_attr('sensor.powerpool_user_data', 'balances') %}
-        {% if data %}
-          {% for balance in data %}
-            {% if balance.coinTicker == 'BTC' %}
-              {{ balance.balance | float | round(8) }}
-              {% break %}
-            {% endif %}
-          {% endfor %}
-        {% else %}
-          0
-        {% endif %}
-
-    powerpool_usd_balance:
-      friendly_name: "PowerPool USD Balance"
-      unit_of_measurement: "USD"
-      value_template: >
-        {% set data = state_attr('sensor.powerpool_user_data', 'balances') %}
-        {% if data %}
-          {% for balance in data %}
-            {% if balance.coinTicker == 'BTC' %}
-              {{ balance.balanceUSD | float | round(2) }}
-              {% break %}
-            {% endif %}
-          {% endfor %}
-        {% else %}
-          0
-        {% endif %}
-
-    powerpool_btc_rewards:
-      friendly_name: "PowerPool BTC Rewards"
-      unit_of_measurement: "BTC"
-      value_template: >
-        {% set data = state_attr('sensor.powerpool_user_data', 'workers') %}
-        {% if data and data[0] and data[0].totalRewards %}
-          {% for reward in data[0].totalRewards %}
-            {% if reward.coinTicker == 'BTC' %}
-              {{ reward.totalRewards | float | round(8) }}
-              {% break %}
-            {% endif %}
-          {% endfor %}
-        {% else %}
-          0
-        {% endif %}
-
-    # Debug sensor to verify data access
-    debug_powerpool_data:
-      friendly_name: "Debug PowerPool Data"
-      value_template: >
-        {% set data = state_attr('sensor.powerpool_user_data', 'hashrate') %}
-        {{ data is not none }}
-
-# Debug sensors
-template:
-  - sensor:
-      - name: "Debug PowerPool Raw"
-        state: >
-          {{ states('sensor.powerpool_user_data') }}
+        {{ states('sensor.powerpool_user_data') }}
           
-      - name: "Debug PowerPool Attributes"
-        state: >
-          {{ state_attr('sensor.powerpool_user_data', 'data') | string }}
+    debug_powerpool_attributes:
+      friendly_name: "Debug PowerPool Attributes"
+      value_template: >
+        {{ state_attr('sensor.powerpool_user_data', 'data') | string }}
           
-      - name: "Debug PowerPool Hashrate"
-        state: >
-          {% set data = state_attr('sensor.powerpool_user_data', 'data') %}
-          {% if data %}
-            {% set hashrate = data.hashrate.scrypt.hashrate %}
-            {{ hashrate }}
-          {% else %}
-            No Data
-          {% endif %}
+    debug_powerpool_hashrate:
+      friendly_name: "Debug PowerPool Hashrate"
+      value_template: >
+        {% set data = state_attr('sensor.powerpool_user_data', 'data') %}
+        {% if data %}
+          {% set hashrate = data.hashrate.scrypt.hashrate %}
+          {{ hashrate }}
+        {% else %}
+          No Data
+        {% endif %}
 
 
