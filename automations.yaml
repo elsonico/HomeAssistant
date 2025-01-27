@@ -485,31 +485,6 @@
   - service: shell_command.publish_fetch_crypto_currency
   - delay:
       seconds: 5
-  id: 6c36ff4b838d4a9dba444d4de4d5f9b6
-- alias: Reboot or Power Cycle Miner
-  description: Reboot the miner on low hash rate, fallback to power cycle if needed
-  trigger:
-    - platform: state
-      entity_id: sensor.litecoinpool_hashrate
-      to: "0"
-      for: "00:15:00"
-  condition: []
-  action:
-    - service: button.press
-      target:
-        entity_id: button.shellyplug_s_3ce90ee04b97_reboot
-    - delay: "00:10:00"  # Wait 10 minutes to see if reboot resolves the issue
-    - condition: state
-      entity_id: sensor.litecoinpool_hashrate
-      state: "0"  # Hashrate is still 0
-    - service: switch.turn_off
-      target:
-        entity_id: switch.shellyplug_s_3ce90ee04b97
-    - delay: "00:00:10"  # Wait 10 seconds
-    - service: switch.turn_on
-      target:
-        entity_id: switch.shellyplug_s_3ce90ee04b97
-  mode: single
 
 - alias: Turn Off Miner When Electricity Price Is High
   description: "Turns off the miner when electricity price goes above 33c/kWh"

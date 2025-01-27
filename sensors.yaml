@@ -962,3 +962,64 @@
           0.00
         {% endif %}
 
+rest:
+  - resource: !secret powerpool_user_api_url
+    sensor:
+      - name: "PowerPool User Data"
+        json_attributes:
+          - data
+        value_template: "{{ 'OK' if value_json is not none else 'ERROR' }}"
+        scan_interval: 300
+
+  - resource: !secret powerpool_pool_api_url
+    sensor:
+      - name: "PowerPool Pool Data"
+        json_attributes:
+          - scrypt
+          - prices
+        value_template: "{{ 'OK' if value_json is not none else 'ERROR' }}"
+        scan_interval: 300
+
+template:
+  - sensor:
+      - name: "PowerPool User Hashrate"
+        unit_of_measurement: "H/s"
+        state: >
+          {% set algo_data = state_attr('sensor.powerpool_user_data', 'hashrate') | default({}) %}
+          {% set scrypt_data = algo_data.get('scrypt', {}) %}
+          {% set raw_hashrate = scrypt_data.get('hashrate', 0) | float %}
+          {% set conversion = scrypt_data.get('speedConversion', 1) | float %}
+          {{ (raw_hashrate * conversion) | round(2) if raw_hashrate > 0 else 0 }}
+
+      - name: "PowerPool BTC Balance EUR"
+        unit_of_measurement: "€"
+        state: >
+          {% set balances = state_attr('sensor.powerpool_user_data', 'balances') | default([]) %}
+          {% set btc_balance = balances | selectattr('coinTicker', 'eq', 'BTC') | map(attribute='balance') | list | first | float(0) %}
+          {% set btc_price_eur = state_attr('sensor.powerpool_pool_data', 'prices', {}).get('BTC', 0) | float %}
+          {{ (btc_balance * btc_price_eur) | round(2) if btc_balance > 0 else 0 }}
+
+      - name: "PowerPool Total BTC Rewards EUR"
+        unit_of_measurement: "€"
+        state: >
+          {% set workers = state_attr('sensor.powerpool_user_data', 'workers') | default([]) %}
+          {% if workers | length > 0 %}
+            {% set btc_price_eur = state_attr('sensor.powerpool_pool_data', 'prices', {}).get('BTC', 0) | float %}
+            {% set total_rewards = workers[0]['totalRewards'] | selectattr('coinTicker', 'eq', 'BTC') | map(attribute='totalRewards') | list | first | float(0) %}
+            {{ (total_rewards * btc_price_eur) | round(2) if total_rewards > 0 else 0 }}
+          {% else %}
+            0
+          {% endif %}
+
+      - name: "PowerPool Daily BTC Rewards EUR"
+        unit_of_measurement: "€"
+        state: >
+          {% set earnings = state_attr('sensor.powerpool_user_data', 'earnings') | default([]) %}
+          {% if earnings | length > 0 %}
+            {% set btc_price_eur = state_attr('sensor.powerpool_pool_data', 'prices', {}).get('BTC', 0) | float %}
+            {% set daily_earnings = earnings[-1]['coins'].get('BTC', {}).get('value', 0) | float %}
+            {{ (daily_earnings * btc_price_eur) | round(2) if daily_earnings > 0 else 0 }}
+          {% else %}
+            0
+          {% endif %}
+
