@@ -1015,4 +1015,41 @@
   unit_of_measurement: "BTC"
   scan_interval: 300
 
+# PowerPool Template Sensors for Advanced Calculations
+- platform: template
+  sensors:
+    powerpool_balance_eur:
+      friendly_name: "PowerPool Balance EUR"
+      unit_of_measurement: "€"
+      value_template: >
+        {% set usd_balance = states('sensor.powerpool_usd_balance') | float %}
+        {% set usd_eur_rate = states('sensor.usd_eur') | float %}
+        {{ (usd_balance * usd_eur_rate) | round(2) }}
+
+    powerpool_expected_daily_rewards:
+      friendly_name: "PowerPool Expected Daily Rewards"
+      unit_of_measurement: "BTC"
+      value_template: >
+        {% set hashrate = states('sensor.powerpool_hashrate') | float %}
+        {% set daily_btc_per_gh = 0.000001 %}  # This is an example value - need to calculate actual rate
+        {{ (hashrate * daily_btc_per_gh) | round(8) }}
+
+    powerpool_expected_daily_rewards_eur:
+      friendly_name: "PowerPool Expected Daily Rewards EUR"
+      unit_of_measurement: "€"
+      value_template: >
+        {% set expected_btc = states('sensor.powerpool_expected_daily_rewards') | float %}
+        {% set usd_balance = states('sensor.powerpool_usd_balance') | float %}
+        {% set btc_balance = states('sensor.powerpool_btc_balance') | float %}
+        {% set btc_eur_rate = (usd_balance / btc_balance) * states('sensor.usd_eur') | float %}
+        {{ (expected_btc * btc_eur_rate) | round(2) }}
+
+    powerpool_expected_daily_profit:
+      friendly_name: "PowerPool Expected Daily Profit"
+      unit_of_measurement: "€"
+      value_template: >
+        {% set expected_rewards = states('sensor.powerpool_expected_daily_rewards_eur') | float %}
+        {% set energy_cost = states('sensor.shellyplug_s_3ce90ee04b97_energy_cost_daily') | float %}
+        {{ (expected_rewards - energy_cost) | round(2) }}
+
 
