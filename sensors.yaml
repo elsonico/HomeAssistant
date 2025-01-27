@@ -969,4 +969,50 @@
   unit_of_measurement: "GH/s"
   scan_interval: 300
 
+- platform: rest         
+  name: "PowerPool Rejection Rate"                                                                                                        
+  resource: !secret powerpool_user_api_url
+  value_template: "{{ value_json.data.workers[0].rejectedPercentage | float }}"
+  unit_of_measurement: "%"
+  scan_interval: 300
+
+- platform: rest         
+  name: "PowerPool BTC Balance"                                                                                                        
+  resource: !secret powerpool_user_api_url
+  value_template: >
+    {% for balance in value_json.data.balances %}
+      {% if balance.coinTicker == 'BTC' %}
+        {{ balance.balance | float }}
+        {% break %}
+      {% endif %}
+    {% endfor %}
+  unit_of_measurement: "BTC"
+  scan_interval: 300
+
+- platform: rest         
+  name: "PowerPool USD Balance"                                                                                                        
+  resource: !secret powerpool_user_api_url
+  value_template: >
+    {% for balance in value_json.data.balances %}
+      {% if balance.coinTicker == 'BTC' %}
+        {{ balance.balanceUSD | float }}
+        {% break %}
+      {% endif %}
+    {% endfor %}
+  unit_of_measurement: "USD"
+  scan_interval: 300
+
+- platform: rest         
+  name: "PowerPool BTC Rewards"                                                                                                        
+  resource: !secret powerpool_user_api_url
+  value_template: >
+    {% for reward in value_json.data.workers[0].totalRewards %}
+      {% if reward.coinTicker == 'BTC' %}
+        {{ reward.totalRewards | float }}
+        {% break %}
+      {% endif %}
+    {% endfor %}
+  unit_of_measurement: "BTC"
+  scan_interval: 300
+
 
