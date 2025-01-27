@@ -129,7 +129,7 @@
     crypto_bitcoin_owned:
       friendly_name: "Bitcoin Owned"
       unit_of_measurement: '$'
-      value_template: >-
+      value_template: >
         {% if not is_state('sensor.cryptoinfo_bitcoin_usd', 'unknown') %}
           {{ (states('sensor.cryptoinfo_bitcoin_usd')|float *0.12345) | round(2) }}
         {%endif %}
@@ -1030,11 +1030,10 @@
       unit_of_measurement: "BTC"
       value_template: >
         {% set hashrate = states('sensor.powerpool_hashrate') | float(0) %}
-        {% if hashrate > 0 %}
-          {% set btc_per_th_30days = 0.02807718 %}
-          {% set btc_per_th_daily = btc_per_th_30days / 30 %}
+        {% set avg_payrate = states('sensor.powerpool_scrypt_average_payrate') | float(0) %}
+        {% if hashrate > 0 and avg_payrate > 0 %}
           {% set hashrate_th = hashrate / 1000 %}
-          {{ (hashrate_th * btc_per_th_daily) | round(8) }}
+          {{ (hashrate_th * avg_payrate) | round(8) }}
         {% else %}
           0
         {% endif %}
@@ -1076,5 +1075,39 @@
       value_template: >
         {% set hashrate = states('sensor.powerpool_hashrate') | float(0) %}
         {{ (hashrate * 1000) | round(0) }}
+
+# First, let's add REST sensor for pool data
+- platform: rest
+  name: "PowerPool Pool Data"
+  resource: !secret powerpool_pool_api_url
+  value_template: "{{ value_json is not none }}"
+  scan_interval: 300
+
+# Add template sensors for pay rates
+- platform: template
+  sensors:
+    powerpool_scrypt_average_payrate:
+      friendly_name: "PowerPool Scrypt 24h Average Pay Rate"
+      unit_of_measurement: "BTC/TH"
+      value_template: >
+        {% set pool_data = states('sensor.powerpool_pool_data') %}
+        {% if pool_data != 'unknown' %}
+          {% set data = fromjson(pool_data) %}
+          {{ data.scrypt.BTCaveragePayRate | float(0) }}
+        {% else %}
+          0
+        {% endif %}
+
+    powerpool_scrypt_current_payrate:
+      friendly_name: "PowerPool Scrypt Current Pay Rate"
+      unit_of_measurement: "BTC/TH"
+      value_template: >
+        {% set pool_data = states('sensor.powerpool_pool_data') %}
+        {% if pool_data != 'unknown' %}
+          {% set data = fromjson(pool_data) %}
+          {{ data.scrypt.BTCpayRate | float(0) }}
+        {% else %}
+          0
+        {% endif %}
 
 
