@@ -1030,10 +1030,10 @@
       unit_of_measurement: "BTC"
       value_template: >
         {% set hashrate = states('sensor.powerpool_hashrate') | float(0) %}
-        {% if hashrate > 0 %}
-          {% set btc_per_th_30days = 0.02807718 %}
-          {% set btc_per_th_daily = btc_per_th_30days / 30 %}
+        {% set avg_payrate = states('sensor.powerpool_scrypt_average_pay_rate') | float(0) %}
+        {% if hashrate > 0 and avg_payrate > 0 %}
           {% set hashrate_th = hashrate / 1000 %}
+          {% set btc_per_th_daily = avg_payrate / 30 %}
           {{ (hashrate_th * btc_per_th_daily) | round(8) }}
         {% else %}
           0
