@@ -965,15 +965,19 @@
 - platform: rest
   name: "PowerPool User Data"
   resource: !secret powerpool_user_api_url
-  json_attributes_path: "$"
   value_template: "{{ value_json is not none }}"
+  json_attributes_path: "$"
+  json_attributes:
+    - "data"
   scan_interval: 300
 
 - platform: rest
   name: "PowerPool Pool Data"
   resource: !secret powerpool_pool_api_url
-  json_attributes_path: "$"
   value_template: "{{ value_json is not none }}"
+  json_attributes_path: "$"
+  json_attributes:
+    - "prices"
   scan_interval: 300
 
 # PowerPool template sensors
@@ -1077,12 +1081,17 @@
     debug_powerpool_raw_data:
       friendly_name: "Debug PowerPool Raw Data"
       value_template: >
-        {{ state_attr('sensor.powerpool_user_data', 'data') }}
+        {{ states('sensor.powerpool_user_data') }}
+
+    debug_powerpool_raw_json:
+      friendly_name: "Debug PowerPool Raw JSON"
+      value_template: >
+        {{ state_attr('sensor.powerpool_user_data', 'data') | tojson }}
 
     debug_powerpool_raw_pool:
       friendly_name: "Debug PowerPool Raw Pool"
       value_template: >
-        {{ state_attr('sensor.powerpool_pool_data', 'prices') }}
+        {{ state_attr('sensor.powerpool_pool_data', 'prices') | tojson }}
 
     debug_powerpool_hashrate:
       friendly_name: "Debug PowerPool Hashrate"
