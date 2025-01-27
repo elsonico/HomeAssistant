@@ -1080,6 +1080,7 @@
 - platform: rest
   name: "PowerPool Pool Data"
   resource: !secret powerpool_pool_api_url
+  json_attributes_path: "$"
   value_template: "{{ value_json is not none }}"
   scan_interval: 300
 
@@ -1087,12 +1088,12 @@
 - platform: template
   sensors:
     powerpool_scrypt_average_payrate:
-      friendly_name: "PowerPool Scrypt 24h Average Pay Rate"
+      friendly_name: "PowerPool Scrypt Average Pay Rate"
       unit_of_measurement: "BTC/TH"
-      value_template: >
-        {% set pool_data = state_attr('sensor.powerpool_pool_data', 'scrypt') %}
-        {% if pool_data %}
-          {{ pool_data.BTCaveragePayRate | float(0) }}
+      state: >
+        {% set data = state_attr('sensor.powerpool_pool_data', 'scrypt') %}
+        {% if data %}
+          {{ data.BTCaveragePayRate | float(0) }}
         {% else %}
           0
         {% endif %}
@@ -1100,10 +1101,10 @@
     powerpool_scrypt_current_payrate:
       friendly_name: "PowerPool Scrypt Current Pay Rate"
       unit_of_measurement: "BTC/TH"
-      value_template: >
-        {% set pool_data = state_attr('sensor.powerpool_pool_data', 'scrypt') %}
-        {% if pool_data %}
-          {{ pool_data.BTCpayRate | float(0) }}
+      state: >
+        {% set data = state_attr('sensor.powerpool_pool_data', 'scrypt') %}
+        {% if data %}
+          {{ data.BTCpayRate | float(0) }}
         {% else %}
           0
         {% endif %}
@@ -1112,7 +1113,7 @@
     powerpool_expected_daily_rewards:
       friendly_name: "PowerPool Expected Daily Rewards"
       unit_of_measurement: "BTC"
-      value_template: >
+      state: >
         {% set hashrate = states('sensor.powerpool_hashrate') | float(0) %}
         {% set avg_payrate = states('sensor.powerpool_scrypt_average_payrate') | float(0) %}
         {% if hashrate > 0 and avg_payrate > 0 %}
