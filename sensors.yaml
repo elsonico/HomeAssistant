@@ -1092,3 +1092,33 @@
   unit_of_measurement: "BTC/TH"
   scan_interval: 300
 
+- platform: template
+  sensors:
+    powerpool_expected_hourly_rewards:
+      friendly_name: "PowerPool Expected Hourly Rewards"
+      unit_of_measurement: "BTC"
+      value_template: >
+        {% set daily_rewards = states('sensor.powerpool_expected_daily_rewards') | float(0) %}
+        {{ (daily_rewards / 24) | round(8) }}
+
+    powerpool_current_profitability:
+      friendly_name: "PowerPool Current Profitability"
+      unit_of_measurement: "BTC/TH/s"
+      value_template: >
+        {% set current_rate = states('sensor.powerpool_scrypt_current_pay_rate') | float(0) %}
+        {{ (current_rate / 30) | round(3) }}
+
+    powerpool_average_profitability:
+      friendly_name: "PowerPool Average Profitability"
+      unit_of_measurement: "BTC/TH/s"
+      value_template: >
+        {% set avg_rate = states('sensor.powerpool_scrypt_average_pay_rate') | float(0) %}
+        {{ (avg_rate / 30) | round(3) }}
+
+    powerpool_expected_hourly_rewards_eur:
+      friendly_name: "PowerPool Expected Hourly Rewards EUR"
+      unit_of_measurement: "€"
+      value_template: >
+        {% set daily_rewards_eur = states('sensor.powerpool_expected_daily_rewards_eur') | float(0) %}
+        {{ (daily_rewards_eur / 24) | round(2) }}
+
