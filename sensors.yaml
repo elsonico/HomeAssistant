@@ -1044,7 +1044,7 @@
         {% set btc_balance = states('sensor.powerpool_btc_balance') | float %}
         {% if btc_balance > 0 %}
           {% set btc_eur_rate = (usd_balance / btc_balance) * states('sensor.usd_eur') | float %}
-          {{ (expected_btc * btc_eur_rate * 24) | round(2) }}  # Multiply by 24 to get daily rate
+          {{ (expected_btc * btc_eur_rate * 24) | round(2) }}
         {% else %}
           0
         {% endif %}
