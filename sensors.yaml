@@ -696,7 +696,7 @@
     binance_btc_2nd_balance_in_eur:
       friendly_name: "Binance BTC 2nd Balance in EUR"
       unit_of_measurement: "€"
-      value_template: >-
+      value_template: >
         {% if states('sensor.binance_btc_2nd_balance') not in ['unknown', 'unavailable'] 
            and states('sensor.crypto_coin_value_btc') not in ['unknown', 'unavailable']
            and states('sensor.usd_eur') not in ['unknown', 'unavailable'] %}
@@ -1063,14 +1063,14 @@
         {% endif %}
 
     debug_powerpool_data:
-      name: "Debug PowerPool Data"
-      state: >
+      friendly_name: "Debug PowerPool Data"
+      value_template: >
         {% set data = state_attr('sensor.powerpool_user_data', 'data') %}
         {{ data is not none }}
 
     debug_powerpool_pool:
-      name: "Debug PowerPool Pool"
-      state: >
+      friendly_name: "Debug PowerPool Pool"
+      value_template: >
         {% set pool = state_attr('sensor.powerpool_pool_data', 'prices') %}
         {{ pool is not none }}
 
