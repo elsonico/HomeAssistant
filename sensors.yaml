@@ -1061,4 +1061,20 @@
         {% set energy_cost = states('sensor.shellyplug_s_3ce90ee04b97_energy_cost_daily') | float(0) %}
         {{ (expected_rewards - energy_cost) | round(2) }}
 
+- platform: template
+  sensors:
+    powerpool_hashrate_gh:
+      friendly_name: "PowerPool Hashrate GH/s"
+      unit_of_measurement: "GH/s"
+      value_template: >
+        {% set hashrate = states('sensor.powerpool_hashrate') | float(0) %}
+        {{ hashrate | round(2) }}
+
+    powerpool_hashrate_mh:
+      friendly_name: "PowerPool Hashrate MH/s"
+      unit_of_measurement: "MH/s"
+      value_template: >
+        {% set hashrate = states('sensor.powerpool_hashrate') | float(0) %}
+        {{ (hashrate * 1000) | round(0) }}
+
 
