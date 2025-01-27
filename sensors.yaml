@@ -1074,3 +1074,33 @@
         {% set pool = state_attr('sensor.powerpool_pool_data', 'prices') %}
         {{ pool is not none }}
 
+    debug_powerpool_raw_data:
+      friendly_name: "Debug PowerPool Raw Data"
+      value_template: >
+        {{ state_attr('sensor.powerpool_user_data', 'data') }}
+
+    debug_powerpool_raw_pool:
+      friendly_name: "Debug PowerPool Raw Pool"
+      value_template: >
+        {{ state_attr('sensor.powerpool_pool_data', 'prices') }}
+
+    debug_powerpool_hashrate:
+      friendly_name: "Debug PowerPool Hashrate"
+      value_template: >
+        {% set data = state_attr('sensor.powerpool_user_data', 'data') %}
+        {% if data %}
+          Hashrate Data: {{ data.hashrate | default('No hashrate') }}
+        {% else %}
+          No Data
+        {% endif %}
+
+    debug_powerpool_balances:
+      friendly_name: "Debug PowerPool Balances"
+      value_template: >
+        {% set data = state_attr('sensor.powerpool_user_data', 'data') %}
+        {% if data %}
+          Balances: {{ data.balances | default('No balances') }}
+        {% else %}
+          No Data
+        {% endif %}
+
