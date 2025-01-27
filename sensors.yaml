@@ -1090,9 +1090,9 @@
     powerpool_scrypt_average_payrate:
       friendly_name: "PowerPool Scrypt Average Pay Rate"
       unit_of_measurement: "BTC/TH"
-      state: >
+      value_template: >
         {% set data = state_attr('sensor.powerpool_pool_data', 'scrypt') %}
-        {% if data %}
+        {% if data and data.BTCaveragePayRate is defined %}
           {{ data.BTCaveragePayRate | float(0) }}
         {% else %}
           0
@@ -1101,21 +1101,20 @@
     powerpool_scrypt_current_payrate:
       friendly_name: "PowerPool Scrypt Current Pay Rate"
       unit_of_measurement: "BTC/TH"
-      state: >
+      value_template: >
         {% set data = state_attr('sensor.powerpool_pool_data', 'scrypt') %}
-        {% if data %}
+        {% if data and data.BTCpayRate is defined %}
           {{ data.BTCpayRate | float(0) }}
         {% else %}
           0
         {% endif %}
 
-    # Modified expected daily rewards using average pay rate
     powerpool_expected_daily_rewards:
       friendly_name: "PowerPool Expected Daily Rewards"
       unit_of_measurement: "BTC"
       value_template: >
         {% set hashrate = states('sensor.powerpool_hashrate') | float(0) %}
-        {% set avg_payrate = states('sensor.powerpool_scrypt_average_pay_rate') | float(0) %}
+        {% set avg_payrate = states('sensor.powerpool_scrypt_average_payrate') | float(0) %}
         {% if hashrate > 0 and avg_payrate > 0 %}
           {% set hashrate_th = hashrate / 1000 %}
           {{ (hashrate_th * avg_payrate) | round(8) }}
