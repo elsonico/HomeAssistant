@@ -986,7 +986,8 @@
         {% set data = state_attr('sensor.powerpool_user_data', 'data') | default({}) %}
         {% if data and data.hashrate is defined and data.hashrate.scrypt is defined %}
           {% set hashrate = data.hashrate.scrypt.hashrate | default(0) | float %}
-          {{ hashrate | round(2) }}
+          {% set conversion = data.hashrate.scrypt.speedConversion | default(1000000000) | float %}
+          {{ ((hashrate * conversion) / 1000000000) | round(2) }}
         {% else %}
           0
         {% endif %}
@@ -999,7 +1000,7 @@
         {% if data and data.balances is defined %}
           {% for balance in data.balances %}
             {% if balance.coinTicker == 'BTC' %}
-              {% set btc_balance = balance.balance | float %}
+              {% set btc_balance = balance.balance | default(0) | float %}
               {% set prices = state_attr('sensor.powerpool_pool_data', 'prices') | default({}) %}
               {% set btc_price_eur = prices.BTC | default(0) | float %}
               {{ (btc_balance * btc_price_eur) | round(2) }}
@@ -1015,12 +1016,12 @@
       unit_of_measurement: "€"
       value_template: >
         {% set data = state_attr('sensor.powerpool_user_data', 'data') | default({}) %}
-        {% if data and data.workers is defined and data.workers %}
+        {% if data and data.workers is sequence and data.workers | length > 0 %}
           {% for worker in data.workers %}
-            {% if worker.name == 'elsonico.dg1' %}
+            {% if worker.name == 'elsonico.dg1' and worker.totalRewards is defined %}
               {% for reward in worker.totalRewards %}
                 {% if reward.coinTicker == 'BTC' %}
-                  {% set btc_rewards = reward.totalRewards | float %}
+                  {% set btc_rewards = reward.totalRewards | default(0) | float %}
                   {% set prices = state_attr('sensor.powerpool_pool_data', 'prices') | default({}) %}
                   {% set btc_price_eur = prices.BTC | default(0) | float %}
                   {{ (btc_rewards * btc_price_eur) | round(2) }}
@@ -1039,10 +1040,10 @@
       unit_of_measurement: "€"
       value_template: >
         {% set data = state_attr('sensor.powerpool_user_data', 'data') | default({}) %}
-        {% if data and data.earnings is defined and data.earnings | length > 0 %}
-          {% set latest_earning = data.earnings[-1] %}
-          {% if latest_earning and latest_earning.coins and latest_earning.coins.BTC %}
-            {% set daily_earnings = latest_earning.coins.BTC.value | float %}
+        {% if data and data.earnings is sequence and data.earnings | length > 0 %}
+          {% set latest_earning = data.earnings[-1] | default({}) %}
+          {% if latest_earning and latest_earning.coins is defined and latest_earning.coins.BTC is defined %}
+            {% set daily_earnings = latest_earning.coins.BTC.value | default(0) | float %}
             {% set prices = state_attr('sensor.powerpool_pool_data', 'prices') | default({}) %}
             {% set btc_price_eur = prices.BTC | default(0) | float %}
             {{ (daily_earnings * btc_price_eur) | round(2) }}
