@@ -1077,4 +1077,18 @@
         {% set hashrate = states('sensor.powerpool_hashrate') | float(0) %}
         {{ (hashrate * 1000) | round(0) }}
 
+# PowerPool REST sensors for pay rates
+- platform: rest     
+  name: "PowerPool Scrypt Average Pay Rate"                                                                                               
+  resource: !secret powerpool_pool_api_url
+  value_template: "{{ value_json.scrypt.BTCaveragePayRate | float }}"
+  unit_of_measurement: "BTC/TH"
+  scan_interval: 300
+               
+- platform: rest     
+  name: "PowerPool Scrypt Current Pay Rate"                                                                                               
+  resource: !secret powerpool_pool_api_url
+  value_template: "{{ value_json.scrypt.BTCpayRate | float }}"
+  unit_of_measurement: "BTC/TH"
+  scan_interval: 300
 
