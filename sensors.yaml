@@ -965,7 +965,7 @@
 - platform: rest
   name: "PowerPool User Data"
   resource: !secret powerpool_user_api_url
-  json_attributes_path: "$.data"
+  json_attributes_path: "$"
   value_template: "{{ value_json is not none }}"
   scan_interval: 300
 
@@ -981,13 +981,12 @@
   sensors:
     powerpool_user_hashrate:
       friendly_name: "PowerPool User Hashrate"
-      unit_of_measurement: "H/s"
+      unit_of_measurement: "GH/s"
       value_template: >
         {% set data = state_attr('sensor.powerpool_user_data', 'data') | default({}) %}
         {% if data and data.hashrate is defined and data.hashrate.scrypt is defined %}
           {% set hashrate = data.hashrate.scrypt.hashrate | default(0) | float %}
-          {% set conversion = data.hashrate.scrypt.speedConversion | default(1) | float %}
-          {{ (hashrate * conversion) | round(2) }}
+          {{ hashrate | round(2) }}
         {% else %}
           0
         {% endif %}
@@ -998,17 +997,15 @@
       value_template: >
         {% set data = state_attr('sensor.powerpool_user_data', 'data') | default({}) %}
         {% if data and data.balances is defined %}
-          {% set btc_balance = namespace() %}
-          {% set btc_balance.value = 0 %}
           {% for balance in data.balances %}
             {% if balance.coinTicker == 'BTC' %}
-              {% set btc_balance.value = balance.balance | float %}
+              {% set btc_balance = balance.balance | float %}
+              {% set prices = state_attr('sensor.powerpool_pool_data', 'prices') | default({}) %}
+              {% set btc_price_eur = prices.BTC | default(0) | float %}
+              {{ (btc_balance * btc_price_eur) | round(2) }}
               {% break %}
             {% endif %}
           {% endfor %}
-          {% set prices = state_attr('sensor.powerpool_pool_data', 'prices') | default({}) %}
-          {% set btc_price_eur = prices.BTC | default(0) | float %}
-          {{ (btc_balance.value * btc_price_eur) | round(2) }}
         {% else %}
           0
         {% endif %}
@@ -1019,22 +1016,20 @@
       value_template: >
         {% set data = state_attr('sensor.powerpool_user_data', 'data') | default({}) %}
         {% if data and data.workers is defined and data.workers %}
-          {% set total_rewards = namespace() %}
-          {% set total_rewards.value = 0 %}
           {% for worker in data.workers %}
             {% if worker.name == 'elsonico.dg1' %}
-              {% for reward in worker.totalRewards | default([]) %}
+              {% for reward in worker.totalRewards %}
                 {% if reward.coinTicker == 'BTC' %}
-                  {% set total_rewards.value = reward.totalRewards | float %}
+                  {% set btc_rewards = reward.totalRewards | float %}
+                  {% set prices = state_attr('sensor.powerpool_pool_data', 'prices') | default({}) %}
+                  {% set btc_price_eur = prices.BTC | default(0) | float %}
+                  {{ (btc_rewards * btc_price_eur) | round(2) }}
                   {% break %}
                 {% endif %}
               {% endfor %}
               {% break %}
             {% endif %}
           {% endfor %}
-          {% set prices = state_attr('sensor.powerpool_pool_data', 'prices') | default({}) %}
-          {% set btc_price_eur = prices.BTC | default(0) | float %}
-          {{ (total_rewards.value * btc_price_eur) | round(2) }}
         {% else %}
           0
         {% endif %}
@@ -1044,12 +1039,16 @@
       unit_of_measurement: "€"
       value_template: >
         {% set data = state_attr('sensor.powerpool_user_data', 'data') | default({}) %}
-        {% if data and data.earnings is defined and data.earnings %}
-          {% set latest_earning = data.earnings[-1] | default({}) %}
-          {% set daily_earnings = latest_earning.coins.BTC.value | default(0) | float %}
-          {% set prices = state_attr('sensor.powerpool_pool_data', 'prices') | default({}) %}
-          {% set btc_price_eur = prices.BTC | default(0) | float %}
-          {{ (daily_earnings * btc_price_eur) | round(2) }}
+        {% if data and data.earnings is defined and data.earnings | length > 0 %}
+          {% set latest_earning = data.earnings[-1] %}
+          {% if latest_earning and latest_earning.coins and latest_earning.coins.BTC %}
+            {% set daily_earnings = latest_earning.coins.BTC.value | float %}
+            {% set prices = state_attr('sensor.powerpool_pool_data', 'prices') | default({}) %}
+            {% set btc_price_eur = prices.BTC | default(0) | float %}
+            {{ (daily_earnings * btc_price_eur) | round(2) }}
+          {% else %}
+            0
+          {% endif %}
         {% else %}
           0
         {% endif %}
