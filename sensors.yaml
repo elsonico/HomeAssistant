@@ -1031,8 +1031,10 @@
       unit_of_measurement: "BTC"
       value_template: >
         {% set hashrate = states('sensor.powerpool_hashrate') | float %}
-        {% set daily_btc_per_gh = 0.000001 %}  # This is an example value - need to calculate actual rate
-        {{ (hashrate * daily_btc_per_gh) | round(8) }}
+        {% set btc_per_th_30days = 0.02807718 %}  # From pool stats
+        {% set btc_per_th_daily = btc_per_th_30days / 30 %}  # Convert to daily rate
+        {% set hashrate_th = hashrate / 1000 %}  # Convert GH/s to TH/s
+        {{ (hashrate_th * btc_per_th_daily) | round(8) }}
 
     powerpool_expected_daily_rewards_eur:
       friendly_name: "PowerPool Expected Daily Rewards EUR"
