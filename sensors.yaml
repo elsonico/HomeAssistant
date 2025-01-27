@@ -1029,21 +1029,25 @@
       friendly_name: "PowerPool Expected Daily Rewards"
       unit_of_measurement: "BTC"
       value_template: >
-        {% set hashrate = states('sensor.powerpool_hashrate') | float %}
-        {% set btc_per_th_30days = 0.02807718 %}  # From pool stats
-        {% set btc_per_th_daily = btc_per_th_30days / 30 %}  # Convert to daily rate (0.00093590 BTC/TH/day)
-        {% set hashrate_th = hashrate / 1000 %}  # Convert GH/s to TH/s
-        {{ (hashrate_th * btc_per_th_daily) | round(8) }}
+        {% set hashrate = states('sensor.powerpool_hashrate') | float(0) %}
+        {% if hashrate > 0 %}
+          {% set btc_per_th_30days = 0.02807718 %}
+          {% set btc_per_th_daily = btc_per_th_30days / 30 %}
+          {% set hashrate_th = hashrate / 1000 %}
+          {{ (hashrate_th * btc_per_th_daily) | round(8) }}
+        {% else %}
+          0
+        {% endif %}
 
     powerpool_expected_daily_rewards_eur:
       friendly_name: "PowerPool Expected Daily Rewards EUR"
       unit_of_measurement: "€"
       value_template: >
-        {% set expected_btc = states('sensor.powerpool_expected_daily_rewards') | float %}
-        {% set usd_balance = states('sensor.powerpool_usd_balance') | float %}
-        {% set btc_balance = states('sensor.powerpool_btc_balance') | float %}
-        {% if btc_balance > 0 %}
-          {% set btc_eur_rate = (usd_balance / btc_balance) * states('sensor.usd_eur') | float %}
+        {% set expected_btc = states('sensor.powerpool_expected_daily_rewards') | float(0) %}
+        {% set usd_balance = states('sensor.powerpool_usd_balance') | float(0) %}
+        {% set btc_balance = states('sensor.powerpool_btc_balance') | float(0) %}
+        {% if btc_balance > 0 and expected_btc > 0 %}
+          {% set btc_eur_rate = (usd_balance / btc_balance) * states('sensor.usd_eur') | float(0) %}
           {{ (expected_btc * btc_eur_rate * 24) | round(2) }}
         {% else %}
           0
@@ -1053,8 +1057,8 @@
       friendly_name: "PowerPool Expected Daily Profit"
       unit_of_measurement: "€"
       value_template: >
-        {% set expected_rewards = states('sensor.powerpool_expected_daily_rewards_eur') | float %}
-        {% set energy_cost = states('sensor.shellyplug_s_3ce90ee04b97_energy_cost_daily') | float %}
+        {% set expected_rewards = states('sensor.powerpool_expected_daily_rewards_eur') | float(0) %}
+        {% set energy_cost = states('sensor.shellyplug_s_3ce90ee04b97_energy_cost_daily') | float(0) %}
         {{ (expected_rewards - energy_cost) | round(2) }}
 
 
