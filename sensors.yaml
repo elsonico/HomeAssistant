@@ -1030,10 +1030,11 @@
       unit_of_measurement: "BTC"
       value_template: >
         {% set hashrate = states('sensor.powerpool_hashrate') | float(0) %}
-        {% set avg_payrate = states('sensor.powerpool_scrypt_average_payrate') | float(0) %}
+        {% set avg_payrate = states('sensor.powerpool_scrypt_average_pay_rate') | float(0) %}
         {% if hashrate > 0 and avg_payrate > 0 %}
           {% set hashrate_th = hashrate / 1000 %}
-          {{ (hashrate_th * avg_payrate) | round(8) }}
+          {% set daily_rate = avg_payrate %}
+          {{ (hashrate_th * daily_rate) | round(8) }}
         {% else %}
           0
         {% endif %}
@@ -1045,9 +1046,9 @@
         {% set expected_btc = states('sensor.powerpool_expected_daily_rewards') | float(0) %}
         {% set usd_balance = states('sensor.powerpool_usd_balance') | float(0) %}
         {% set btc_balance = states('sensor.powerpool_btc_balance') | float(0) %}
-        {% if btc_balance > 0 and expected_btc > 0 %}
+        {% if btc_balance > 0 %}
           {% set btc_eur_rate = (usd_balance / btc_balance) * states('sensor.usd_eur') | float(0) %}
-          {{ (expected_btc * btc_eur_rate * 24) | round(2) }}
+          {{ (expected_btc * btc_eur_rate) | round(2) }}
         {% else %}
           0
         {% endif %}
@@ -1114,10 +1115,25 @@
       unit_of_measurement: "BTC"
       value_template: >
         {% set hashrate = states('sensor.powerpool_hashrate') | float(0) %}
-        {% set avg_payrate = states('sensor.powerpool_scrypt_average_payrate') | float(0) %}
+        {% set avg_payrate = states('sensor.powerpool_scrypt_average_pay_rate') | float(0) %}
         {% if hashrate > 0 and avg_payrate > 0 %}
           {% set hashrate_th = hashrate / 1000 %}
-          {{ (hashrate_th * avg_payrate) | round(8) }}
+          {% set daily_rate = avg_payrate %}
+          {{ (hashrate_th * daily_rate) | round(8) }}
+        {% else %}
+          0
+        {% endif %}
+
+    powerpool_expected_daily_rewards_eur:
+      friendly_name: "PowerPool Expected Daily Rewards EUR"
+      unit_of_measurement: "€"
+      value_template: >
+        {% set expected_btc = states('sensor.powerpool_expected_daily_rewards') | float(0) %}
+        {% set usd_balance = states('sensor.powerpool_usd_balance') | float(0) %}
+        {% set btc_balance = states('sensor.powerpool_btc_balance') | float(0) %}
+        {% if btc_balance > 0 %}
+          {% set btc_eur_rate = (usd_balance / btc_balance) * states('sensor.usd_eur') | float(0) %}
+          {{ (expected_btc * btc_eur_rate) | round(2) }}
         {% else %}
           0
         {% endif %}
