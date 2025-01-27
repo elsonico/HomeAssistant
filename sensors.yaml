@@ -962,35 +962,11 @@
           0.00
         {% endif %}
 
-# PowerPool REST sensor
-- platform: rest
-  name: "PowerPool User Data"
+- platform: rest         
+  name: "PowerPool Hashrate"                                                                                                        
   resource: !secret powerpool_user_api_url
-  value_template: "{{ value_json is not none }}"
+  value_template: "{{ value_json.data.hashrate.scrypt.hashrate | float }}"
+  unit_of_measurement: "GH/s"
   scan_interval: 300
-
-# Debug sensors
-- platform: template
-  sensors:
-    debug_powerpool_raw:
-      friendly_name: "Debug PowerPool Raw"
-      value_template: >
-        {{ states('sensor.powerpool_user_data') }}
-          
-    debug_powerpool_attributes:
-      friendly_name: "Debug PowerPool Attributes"
-      value_template: >
-        {{ state_attr('sensor.powerpool_user_data', 'data') | string }}
-          
-    debug_powerpool_hashrate:
-      friendly_name: "Debug PowerPool Hashrate"
-      value_template: >
-        {% set data = state_attr('sensor.powerpool_user_data', 'data') %}
-        {% if data %}
-          {% set hashrate = data.hashrate.scrypt.hashrate %}
-          {{ hashrate }}
-        {% else %}
-          No Data
-        {% endif %}
 
 
