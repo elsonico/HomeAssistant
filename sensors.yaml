@@ -1079,14 +1079,14 @@
 
 # PowerPool REST sensors for pay rates
 - platform: rest     
-  name: "PowerPool Scrypt Average Pay Rate"                                                                                               
+  name: "PowerPool Scrypt Average Pay Rate"
   resource: !secret powerpool_pool_api_url
   value_template: "{{ value_json.scrypt.BTCaveragePayRate | float }}"
   unit_of_measurement: "BTC/TH"
   scan_interval: 300
                
 - platform: rest     
-  name: "PowerPool Scrypt Current Pay Rate"                                                                                               
+  name: "PowerPool Scrypt Current Pay Rate"
   resource: !secret powerpool_pool_api_url
   value_template: "{{ value_json.scrypt.BTCpayRate | float }}"
   unit_of_measurement: "BTC/TH"
@@ -1106,14 +1106,14 @@
       unit_of_measurement: "BTC/TH/s"
       value_template: >
         {% set current_rate = states('sensor.powerpool_scrypt_current_pay_rate') | float(0) %}
-        {{ (current_rate / 30) | round(3) }}
+        {{ current_rate | round(4) }}
 
     powerpool_average_profitability:
       friendly_name: "PowerPool Average Profitability"
       unit_of_measurement: "BTC/TH/s"
       value_template: >
         {% set avg_rate = states('sensor.powerpool_scrypt_average_pay_rate') | float(0) %}
-        {{ (avg_rate / 30) | round(3) }}
+        {{ avg_rate | round(4) }}
 
     powerpool_expected_hourly_rewards_eur:
       friendly_name: "PowerPool Expected Hourly Rewards EUR"
