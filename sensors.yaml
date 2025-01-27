@@ -1050,4 +1050,25 @@
         {% set data = state_attr('sensor.powerpool_user_data', 'hashrate') %}
         {{ data is not none }}
 
+# Debug sensors
+template:
+  - sensor:
+      - name: "Debug PowerPool Raw"
+        state: >
+          {{ states('sensor.powerpool_user_data') }}
+          
+      - name: "Debug PowerPool Attributes"
+        state: >
+          {{ state_attr('sensor.powerpool_user_data', 'data') | string }}
+          
+      - name: "Debug PowerPool Hashrate"
+        state: >
+          {% set data = state_attr('sensor.powerpool_user_data', 'data') %}
+          {% if data %}
+            {% set hashrate = data.hashrate.scrypt.hashrate %}
+            {{ hashrate }}
+          {% else %}
+            No Data
+          {% endif %}
+
 
