@@ -1098,8 +1098,15 @@
       friendly_name: "PowerPool Expected Hourly Rewards"
       unit_of_measurement: "BTC"
       value_template: >
-        {% set daily_rewards = states('sensor.powerpool_expected_daily_rewards') | float(0) %}
-        {{ (daily_rewards / 24) | round(8) }}
+        {% set hashrate = states('sensor.powerpool_hashrate') | float(0) %}
+        {% set avg_payrate = states('sensor.powerpool_scrypt_average_pay_rate') | float(0) %}
+        {% if hashrate > 0 and avg_payrate > 0 %}
+          {% set hashrate_th = hashrate / 1000000 %}  # Convert GH/s to TH/s
+          {% set hourly_rate = (avg_payrate * hashrate_th * 3600) %}  # 3600 seconds in an hour
+          {{ hourly_rate | round(8) }}
+        {% else %}
+          0
+        {% endif %}
 
     powerpool_current_profitability:
       friendly_name: "PowerPool Current Profitability"
@@ -1119,6 +1126,16 @@
       friendly_name: "PowerPool Expected Hourly Rewards EUR"
       unit_of_measurement: "€"
       value_template: >
-        {% set daily_rewards_eur = states('sensor.powerpool_expected_daily_rewards_eur') | float(0) %}
-        {{ (daily_rewards_eur / 24) | round(2) }}
+        {% set hashrate = states('sensor.powerpool_hashrate') | float(0) %}
+        {% set avg_payrate = states('sensor.powerpool_scrypt_average_pay_rate') | float(0) %}
+        {% set btc_price = states('sensor.cryptoinfo_btc_price') | float(0) %}
+        {% set usd_eur = states('sensor.usd_eur') | float(0) %}
+        {% if hashrate > 0 and avg_payrate > 0 %}
+          {% set hashrate_th = hashrate / 1000000 %}  # Convert GH/s to TH/s
+          {% set hourly_usd = avg_payrate * hashrate_th * btc_price * 3600 %}  # 3600 seconds in an hour
+          {% set hourly_eur = hourly_usd * usd_eur %}
+          {{ hourly_eur | round(2) }}
+        {% else %}
+          0
+        {% endif %}
 
