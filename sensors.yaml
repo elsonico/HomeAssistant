@@ -1032,8 +1032,8 @@
         {% set hashrate = states('sensor.powerpool_hashrate') | float(0) %}
         {% set avg_payrate = states('sensor.powerpool_scrypt_average_pay_rate') | float(0) %}
         {% if hashrate > 0 and avg_payrate > 0 %}
-          {% set hashrate_th = hashrate / 1000000 %}  # Convert GH/s to TH/s
-          {% set daily_rate = (avg_payrate * hashrate_th * 86400) %}  # 86400 seconds in a day
+          {% set hashrate_th = hashrate / 1000000 %}
+          {% set daily_rate = (avg_payrate * hashrate_th * 86400) %}
           {{ daily_rate | round(8) }}
         {% else %}
           0
@@ -1048,8 +1048,8 @@
         {% set btc_price = states('sensor.cryptoinfo_btc_price') | float(0) %}
         {% set usd_eur = states('sensor.usd_eur') | float(0) %}
         {% if hashrate > 0 and avg_payrate > 0 %}
-          {% set hashrate_th = hashrate / 1000000 %}  # Convert GH/s to TH/s
-          {% set daily_usd = avg_payrate * hashrate_th * btc_price * 86400 %}  # 86400 seconds in a day
+          {% set hashrate_th = hashrate / 1000000 %}
+          {% set daily_usd = avg_payrate * hashrate_th * btc_price * 86400 %}
           {% set daily_eur = daily_usd * usd_eur %}
           {{ daily_eur | round(2) }}
         {% else %}
