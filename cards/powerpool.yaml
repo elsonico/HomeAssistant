@@ -1,0 +1,59 @@
+type: vertical-stack
+cards:
+  - type: history-graph
+    entities:
+      - entity: sensor.powerpool_hashrate
+    hours_to_show: 48
+    refresh_interval: 60
+    name: Hashrate (Last 24h)
+  - type: entities
+    title: PowerPool Metrics
+    entities:
+      - entity: sensor.powerpool_hashrate_gh
+        name: Hashrate
+        icon: mdi:cpu-64-bit
+      - entity: sensor.powerpool_average_profitability
+        name: Average profitability
+        icon: mdi:calculator-variant
+      - entity: sensor.powerpool_current_profitability
+        name: Current profitability
+        icon: mdi:calculator-variant
+      - entity: sensor.powerpool_btc_balance
+        name: Balance in BTC
+        icon: crypto:btc
+      - entity: sensor.powerpool_usd_balance
+        name: Balance in USD
+        icon: crypto:fiat-usd
+      - entity: sensor.powerpool_balance_eur
+        name: Balance in EUR
+        icon: crypto:fiat-eur
+      - entity: sensor.cryptoinfo_btc_price
+        name: BTC Price
+      - entity: sensor.powerpool_rejection_rate
+        name: Rejection rate
+        icon: mdi:percent
+      - entity: sensor.powerpool_expected_hourly_rewards_eur
+        name: Hourly Rewards
+        icon: crypto:fiat-eur
+      - entity: sensor.powerpool_expected_daily_rewards_eur
+        name: Expected Daily Rewards
+        icon: crypto:fiat-eur
+      - entity: sensor.powerpool_expected_daily_profit
+        name: Expected Daily Profit
+        icon: crypto:fiat-eur
+  - type: entities
+    title: Miner Energy Costs
+    entities:
+      - entity: sensor.electricity_cost_in_cents_per_kwh
+        name: Electricity price
+        icon: crypto:fiat-eur
+      - entity: sensor.shellyplug_s_3ce90ee04b97_energy_cost_hourly
+        name: Cost per Hour
+        icon: crypto:fiat-eur
+      - entity: sensor.shellyplug_s_3ce90ee04b97_energy_cost_daily
+        name: Cost per Day
+        icon: crypto:fiat-eur
+      - entity: sensor.shellyplug_s_3ce90ee04b97_energy_cost_weekly
+        name: Cost per Week
+        icon: crypto:fiat-eur
+

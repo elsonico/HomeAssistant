@@ -1,0 +1,44 @@
+type: vertical-stack
+cards:
+  - type: history-graph
+    entities:
+      - entity: sensor.litecoinpool_hashrate
+    hours_to_show: 24
+    refresh_interval: 60
+    name: Hashrate (Last 24h)
+  - type: entities
+    title: Litecoinpool Balances
+    entities:
+      - entity: sensor.litecoinpool_hashrate
+        name: Hashrate
+      - entity: sensor.litecoinpool_ltc_balance
+        name: Unpaid Rewards
+        icon: crypto:ltc
+      - entity: sensor.litecoinpool_doge_balance
+        name: Unpaid Rewards
+        icon: crypto:doge
+      - entity: sensor.miner_rewards_hourly
+        icon: crypto:fiat-eur
+      - entity: sensor.miner_rewards_daily
+        icon: crypto:fiat-eur
+      - entity: sensor.total_rewards_eur
+        icon: crypto:fiat-eur
+        name: Total Earned Rewards
+  - type: entities
+    title: Miner Energy Costs
+    entities:
+      - entity: sensor.electricity_cost_in_cents_per_kwh
+        name: Electricity price
+        icon: crypto:fiat-eur
+      - entity: sensor.shellyplug_s_3ce90ee04b97_energy_cost_hourly
+        name: Cost per Hour
+        icon: crypto:fiat-eur
+      - entity: sensor.shellyplug_s_3ce90ee04b97_energy_cost_daily
+        name: Cost per Day
+        icon: crypto:fiat-eur
+      - entity: sensor.shellyplug_s_3ce90ee04b97_energy_cost_weekly
+        name: Cost per Week
+        icon: crypto:fiat-eur
+      - entity: sensor.miner_profitability
+        name: Profitability
+        icon: crypto:fiat-eur
