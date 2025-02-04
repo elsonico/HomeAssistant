@@ -596,3 +596,43 @@
           entity_id: climate.ac_12494102
     default: []
   mode: single
+- id: bedroom_temperature_control
+  alias: Bedroom Temperature Control
+  description: Control bedroom heating based on temperature between 9 AM and 7 PM
+  trigger:
+    - platform: numeric_state
+      entity_id: sensor.temperature_bedroom
+      below: 20
+    - platform: numeric_state
+      entity_id: sensor.temperature_bedroom
+      above: 20
+  condition:
+    - condition: time
+      after: "09:00:00"
+      before: "19:00:00"
+  action:
+    - choose:
+        - conditions:
+            - condition: numeric_state
+              entity_id: sensor.temperature_bedroom
+              below: 20
+          sequence:
+            - service: climate.set_hvac_mode
+              target:
+                entity_id: climate.ac_12488762
+              data:
+                hvac_mode: heat
+            - service: climate.set_temperature
+              target:
+                entity_id: climate.ac_12488762
+              data:
+                temperature: 20
+        - conditions:
+            - condition: numeric_state
+              entity_id: sensor.temperature_bedroom
+              above: 20
+          sequence:
+            - service: climate.turn_off
+              target:
+                entity_id: climate.ac_12488762
+  mode: single
