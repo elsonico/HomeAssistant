@@ -485,49 +485,114 @@
   - service: shell_command.publish_fetch_crypto_currency
   - delay:
       seconds: 5
-
+  id: da1dd4c21a704b64a14d205c65f8da8b
 - alias: Turn Off Miner When Electricity Price Is High
-  description: "Turns off the miner when electricity price goes above 33c/kWh"
+  description: Turns off the miner when electricity price goes above 33c/kWh
   trigger:
-    - platform: numeric_state
-      entity_id: sensor.electricity_cost_in_cents_per_kwh
-      above: 33
+  - platform: numeric_state
+    entity_id: sensor.electricity_cost_in_cents_per_kwh
+    above: 33
   action:
-    - service: switch.turn_off
-      target:
-        entity_id: switch.shellyplug_s_3ce90ee04b97
+  - service: switch.turn_off
+    target:
+      entity_id: switch.shellyplug_s_3ce90ee04b97
+  id: 634d0fe360ec41c3ac1ea0f3473ad603
 - alias: Turn On Miner When Electricity Price Is Low
-  description: "Turns on the miner when electricity price goes below 33c/kWh"
+  description: Turns on the miner when electricity price goes below 33c/kWh
   trigger:
-    - platform: numeric_state
-      entity_id: sensor.electricity_cost_in_cents_per_kwh
-      below: 33
+  - platform: numeric_state
+    entity_id: sensor.electricity_cost_in_cents_per_kwh
+    below: 33
   action:
-    - service: switch.turn_on
-      target:
-        entity_id: switch.shellyplug_s_3ce90ee04b97
-- alias: Reboot or Power Cycle Miner
+  - service: switch.turn_on
+    target:
+      entity_id: switch.shellyplug_s_3ce90ee04b97
+  id: 9c4564819e404cff95fcc447532bd19b
+- id: 28077b7f639644688b946f35ccf0127b
+  alias: Reboot or Power Cycle Miner
   description: Reboot the miner on low hash rate, fallback to power cycle if needed
+  triggers:
+  - entity_id: sensor.powerpool_hashrate
+    to: '0'
+    for: 00:15:00
+    trigger: state
+  conditions: []
+  actions:
+  - target:
+      entity_id: switch.shellyplug_s_3ce90ee04b97
+    action: switch.turn_off
+    data: {}
+  - delay: 00:00:10
+  - target:
+      entity_id: switch.shellyplug_s_3ce90ee04b97
+    action: switch.turn_on
+    data: {}
+  mode: single
+- alias: Heater Control Based on Living Room Temperature
+  description: Turn the heater on when temp is below 22°C and turn it off when above
+    22°C.
   trigger:
-    - platform: state
-      entity_id: sensor.powerpool_hashrate
-      to: "0" 
-      for: "00:15:00"
+  - platform: numeric_state
+    entity_id: sensor.temperature_living_room
+    below: 21
+  - platform: numeric_state
+    entity_id: sensor.temperature_living_room
+    above: 21
   condition: []
   action:
-    - service: button.press
-      target:
-        entity_id: button.shellyplug_s_3ce90ee04b97_reboot
-    - delay: "00:10:00"  # Wait 10 minutes to see if reboot resolves the issue
-    - condition: state
-      entity_id: sensor.powerpool_hashrate
-      state: "0"  # Hashrate is still 0
-    - service: switch.turn_off
-      target:
-        entity_id: switch.shellyplug_s_3ce90ee04b97
-    - delay: "00:00:10"  # Wait 10 seconds
-    - service: switch.turn_on
-      target:
-        entity_id: switch.shellyplug_s_3ce90ee04b97
+  - choose:
+    - conditions:
+      - condition: numeric_state
+        entity_id: sensor.temperature_living_room
+        below: 21
+      sequence:
+      - service: climate.set_hvac_mode
+        target:
+          entity_id: climate.ac_12494102
+        data:
+          hvac_mode: heat
+    - conditions:
+      - condition: numeric_state
+        entity_id: sensor.temperature_living_room
+        above: 21
+      sequence:
+      - service: climate.turn_off
+        target:
+          entity_id: climate.ac_12494102
+    default: []
   mode: single
-
+  id: 9d86162251f94cff98151e5b908d8f43
+- id: '1738402194414'
+  alias: Heater Control Based on Living Room Temperature
+  description: Turn the heater on when temp is below 21°C and turn it off when above
+    22°C
+  trigger:
+  - platform: numeric_state
+    entity_id: sensor.temperature_living_room
+    below: 21
+  - platform: numeric_state
+    entity_id: sensor.temperature_living_room
+    above: 22
+  condition: []
+  action:
+  - choose:
+    - conditions:
+      - condition: numeric_state
+        entity_id: sensor.temperature_living_room
+        below: 21
+      sequence:
+      - service: climate.set_hvac_mode
+        target:
+          entity_id: climate.ac_12494102
+        data:
+          hvac_mode: heat
+    - conditions:
+      - condition: numeric_state
+        entity_id: sensor.temperature_living_room
+        above: 22
+      sequence:
+      - service: climate.turn_off
+        target:
+          entity_id: climate.ac_12494102
+    default: []
+  mode: single
