@@ -696,7 +696,7 @@
     binance_btc_2nd_balance_in_eur:
       friendly_name: "Binance BTC 2nd Balance in EUR"
       unit_of_measurement: "€"
-      value_template: >
+      value_template: >-
         {% if states('sensor.binance_btc_2nd_balance') not in ['unknown', 'unavailable'] 
            and states('sensor.crypto_coin_value_btc') not in ['unknown', 'unavailable']
            and states('sensor.usd_eur') not in ['unknown', 'unavailable'] %}
@@ -704,6 +704,7 @@
               states('sensor.crypto_coin_value_btc') | float * 
               states('sensor.usd_eur') | float) | round(2) }}
         {% endif %}
+
     binance_doge_2nd_balance_in_eur:
       friendly_name: "Binance DOGE 2nd Balance in EUR"
       unit_of_measurement: "€"
@@ -715,6 +716,7 @@
               states('sensor.crypto_coin_value_doge') | float * 
               states('sensor.usd_eur') | float) | round(2) }}
         {% endif %}
+
     binance_ltc_2nd_balance_in_eur:
       friendly_name: "Binance LTC 2nd Balance in EUR"
       unit_of_measurement: "€"
@@ -726,6 +728,7 @@
               states('sensor.crypto_coin_value_ltc') | float * 
               states('sensor.usd_eur') | float) | round(2) }}
         {% endif %}
+
     binance_bnb_2nd_balance_in_eur:
       friendly_name: "Binance BNB 2nd Balance in EUR"
       unit_of_measurement: "€"
@@ -737,6 +740,7 @@
               states('sensor.crypto_coin_value_bnb') | float * 
               states('sensor.usd_eur') | float) | round(2) }}
         {% endif %}
+
     binance_eth_2nd_balance_in_eur:
       friendly_name: "Binance ETH 2nd Balance in EUR"
       unit_of_measurement: "€"
@@ -748,6 +752,7 @@
               states('sensor.crypto_coin_value_eth') | float * 
               states('sensor.usd_eur') | float) | round(2) }}
         {% endif %}
+
     binance_ada_2nd_balance_in_eur:
       friendly_name: "Binance ADA 2nd Balance in EUR"
       unit_of_measurement: "€"
@@ -758,6 +763,7 @@
           {{ (states('sensor.binance_ada_2nd_balance') | float * 
               states('sensor.crypto_coin_value_ada') | float * 
               states('sensor.usd_eur') | float) | round(2) }}
+
     binance_total_2nd_balance_in_eur:
       friendly_name: "Binance Total 2nd Balance in EUR"
       unit_of_measurement: "€"
