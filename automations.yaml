@@ -645,3 +645,55 @@
               target:
                 entity_id: climate.ac_12488762
   mode: single
+
+- id: run_miner_monitor
+  alias: Run miner monitoring
+  trigger:
+    platform: time_pattern
+    minutes: "/5"
+  action:
+    service: shell_command.monitor_miner
+
+- id: miner_hashrate_alert
+  alias: Alert when miner hashrate is low
+  trigger:
+    platform: numeric_state
+    entity_id: sensor.miner_hashrate
+    below: 2000
+    for:
+      minutes: 20
+  action:
+    service: notify.whatsapp
+    data:
+      title: "Miner Alert - Low Hashrate"
+      message: "Miner hashrate has dropped below 2000 MH/s (Current: {{ states('sensor.miner_hashrate') }} MH/s)"
+      target: "14164327184@c.us"
+
+- id: miner_temperature_alert
+  alias: Alert when miner temperatures are high
+  trigger:
+    platform: or
+    conditions:
+      - condition: numeric_state
+        entity_id: sensor.miner_outlet_temp1
+        above: 55
+      - condition: numeric_state
+        entity_id: sensor.miner_outlet_temp2
+        above: 55
+      - condition: numeric_state
+        entity_id: sensor.miner_inlet_temp1
+        above: 55
+      - condition: numeric_state
+        entity_id: sensor.miner_inlet_temp2
+        above: 55
+  action:
+    service: notify.whatsapp
+    data_template:
+      title: "Miner Alert - High Temperature"
+      message: >
+        High temperature detected:
+        Outlet 1: {{ states('sensor.miner_outlet_temp1') }}°C
+        Outlet 2: {{ states('sensor.miner_outlet_temp2') }}°C
+        Inlet 1: {{ states('sensor.miner_inlet_temp1') }}°C
+        Inlet 2: {{ states('sensor.miner_inlet_temp2') }}°C
+      target: "14164327184@c.us"

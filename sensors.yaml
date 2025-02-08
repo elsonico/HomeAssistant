@@ -1142,3 +1142,33 @@
           0
         {% endif %}
 
+sensor:
+  - platform: file
+    name: miner_hashrate
+    file_path: /config/ha_states/sensor.miner_hashrate
+    value_template: "{{ value_json.state }}"
+    unit_of_measurement: "MH/s"
+    
+  - platform: file
+    name: miner_outlet_temp1
+    file_path: /config/ha_states/sensor.miner_outlet_temp1
+    value_template: "{{ value_json.state }}"
+    unit_of_measurement: "°C"
+    
+  - platform: file
+    name: miner_outlet_temp2
+    file_path: /config/ha_states/sensor.miner_outlet_temp2
+    value_template: "{{ value_json.state }}"
+    unit_of_measurement: "°C"
+    
+  - platform: file
+    name: miner_inlet_temp1
+    file_path: /config/ha_states/sensor.miner_inlet_temp1
+    value_template: "{{ value_json.state }}"
+    unit_of_measurement: "°C"
+    
+  - platform: file
+    name: miner_inlet_temp2
+    file_path: /config/ha_states/sensor.miner_inlet_temp2
+    value_template: "{{ value_json.state }}"
+    unit_of_measurement: "°C"
