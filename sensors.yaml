@@ -1257,4 +1257,3 @@
       value_template: "{{ (states('sensor.miner_hashrate') | float / 1000) | round(2) }}"
       unit_of_measurement: "GH/s"
       device_class: "power"
-      state_class: "measurement"
