@@ -1148,7 +1148,7 @@
       friendly_name: "Miner Hashrate"
       value_template: >-
         {% set data = states('sensor.miner_hashrate_raw') %}
-        {% if data != 'unknown' %}
+        {% if data != 'unknown' and data != '' %}
           {% set json = data | from_json %}
           {{ json.state }}
         {% else %}
@@ -1158,13 +1158,13 @@
       attribute_templates:
         ideal_hashrate: >-
           {% set data = states('sensor.miner_hashrate_raw') %}
-          {% if data != 'unknown' %}
+          {% if data != 'unknown' and data != '' %}
             {% set json = data | from_json %}
             {{ json.attributes.ideal_hashrate }}
           {% endif %}
         efficiency: >-
           {% set data = states('sensor.miner_hashrate_raw') %}
-          {% if data != 'unknown' %}
+          {% if data != 'unknown' and data != '' %}
             {% set json = data | from_json %}
             {{ json.attributes.efficiency }}
           {% endif %}
@@ -1173,7 +1173,7 @@
       friendly_name: "Miner Outlet Temperature 1"
       value_template: >-
         {% set data = states('sensor.miner_outlet_temp1_raw') %}
-        {% if data != 'unknown' %}
+        {% if data != 'unknown' and data != '' %}
           {% set json = data | from_json %}
           {{ json.state }}
         {% else %}
@@ -1185,7 +1185,7 @@
       friendly_name: "Miner Outlet Temperature 2"
       value_template: >-
         {% set data = states('sensor.miner_outlet_temp2_raw') %}
-        {% if data != 'unknown' %}
+        {% if data != 'unknown' and data != '' %}
           {% set json = data | from_json %}
           {{ json.state }}
         {% else %}
@@ -1197,7 +1197,7 @@
       friendly_name: "Miner Inlet Temperature 1"
       value_template: >-
         {% set data = states('sensor.miner_inlet_temp1_raw') %}
-        {% if data != 'unknown' %}
+        {% if data != 'unknown' and data != '' %}
           {% set json = data | from_json %}
           {{ json.state }}
         {% else %}
@@ -1209,7 +1209,7 @@
       friendly_name: "Miner Inlet Temperature 2"
       value_template: >-
         {% set data = states('sensor.miner_inlet_temp2_raw') %}
-        {% if data != 'unknown' %}
+        {% if data != 'unknown' and data != '' %}
           {% set json = data | from_json %}
           {{ json.state }}
         {% else %}
@@ -1221,7 +1221,7 @@
       friendly_name: "Miner Fan Speed"
       value_template: >-
         {% set data = states('sensor.miner_fan_speed_raw') %}
-        {% if data != 'unknown' %}
+        {% if data != 'unknown' and data != '' %}
           {% set json = data | from_json %}
           {{ json.state }}
         {% else %}
@@ -1231,7 +1231,7 @@
       attribute_templates:
         all_fans: >-
           {% set data = states('sensor.miner_fan_speed_raw') %}
-          {% if data != 'unknown' %}
+          {% if data != 'unknown' and data != '' %}
             {% set json = data | from_json %}
             {{ json.attributes.all_fans }}
           {% endif %}
