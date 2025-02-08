@@ -1,0 +1,10 @@
+sensor.miner_hashrate_efficiency:
+  icon: mdi:percent
+sensor.miner_maximum_temperature:
+  icon: mdi:thermometer-high
+sensor.miner_minimum_temperature:
+  icon: mdi:thermometer-low
+sensor.miner_average_temperature:
+  icon: mdi:thermometer
+sensor.miner_maximum_fan_speed:
+  icon: mdi:fan 
