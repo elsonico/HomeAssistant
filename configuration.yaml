@@ -60,10 +60,6 @@ homeassistant:
 recorder:
   db_url: !secret db_url
 
-# Create states directory
-shell_command:
-  create_states_dir: "mkdir -p /config/ha_states"
-
 # Run on startup
 automation startup_automation:
   alias: "Create States Directory"
