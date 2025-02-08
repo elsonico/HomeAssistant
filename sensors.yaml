@@ -1148,6 +1148,9 @@
   file_path: /config/ha_states/sensor.miner_hashrate
   value_template: "{{ value_json.state }}"
   unit_of_measurement: "MH/s"
+  attribute_templates:
+    ideal_hashrate: "{{ value_json.attributes.ideal_hashrate }}"
+    efficiency: "{{ value_json.attributes.efficiency }}"
 
 - platform: file
   name: miner_outlet_temp1
@@ -1178,6 +1181,8 @@
   file_path: /config/ha_states/sensor.miner_fan_speed
   value_template: "{{ value_json.state }}"
   unit_of_measurement: "RPM"
+  attribute_templates:
+    all_fans: "{{ value_json.attributes.all_fans }}"
 
 # Template Sensors
 - platform: template
@@ -1185,8 +1190,8 @@
     miner_hashrate_efficiency:
       friendly_name: "Miner Hashrate Efficiency"
       value_template: >
-        {% if states('sensor.miner_hashrate') not in ['unknown', 'unavailable'] 
-           and state_attr('sensor.miner_hashrate', 'efficiency') is not none %}
+        {% if states('sensor.miner_hashrate') != 'unknown' and 
+           state_attr('sensor.miner_hashrate', 'efficiency') is not none %}
           {{ state_attr('sensor.miner_hashrate', 'efficiency') | replace('%', '') | float }}
         {% else %}
           0
@@ -1199,7 +1204,7 @@
         {% set temps = [] %}
         {% for sensor in ['sensor.miner_outlet_temp1', 'sensor.miner_outlet_temp2', 
                          'sensor.miner_inlet_temp1', 'sensor.miner_inlet_temp2'] %}
-          {% if states(sensor) not in ['unknown', 'unavailable'] %}
+          {% if states(sensor) != 'unknown' %}
             {% set temps = temps + [states(sensor) | float] %}
           {% endif %}
         {% endfor %}
