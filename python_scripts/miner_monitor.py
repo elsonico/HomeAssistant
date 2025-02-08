@@ -34,7 +34,7 @@ logger = logging.getLogger("miner_monitor")
 
 def load_secrets():
     try:
-        with open("/config/python_scripts/secrets.yaml", "r") as file:
+        with open("/config/secrets.yaml", "r") as file:
             secrets = yaml.safe_load(file)
             if 'miner_ip' not in secrets:
                 logging.error("miner_ip not found in secrets.yaml")
