@@ -179,16 +179,16 @@ def write_ha_sensors(temp_data: Dict[str, Any]) -> None:
         # Write chip temperatures
         temp_names = ['outlet_temp1', 'outlet_temp2', 'inlet_temp1', 'inlet_temp2']
         for i, temp in enumerate(temp_data['chip_temps']):
-            temp_data = {
+            sensor_data = {  # Changed from temp_data to sensor_data
                 "state": temp,
                 "attributes": {
                     "unit_of_measurement": "°C",
                     "friendly_name": f"Miner {temp_names[i].replace('_', ' ').title()}",
-                    "serial_number": temp_data['sn']
+                    "serial_number": temp_data['sn']  # Using the original temp_data here
                 }
             }
             with open(ha_state_path / f"sensor.miner_{temp_names[i]}", 'w') as f:
-                json.dump(temp_data, f)
+                json.dump(sensor_data, f)
         
         # Write fan speeds
         fan_data = {
