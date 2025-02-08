@@ -967,7 +967,7 @@
   resource: !secret powerpool_user_api_url
   value_template: "{{ value_json.data.hashrate.scrypt.hashrate | float }}"
   unit_of_measurement: "GH/s"
-  scan_interval: 60
+  scan_interval: 300
 
 - platform: rest         
   name: "PowerPool Rejection Rate"                                                                                                        
@@ -1142,33 +1142,87 @@
           0
         {% endif %}
 
-sensor:
-  - platform: file
-    name: miner_hashrate
-    file_path: /config/ha_states/sensor.miner_hashrate
-    value_template: "{{ value_json.state }}"
-    unit_of_measurement: "MH/s"
-    
-  - platform: file
-    name: miner_outlet_temp1
-    file_path: /config/ha_states/sensor.miner_outlet_temp1
-    value_template: "{{ value_json.state }}"
-    unit_of_measurement: "°C"
-    
-  - platform: file
-    name: miner_outlet_temp2
-    file_path: /config/ha_states/sensor.miner_outlet_temp2
-    value_template: "{{ value_json.state }}"
-    unit_of_measurement: "°C"
-    
-  - platform: file
-    name: miner_inlet_temp1
-    file_path: /config/ha_states/sensor.miner_inlet_temp1
-    value_template: "{{ value_json.state }}"
-    unit_of_measurement: "°C"
-    
-  - platform: file
-    name: miner_inlet_temp2
-    file_path: /config/ha_states/sensor.miner_inlet_temp2
-    value_template: "{{ value_json.state }}"
-    unit_of_measurement: "°C"
+- platform: file
+  name: miner_hashrate
+  file_path: /config/ha_states/sensor.miner_hashrate
+  value_template: "{{ value_json.state }}"
+  unit_of_measurement: "MH/s"
+
+- platform: file
+  name: miner_outlet_temp1
+  file_path: /config/ha_states/sensor.miner_outlet_temp1
+  value_template: "{{ value_json.state }}"
+  unit_of_measurement: "°C"
+
+- platform: file
+  name: miner_outlet_temp2
+  file_path: /config/ha_states/sensor.miner_outlet_temp2
+  value_template: "{{ value_json.state }}"
+  unit_of_measurement: "°C"
+
+- platform: file
+  name: miner_inlet_temp1
+  file_path: /config/ha_states/sensor.miner_inlet_temp1
+  value_template: "{{ value_json.state }}"
+  unit_of_measurement: "°C"
+
+- platform: file
+  name: miner_inlet_temp2
+  file_path: /config/ha_states/sensor.miner_inlet_temp2
+  value_template: "{{ value_json.state }}"
+  unit_of_measurement: "°C"
+
+- platform: file
+  name: miner_fan_speed
+  file_path: /config/ha_states/sensor.miner_fan_speed
+  value_template: "{{ value_json.state }}"
+  unit_of_measurement: "RPM"
+
+# Template Sensors
+template:
+  - sensor:
+      - name: "Miner Hashrate Efficiency"
+        state: "{{ states.sensor.miner_hashrate.attributes.efficiency | replace('%', '') | float }}"
+        unit_of_measurement: "%"
+        icon: mdi:percent
+
+      - name: "Miner Maximum Temperature"
+        state: >
+          {% set temps = [
+            states('sensor.miner_outlet_temp1') | float,
+            states('sensor.miner_outlet_temp2') | float,
+            states('sensor.miner_inlet_temp1') | float,
+            states('sensor.miner_inlet_temp2') | float
+          ] %}
+          {{ temps | max }}
+        unit_of_measurement: "°C"
+        icon: mdi:thermometer-high
+
+      - name: "Miner Minimum Temperature"
+        state: >
+          {% set temps = [
+            states('sensor.miner_outlet_temp1') | float,
+            states('sensor.miner_outlet_temp2') | float,
+            states('sensor.miner_inlet_temp1') | float,
+            states('sensor.miner_inlet_temp2') | float
+          ] %}
+          {{ temps | min }}
+        unit_of_measurement: "°C"
+        icon: mdi:thermometer-low
+
+      - name: "Miner Average Temperature"
+        state: >
+          {% set temps = [
+            states('sensor.miner_outlet_temp1') | float,
+            states('sensor.miner_outlet_temp2') | float,
+            states('sensor.miner_inlet_temp1') | float,
+            states('sensor.miner_inlet_temp2') | float
+          ] %}
+          {{ (temps | sum / temps | length) | round(1) }}
+        unit_of_measurement: "°C"
+        icon: mdi:thermometer
+
+      - name: "Miner Maximum Fan Speed"
+        state: "{{ states.sensor.miner_fan_speed.attributes.all_fans | max }}"
+        unit_of_measurement: "RPM"
+        icon: mdi:fan
