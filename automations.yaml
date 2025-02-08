@@ -646,6 +646,15 @@
                 entity_id: climate.ac_12488762
   mode: single
 
+- id: run_miner_monitoring_on_start
+  alias: Run miner monitoring on startup
+  trigger:
+    platform: homeassistant
+    event: start
+  action:
+    - delay: '30'  # Wait 30 seconds for all services to be ready
+    - service: shell_command.monitor_miner
+
 - id: run_miner_monitoring
   alias: Run miner monitoring
   trigger:
@@ -665,6 +674,7 @@
   condition:
     - condition: template
       value_template: "{{ states('sensor.miner_hashrate') not in ['unknown', 'unavailable'] }}"
+  mode: single
   action:
     service: notify.whatsapp
     data:
@@ -675,27 +685,25 @@
 - id: miner_temperature_alert
   alias: Alert when miner temperatures are high
   trigger:
-    - platform: numeric_state
-      entity_id: sensor.miner_outlet_temp1
-      above: 55
-    - platform: numeric_state
-      entity_id: sensor.miner_outlet_temp2
-      above: 55
-    - platform: numeric_state
-      entity_id: sensor.miner_inlet_temp1
-      above: 55
-    - platform: numeric_state
-      entity_id: sensor.miner_inlet_temp2
-      above: 55
+    platform: state
+    entity_id:
+      - sensor.miner_outlet_temp1
+      - sensor.miner_outlet_temp2
+      - sensor.miner_inlet_temp1
+      - sensor.miner_inlet_temp2
   condition:
     - condition: template
       value_template: >
-        {{ 
-          states('sensor.miner_outlet_temp1') not in ['unknown', 'unavailable'] and
-          states('sensor.miner_outlet_temp2') not in ['unknown', 'unavailable'] and
-          states('sensor.miner_inlet_temp1') not in ['unknown', 'unavailable'] and
-          states('sensor.miner_inlet_temp2') not in ['unknown', 'unavailable']
-        }}
+        {% set high_temps = namespace(count=0) %}
+        {% for sensor in ['sensor.miner_outlet_temp1', 'sensor.miner_outlet_temp2', 
+                         'sensor.miner_inlet_temp1', 'sensor.miner_inlet_temp2'] %}
+          {% if states(sensor) not in ['unknown', 'unavailable'] 
+             and states(sensor) | float > 55 %}
+            {% set high_temps.count = high_temps.count + 1 %}
+          {% endif %}
+        {% endfor %}
+        {{ high_temps.count > 0 }}
+  mode: single
   action:
     service: notify.whatsapp
     data:
