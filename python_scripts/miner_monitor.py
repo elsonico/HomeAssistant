@@ -176,7 +176,14 @@ def write_ha_sensors(temp_data: Dict[str, Any]) -> None:
             json.dump(hashrate_data, f)
         
         # Write temperatures
-        chip_temps = [float(t.replace('°C', '')) for t in temp_data['chip_temps']]
+        # Parse temperatures, handling both string and float inputs
+        chip_temps = []
+        for temp in temp_data['chip_temps']:
+            if isinstance(temp, str):
+                chip_temps.append(float(temp.replace('°C', '')))
+            else:
+                chip_temps.append(float(temp))
+                
         temp_names = ['outlet_temp1', 'outlet_temp2', 'inlet_temp1', 'inlet_temp2']
         
         for i, temp in enumerate(chip_temps):
