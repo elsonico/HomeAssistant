@@ -422,6 +422,13 @@ sensor:
     state_class: "measurement"
     unique_id: "miner_hashrate"
 
+  - name: "Miner Hashrate Efficiency"
+    state_topic: "miner/hashrate_efficiency"
+    value_template: "{{ value | float | round(1) }}"
+    unit_of_measurement: "%"
+    state_class: "measurement"
+    unique_id: "miner_hashrate_efficiency"
+
   - name: "Miner Outlet Temperature 1"
     state_topic: "miner/outlet_temp1"
     value_template: "{{ value | float | round(1) }}"

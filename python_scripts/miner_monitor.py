@@ -187,20 +187,24 @@ def write_ha_sensors(temp_data: Dict[str, Any]) -> None:
         ha_state_path = Path("/config/ha_states")
         ha_state_path.mkdir(parents=True, exist_ok=True)
         
-        # Write hashrate
+        # Calculate efficiency
+        efficiency = (temp_data['hashrate'] / temp_data['hashrate_ideal'] * 100) if temp_data['hashrate_ideal'] > 0 else 0
+        
+        # Write hashrate and efficiency
         hashrate_data = {
             "state": temp_data['hashrate'],
             "attributes": {
                 "unit_of_measurement": temp_data['hashrate_unit'],
                 "friendly_name": "Miner Hashrate",
                 "ideal_hashrate": temp_data['hashrate_ideal'],
-                "efficiency": f"{(temp_data['hashrate'] / temp_data['hashrate_ideal'] * 100):.1f}%",
+                "efficiency": f"{efficiency:.1f}%",
                 "serial_number": temp_data['sn']
             }
         }
         with open(ha_state_path / "sensor.miner_hashrate", 'w') as f:
             json.dump(hashrate_data, f)
         publish_to_mqtt("miner/hashrate", temp_data['hashrate'])
+        publish_to_mqtt("miner/hashrate_efficiency", efficiency)
         
         # Write chip temperatures
         temp_names = ['outlet_temp1', 'outlet_temp2', 'inlet_temp1', 'inlet_temp2']
