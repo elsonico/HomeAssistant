@@ -414,8 +414,7 @@ sensor:
     unit_of_measurement: "USD"
     unique_id: "cryptocoin_value_ada"
 
-  - platform: mqtt
-    name: "miner_hashrate"
+  - name: "miner_hashrate"
     state_topic: "homeassistant/sensor/miner/hashrate"
     unit_of_measurement: "MH/s"
     device_class: "frequency"
