@@ -420,7 +420,7 @@ sensor:
     unit_of_measurement: "MH/s"
     device_class: "power"
     state_class: "measurement"
-    unique_id: "miner_hashrate"
+    unique_id: "miner_hashrate"  
 
   - name: "Miner Hashrate Efficiency"
     state_topic: "miner/hashrate_efficiency"
