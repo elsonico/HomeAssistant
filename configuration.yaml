@@ -55,6 +55,16 @@ http:
 
 homeassistant:
   external_url: !secret external_url
+  customize: !include customize.yaml
 
 recorder:
   db_url: !secret db_url
+
+# Run on startup
+automation startup_automation:
+  alias: "Create States Directory"
+  trigger:
+    platform: homeassistant
+    event: start
+  action:
+    service: shell_command.create_states_dir

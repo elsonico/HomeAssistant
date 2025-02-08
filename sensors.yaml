@@ -758,7 +758,6 @@
           {{ (states('sensor.binance_ada_2nd_balance') | float * 
               states('sensor.crypto_coin_value_ada') | float * 
               states('sensor.usd_eur') | float) | round(2) }}
-        {% endif %}
     binance_total_2nd_balance_in_eur:
       friendly_name: "Binance Total 2nd Balance in EUR"
       unit_of_measurement: "€"
@@ -967,7 +966,7 @@
   resource: !secret powerpool_user_api_url
   value_template: "{{ value_json.data.hashrate.scrypt.hashrate | float }}"
   unit_of_measurement: "GH/s"
-  scan_interval: 60
+  scan_interval: 300
 
 - platform: rest         
   name: "PowerPool Rejection Rate"                                                                                                        
@@ -1142,33 +1141,119 @@
           0
         {% endif %}
 
-sensor:
-  - platform: file
-    name: miner_hashrate
-    file_path: /config/ha_states/sensor.miner_hashrate
-    value_template: "{{ value_json.state }}"
-    unit_of_measurement: "MH/s"
-    
-  - platform: file
-    name: miner_outlet_temp1
-    file_path: /config/ha_states/sensor.miner_outlet_temp1
-    value_template: "{{ value_json.state }}"
-    unit_of_measurement: "°C"
-    
-  - platform: file
-    name: miner_outlet_temp2
-    file_path: /config/ha_states/sensor.miner_outlet_temp2
-    value_template: "{{ value_json.state }}"
-    unit_of_measurement: "°C"
-    
-  - platform: file
-    name: miner_inlet_temp1
-    file_path: /config/ha_states/sensor.miner_inlet_temp1
-    value_template: "{{ value_json.state }}"
-    unit_of_measurement: "°C"
-    
-  - platform: file
-    name: miner_inlet_temp2
-    file_path: /config/ha_states/sensor.miner_inlet_temp2
-    value_template: "{{ value_json.state }}"
-    unit_of_measurement: "°C"
+# MQTT Sensors for Miner Data
+- platform: mqtt
+  name: "miner_hashrate"
+  state_topic: "homeassistant/sensor/miner/hashrate"
+  unit_of_measurement: "MH/s"
+  device_class: "power"
+  state_class: "measurement"
+
+- platform: mqtt
+  name: "miner_outlet_temp1"
+  state_topic: "homeassistant/sensor/miner/outlet_temp1"
+  unit_of_measurement: "°C"
+  device_class: "temperature"
+  state_class: "measurement"
+
+- platform: mqtt
+  name: "miner_outlet_temp2"
+  state_topic: "homeassistant/sensor/miner/outlet_temp2"
+  unit_of_measurement: "°C"
+  device_class: "temperature"
+  state_class: "measurement"
+
+- platform: mqtt
+  name: "miner_inlet_temp1"
+  state_topic: "homeassistant/sensor/miner/inlet_temp1"
+  unit_of_measurement: "°C"
+  device_class: "temperature"
+  state_class: "measurement"
+
+- platform: mqtt
+  name: "miner_inlet_temp2"
+  state_topic: "homeassistant/sensor/miner/inlet_temp2"
+  unit_of_measurement: "°C"
+  device_class: "temperature"
+  state_class: "measurement"
+
+- platform: mqtt
+  name: "miner_fan_speed"
+  state_topic: "homeassistant/sensor/miner/fan_speed"
+  unit_of_measurement: "RPM"
+  device_class: "frequency"
+  state_class: "measurement"
+
+# Template sensors for calculations
+- platform: template
+  sensors:
+    miner_hashrate_efficiency:
+      friendly_name: "Miner Hashrate Efficiency"
+      value_template: >-
+        {% if states('sensor.miner_hashrate') not in ['unknown', 'unavailable', '0'] %}
+          {{ state_attr('sensor.miner_hashrate', 'efficiency') | replace('%', '') | float(0) }}
+        {% else %}
+          0
+        {% endif %}
+      unit_of_measurement: "%"
+
+    miner_maximum_temperature:
+      friendly_name: "Miner Maximum Temperature"
+      value_template: >-
+        {% set temps = [] %}
+        {% for sensor in ['sensor.miner_outlet_temp1', 'sensor.miner_outlet_temp2', 
+                         'sensor.miner_inlet_temp1', 'sensor.miner_inlet_temp2'] %}
+          {% if states(sensor) not in ['unknown', 'unavailable', '0'] %}
+            {% set temps = temps + [states(sensor) | float] %}
+          {% endif %}
+        {% endfor %}
+        {{ temps | max if temps else 0 }}
+      unit_of_measurement: "°C"
+      device_class: "temperature"
+
+    miner_minimum_temperature:
+      friendly_name: "Miner Minimum Temperature"
+      value_template: >-
+        {% set temps = [] %}
+        {% for sensor in ['sensor.miner_outlet_temp1', 'sensor.miner_outlet_temp2', 
+                         'sensor.miner_inlet_temp1', 'sensor.miner_inlet_temp2'] %}
+          {% if states(sensor) not in ['unknown', 'unavailable', '0'] %}
+            {% set temps = temps + [states(sensor) | float] %}
+          {% endif %}
+        {% endfor %}
+        {{ temps | min if temps else 0 }}
+      unit_of_measurement: "°C"
+      device_class: "temperature"
+
+    miner_average_temperature:
+      friendly_name: "Miner Average Temperature"
+      value_template: >-
+        {% set temps = [] %}
+        {% for sensor in ['sensor.miner_outlet_temp1', 'sensor.miner_outlet_temp2', 
+                         'sensor.miner_inlet_temp1', 'sensor.miner_inlet_temp2'] %}
+          {% if states(sensor) not in ['unknown', 'unavailable', '0'] %}
+            {% set temps = temps + [states(sensor) | float] %}
+          {% endif %}
+        {% endfor %}
+        {{ (temps | sum / temps | length) | round(1) if temps else 0 }}
+      unit_of_measurement: "°C"
+      device_class: "temperature"
+
+    miner_maximum_fan_speed:
+      friendly_name: "Miner Maximum Fan Speed"
+      value_template: >-
+        {% if states('sensor.miner_fan_speed') not in ['unknown', 'unavailable', '0'] 
+           and state_attr('sensor.miner_fan_speed', 'all_fans') is not none %}
+          {{ state_attr('sensor.miner_fan_speed', 'all_fans') | max }}
+        {% else %}
+          0
+        {% endif %}
+      unit_of_measurement: "RPM"
+
+- platform: template
+  sensors:
+    miner_hashrate_gh:
+      friendly_name: "Miner Hashrate GH"
+      value_template: "{{ (states('sensor.miner_hashrate') | float / 1000) | round(2) }}"
+      unit_of_measurement: "GH/s"
+      device_class: "power"

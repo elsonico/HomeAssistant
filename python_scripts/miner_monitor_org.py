@@ -9,8 +9,6 @@ import json
 import traceback
 from typing import Optional, Dict, Any, List, Union
 from pathlib import Path
-import paho.mqtt.client as mqtt
-import yaml
 
 # Disable SSL warnings
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
@@ -22,18 +20,6 @@ logging.basicConfig(
     datefmt='%Y-%m-%d %H:%M:%S'
 )
 logger = logging.getLogger(__name__)
-
-def load_secrets():
-    with open("/config/python_scripts/secrets.yaml", "r") as file:
-        return yaml.safe_load(file)
-
-secrets = load_secrets()
-
-# MQTT configuration
-MQTT_BROKER = secrets["mqtt_broker"]
-MQTT_PORT = 1883
-MQTT_USERNAME = secrets["mqtt_username"]
-MQTT_PASSWORD = secrets["mqtt_password"]
 
 def parse_chip_temp(temp_str: str) -> Optional[float]:
     """Convert chip temperature from millidegrees to degrees"""
@@ -169,47 +155,31 @@ def get_miner_temperatures() -> Optional[Dict[str, Any]]:
     
     return None
 
-def publish_to_mqtt(topic: str, value: Any) -> None:
-    """Publish data to MQTT broker"""
-    try:
-        client = mqtt.Client()
-        client.username_pw_set(MQTT_USERNAME, MQTT_PASSWORD)
-        client.connect(MQTT_BROKER, MQTT_PORT, 60)
-        client.publish(topic, value)
-        client.disconnect()
-        logger.debug(f"Published {value} to MQTT topic: {topic}")
-    except Exception as e:
-        logger.error(f"Error publishing to MQTT: {str(e)}")
-
 def write_ha_sensors(temp_data: Dict[str, Any]) -> None:
-    """Write sensor data for Home Assistant and publish to MQTT"""
+    """Write sensor data for Home Assistant"""
     try:
         ha_state_path = Path("/config/ha_states")
         ha_state_path.mkdir(parents=True, exist_ok=True)
         
-        # Calculate efficiency
-        efficiency = (temp_data['hashrate'] / temp_data['hashrate_ideal'] * 100) if temp_data['hashrate_ideal'] > 0 else 0
-        
-        # Write hashrate and efficiency
+        # Write hashrate
         hashrate_data = {
             "state": temp_data['hashrate'],
             "attributes": {
                 "unit_of_measurement": temp_data['hashrate_unit'],
                 "friendly_name": "Miner Hashrate",
                 "ideal_hashrate": temp_data['hashrate_ideal'],
-                "efficiency": f"{efficiency:.1f}%",
+                "efficiency": f"{(temp_data['hashrate'] / temp_data['hashrate_ideal'] * 100):.1f}%",
                 "serial_number": temp_data['sn']
             }
         }
+        
         with open(ha_state_path / "sensor.miner_hashrate", 'w') as f:
             json.dump(hashrate_data, f)
-        publish_to_mqtt("miner/hashrate", temp_data['hashrate'])
-        publish_to_mqtt("miner/hashrate_efficiency", efficiency)
         
         # Write chip temperatures
         temp_names = ['outlet_temp1', 'outlet_temp2', 'inlet_temp1', 'inlet_temp2']
-        for i, temp in enumerate(temp_data['chip_temps'][:4]):  # Limit to first 4 temperatures
-            temp_data_sensor = {
+        for i, temp in enumerate(temp_data['chip_temps']):
+            temp_data = {
                 "state": temp,
                 "attributes": {
                     "unit_of_measurement": "°C",
@@ -218,8 +188,7 @@ def write_ha_sensors(temp_data: Dict[str, Any]) -> None:
                 }
             }
             with open(ha_state_path / f"sensor.miner_{temp_names[i]}", 'w') as f:
-                json.dump(temp_data_sensor, f)
-            publish_to_mqtt(f"miner/{temp_names[i]}", temp)
+                json.dump(temp_data, f)
         
         # Write fan speeds
         fan_data = {
@@ -233,12 +202,11 @@ def write_ha_sensors(temp_data: Dict[str, Any]) -> None:
         }
         with open(ha_state_path / "sensor.miner_fan_speed", 'w') as f:
             json.dump(fan_data, f)
-        publish_to_mqtt("miner/fan_speed", temp_data['fan_speeds'][0] if temp_data['fan_speeds'] else 0)
             
-        logger.info("Successfully wrote sensor data for Home Assistant and MQTT")
+        logger.info("Successfully wrote sensor data for Home Assistant")
         
     except Exception as e:
-        logger.error(f"Error writing sensor data: {str(e)}")
+        logger.error(f"Error writing Home Assistant sensor data: {str(e)}")
         logger.debug(f"Traceback: {traceback.format_exc()}")
 
 def format_temp(temp: float) -> str:
@@ -249,7 +217,7 @@ if __name__ == "__main__":
     logger.info("Starting miner temperature monitoring")
     temps = get_miner_temperatures()
     if temps:
-        # Write data for Home Assistant and publish to MQTT
+        # Write data for Home Assistant
         write_ha_sensors(temps)
         
         # Log detailed information
