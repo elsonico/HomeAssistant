@@ -25,5 +25,7 @@ services:
       - SENDERNAME=${SENDERNAME}
       - MAILSERVER=${MAILSERVER}
       - WAURL=${WAURL}
+      - MINERUSER=${MINERUSER}
+      - MINERPWD=${MINERPWD}
     restart: unless-stopped
     network_mode: host
