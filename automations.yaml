@@ -632,7 +632,7 @@
         - conditions:
             - condition: numeric_state
               entity_id: sensor.temperature_bedroom
-              above: 20
+              above: 21
           sequence:
             - service: climate.turn_off
               target:
