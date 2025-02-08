@@ -712,30 +712,13 @@
     - service: persistent_notification.create
       data:
         title: "Debug: Miner Temperature Alert Triggered"
-        message: >
-          Current temperatures:
-          Outlet 1: {{ states('sensor.miner_outlet_temperature_1') }}°C
-          Outlet 2: {{ states('sensor.miner_outlet_temperature_2') }}°C
-          Inlet 1: {{ states('sensor.miner_inlet_temperature_1') }}°C
-          Inlet 2: {{ states('sensor.miner_inlet_temperature_2') }}°C
+        message: "Current temperatures: Outlet 1: {{ states('sensor.miner_outlet_temperature_1') }}°C, Outlet 2: {{ states('sensor.miner_outlet_temperature_2') }}°C, Inlet 1: {{ states('sensor.miner_inlet_temperature_1') }}°C, Inlet 2: {{ states('sensor.miner_inlet_temperature_2') }}°C"
     - service: notify.whatsapp
       data:
-        message: >
-          High temperature detected:
-          Outlet 1: {{ states('sensor.miner_outlet_temperature_1') }}°C
-          Outlet 2: {{ states('sensor.miner_outlet_temperature_2') }}°C
-          Inlet 1: {{ states('sensor.miner_inlet_temperature_1') }}°C
-          Inlet 2: {{ states('sensor.miner_inlet_temperature_2') }}°C
+        message: "High temperature detected: Outlet 1: {{ states('sensor.miner_outlet_temperature_1') }}°C, Outlet 2: {{ states('sensor.miner_outlet_temperature_2') }}°C, Inlet 1: {{ states('sensor.miner_inlet_temperature_1') }}°C, Inlet 2: {{ states('sensor.miner_inlet_temperature_2') }}°C"
         target: "14164327184@c.us"
+        data: {}
     - service: notify.email
       data:
         title: "Miner Alert - High Temperature"
-        message: >
-          High temperature detected on your miner:
-
-          Outlet 1: {{ states('sensor.miner_outlet_temperature_1') }}°C
-          Outlet 2: {{ states('sensor.miner_outlet_temperature_2') }}°C
-          Inlet 1: {{ states('sensor.miner_inlet_temperature_1') }}°C
-          Inlet 2: {{ states('sensor.miner_inlet_temperature_2') }}°C
-
-          Please check your miner's cooling system.
+        message: "High temperature detected on your miner: Outlet 1: {{ states('sensor.miner_outlet_temperature_1') }}°C, Outlet 2: {{ states('sensor.miner_outlet_temperature_2') }}°C, Inlet 1: {{ states('sensor.miner_inlet_temperature_1') }}°C, Inlet 2: {{ states('sensor.miner_inlet_temperature_2') }}°C. Please check your miner's cooling system."
