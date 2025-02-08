@@ -1144,7 +1144,7 @@
   name: "miner_hashrate"
   state_topic: "homeassistant/sensor/miner/hashrate"
   unit_of_measurement: "MH/s"
-  device_class: "power"
+  device_class: "frequency"
   state_class: "measurement"
 
 - platform: mqtt
