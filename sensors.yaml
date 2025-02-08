@@ -758,7 +758,6 @@
           {{ (states('sensor.binance_ada_2nd_balance') | float * 
               states('sensor.crypto_coin_value_ada') | float * 
               states('sensor.usd_eur') | float) | round(2) }}
-        {% endif %}
     binance_total_2nd_balance_in_eur:
       friendly_name: "Binance Total 2nd Balance in EUR"
       unit_of_measurement: "€"
@@ -1146,41 +1145,98 @@
 - platform: file
   name: miner_hashrate
   file_path: /config/ha_states/sensor.miner_hashrate
-  value_template: "{{ value_json.state }}"
+  value_template: >-
+    {% if value_json is defined and value_json.state is defined %}
+      {{ value_json.state }}
+    {% else %}
+      0
+    {% endif %}
+  json_attributes:
+    - unit_of_measurement
+    - friendly_name
+    - ideal_hashrate
+    - efficiency
+    - serial_number
 
 - platform: file
   name: miner_outlet_temp1
   file_path: /config/ha_states/sensor.miner_outlet_temp1
-  value_template: "{{ value_json.state }}"
+  value_template: >-
+    {% if value_json is defined and value_json.state is defined %}
+      {{ value_json.state }}
+    {% else %}
+      0
+    {% endif %}
+  json_attributes:
+    - unit_of_measurement
+    - friendly_name
+    - serial_number
 
 - platform: file
   name: miner_outlet_temp2
   file_path: /config/ha_states/sensor.miner_outlet_temp2
-  value_template: "{{ value_json.state }}"
+  value_template: >-
+    {% if value_json is defined and value_json.state is defined %}
+      {{ value_json.state }}
+    {% else %}
+      0
+    {% endif %}
+  json_attributes:
+    - unit_of_measurement
+    - friendly_name
+    - serial_number
 
 - platform: file
   name: miner_inlet_temp1
   file_path: /config/ha_states/sensor.miner_inlet_temp1
-  value_template: "{{ value_json.state }}"
+  value_template: >-
+    {% if value_json is defined and value_json.state is defined %}
+      {{ value_json.state }}
+    {% else %}
+      0
+    {% endif %}
+  json_attributes:
+    - unit_of_measurement
+    - friendly_name
+    - serial_number
 
 - platform: file
   name: miner_inlet_temp2
   file_path: /config/ha_states/sensor.miner_inlet_temp2
-  value_template: "{{ value_json.state }}"
+  value_template: >-
+    {% if value_json is defined and value_json.state is defined %}
+      {{ value_json.state }}
+    {% else %}
+      0
+    {% endif %}
+  json_attributes:
+    - unit_of_measurement
+    - friendly_name
+    - serial_number
 
 - platform: file
   name: miner_fan_speed
   file_path: /config/ha_states/sensor.miner_fan_speed
-  value_template: "{{ value_json.state }}"
+  value_template: >-
+    {% if value_json is defined and value_json.state is defined %}
+      {{ value_json.state }}
+    {% else %}
+      0
+    {% endif %}
+  json_attributes:
+    - unit_of_measurement
+    - friendly_name
+    - all_fans
+    - serial_number
 
 # Template Sensors
 - platform: template
   sensors:
     miner_hashrate_efficiency:
       friendly_name: "Miner Hashrate Efficiency"
-      value_template: >
-        {% if states('sensor.miner_hashrate') != 'unknown' %}
-          {{ state_attr('sensor.miner_hashrate', 'efficiency') | replace('%', '') | float }}
+      value_template: >-
+        {% if states('sensor.miner_hashrate') not in ['unknown', 'unavailable', '0'] %}
+          {{ state_attr('sensor.miner_hashrate', 'efficiency') | replace('%', '') | float(0) }}
         {% else %}
           0
         {% endif %}
@@ -1188,59 +1244,48 @@
 
     miner_maximum_temperature:
       friendly_name: "Miner Maximum Temperature"
-      value_template: >
+      value_template: >-
         {% set temps = [] %}
         {% for sensor in ['sensor.miner_outlet_temp1', 'sensor.miner_outlet_temp2', 
                          'sensor.miner_inlet_temp1', 'sensor.miner_inlet_temp2'] %}
-          {% if states(sensor) != 'unknown' %}
+          {% if states(sensor) not in ['unknown', 'unavailable', '0'] %}
             {% set temps = temps + [states(sensor) | float] %}
           {% endif %}
         {% endfor %}
-        {% if temps | length > 0 %}
-          {{ temps | max }}
-        {% else %}
-          0
-        {% endif %}
+        {{ temps | max if temps else 0 }}
       unit_of_measurement: "°C"
 
     miner_minimum_temperature:
       friendly_name: "Miner Minimum Temperature"
-      value_template: >
+      value_template: >-
         {% set temps = [] %}
         {% for sensor in ['sensor.miner_outlet_temp1', 'sensor.miner_outlet_temp2', 
                          'sensor.miner_inlet_temp1', 'sensor.miner_inlet_temp2'] %}
-          {% if states(sensor) != 'unknown' %}
+          {% if states(sensor) not in ['unknown', 'unavailable', '0'] %}
             {% set temps = temps + [states(sensor) | float] %}
           {% endif %}
         {% endfor %}
-        {% if temps | length > 0 %}
-          {{ temps | min }}
-        {% else %}
-          0
-        {% endif %}
+        {{ temps | min if temps else 0 }}
       unit_of_measurement: "°C"
 
     miner_average_temperature:
       friendly_name: "Miner Average Temperature"
-      value_template: >
+      value_template: >-
         {% set temps = [] %}
         {% for sensor in ['sensor.miner_outlet_temp1', 'sensor.miner_outlet_temp2', 
                          'sensor.miner_inlet_temp1', 'sensor.miner_inlet_temp2'] %}
-          {% if states(sensor) != 'unknown' %}
+          {% if states(sensor) not in ['unknown', 'unavailable', '0'] %}
             {% set temps = temps + [states(sensor) | float] %}
           {% endif %}
         {% endfor %}
-        {% if temps | length > 0 %}
-          {{ (temps | sum / temps | length) | round(1) }}
-        {% else %}
-          0
-        {% endif %}
+        {{ (temps | sum / temps | length) | round(1) if temps else 0 }}
       unit_of_measurement: "°C"
 
     miner_maximum_fan_speed:
       friendly_name: "Miner Maximum Fan Speed"
-      value_template: >
-        {% if states('sensor.miner_fan_speed') != 'unknown' %}
+      value_template: >-
+        {% if states('sensor.miner_fan_speed') not in ['unknown', 'unavailable', '0'] 
+           and state_attr('sensor.miner_fan_speed', 'all_fans') is not none %}
           {{ state_attr('sensor.miner_fan_speed', 'all_fans') | max }}
         {% else %}
           0
