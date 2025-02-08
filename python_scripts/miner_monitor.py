@@ -35,7 +35,19 @@ def get_miner_temperatures():
         
         # Get the log content
         log_content = response.text
-        logger.debug(f"Received response length: {len(log_content)} characters")
+        
+        # Dump response details and content to file
+        with open('miner_response.log', 'w') as f:
+            f.write(f"Response Status Code: {response.status_code}\n")
+            f.write(f"Response Headers:\n{dict(response.headers)}\n")
+            f.write("\nResponse Content:\n")
+            f.write(log_content)
+        
+        logger.info(f"Response status code: {response.status_code}")
+        logger.info(f"Response content type: {response.headers.get('content-type', 'unknown')}")
+        logger.info(f"Response length: {len(log_content)} characters")
+        logger.info(f"First 200 characters of response: {log_content[:200]}")
+        logger.info("Full response saved to miner_response.log")
         
         # Regular expression to find temperature readings
         temp_pattern = r"health: min = (\d+\.\d+) Degree centigrade, max = (\d+\.\d+) Degree centigrade"
@@ -53,7 +65,6 @@ def get_miner_temperatures():
             }
         else:
             logger.warning("No temperature readings found in the log content")
-            logger.debug(f"Log content: {log_content[:500]}...")  # First 500 chars for debugging
             return None
             
     except requests.exceptions.RequestException as e:
