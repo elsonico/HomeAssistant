@@ -521,6 +521,8 @@
     - condition: numeric_state
       entity_id: sensor.powerpool_hashrate
       below: 0.1
+      for:
+        minutes: 5
   action:
     - service: switch.turn_off
       target:
