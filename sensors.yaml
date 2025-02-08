@@ -759,21 +759,11 @@
               states('sensor.crypto_coin_value_ada') | float * 
               states('sensor.usd_eur') | float) | round(2) }}
     binance_total_2nd_balance_in_eur:
-      friendly_name: "Binance Total 2nd Balance in EUR"
+      friendly_name: "Binance 2nd Total Balance EUR"
       unit_of_measurement: "€"
-      value_template: >-
+      value_template: >
         {% if states('sensor.binance2_balance_btc') not in ['unknown', 'unavailable'] 
-           and states('sensor.binance2_balance_doge') not in ['unknown', 'unavailable']
-           and states('sensor.binance2_balance_ltc') not in ['unknown', 'unavailable']
-           and states('sensor.binance2_balance_bnb') not in ['unknown', 'unavailable']
-           and states('sensor.binance2_balance_eth') not in ['unknown', 'unavailable']
-           and states('sensor.binance2_balance_ada') not in ['unknown', 'unavailable']
            and states('sensor.crypto_coin_value_btc') not in ['unknown', 'unavailable']
-           and states('sensor.crypto_coin_value_doge') not in ['unknown', 'unavailable']
-           and states('sensor.crypto_coin_value_ltc') not in ['unknown', 'unavailable']
-           and states('sensor.crypto_coin_value_bnb') not in ['unknown', 'unavailable']
-           and states('sensor.crypto_coin_value_eth') not in ['unknown', 'unavailable']
-           and states('sensor.crypto_coin_value_ada') not in ['unknown', 'unavailable']
            and states('sensor.usd_eur') not in ['unknown', 'unavailable'] %}
           {% set btc = states('sensor.binance2_balance_btc') | float * states('sensor.crypto_coin_value_btc') | float * states('sensor.usd_eur') | float %}
           {% set doge = states('sensor.binance2_balance_doge') | float * states('sensor.crypto_coin_value_doge') | float * states('sensor.usd_eur') | float %}
@@ -782,6 +772,8 @@
           {% set eth = states('sensor.binance2_balance_eth') | float * states('sensor.crypto_coin_value_eth') | float * states('sensor.usd_eur') | float %}
           {% set ada = states('sensor.binance2_balance_ada') | float * states('sensor.crypto_coin_value_ada') | float * states('sensor.usd_eur') | float %}
           {{ (btc + doge + ltc + bnb + eth + ada) | round(2) }}
+        {% else %}
+          0
         {% endif %}
 
 - platform: rest
@@ -1249,11 +1241,3 @@
           0
         {% endif %}
       unit_of_measurement: "RPM"
-
-- platform: template
-  sensors:
-    miner_hashrate_gh:
-      friendly_name: "Miner Hashrate GH"
-      value_template: "{{ (states('sensor.miner_hashrate') | float / 1000) | round(2) }}"
-      unit_of_measurement: "GH/s"
-      device_class: "power"
