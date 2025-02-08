@@ -1179,55 +1179,45 @@
   unit_of_measurement: "RPM"
 
 # Template Sensors for Miner
-- platform: template
-  sensors:
-    miner_hashrate_efficiency:
-      friendly_name: "Miner Hashrate Efficiency"
-      value_template: "{{ states.sensor.miner_hashrate.attributes.efficiency | replace('%', '') | float }}"
-      unit_of_measurement: "%"
-      icon: "mdi:percent"
+template:
+  - sensor:
+      - name: "Miner Hashrate Efficiency"
+        state: "{{ states.sensor.miner_hashrate.attributes.efficiency | replace('%', '') | float }}"
+        unit_of_measurement: "%"
 
-    miner_maximum_temperature:
-      friendly_name: "Miner Maximum Temperature"
-      value_template: >
-        {% set temps = [
-          states('sensor.miner_outlet_temp1') | float,
-          states('sensor.miner_outlet_temp2') | float,
-          states('sensor.miner_inlet_temp1') | float,
-          states('sensor.miner_inlet_temp2') | float
-        ] %}
-        {{ temps | max }}
-      unit_of_measurement: "°C"
-      icon: "mdi:thermometer-high"
+      - name: "Miner Maximum Temperature"
+        state: >
+          {% set temps = [
+            states('sensor.miner_outlet_temp1') | float,
+            states('sensor.miner_outlet_temp2') | float,
+            states('sensor.miner_inlet_temp1') | float,
+            states('sensor.miner_inlet_temp2') | float
+          ] %}
+          {{ temps | max }}
+        unit_of_measurement: "°C"
 
-    miner_minimum_temperature:
-      friendly_name: "Miner Minimum Temperature"
-      value_template: >
-        {% set temps = [
-          states('sensor.miner_outlet_temp1') | float,
-          states('sensor.miner_outlet_temp2') | float,
-          states('sensor.miner_inlet_temp1') | float,
-          states('sensor.miner_inlet_temp2') | float
-        ] %}
-        {{ temps | min }}
-      unit_of_measurement: "°C"
-      icon: "mdi:thermometer-low"
+      - name: "Miner Minimum Temperature"
+        state: >
+          {% set temps = [
+            states('sensor.miner_outlet_temp1') | float,
+            states('sensor.miner_outlet_temp2') | float,
+            states('sensor.miner_inlet_temp1') | float,
+            states('sensor.miner_inlet_temp2') | float
+          ] %}
+          {{ temps | min }}
+        unit_of_measurement: "°C"
 
-    miner_average_temperature:
-      friendly_name: "Miner Average Temperature"
-      value_template: >
-        {% set temps = [
-          states('sensor.miner_outlet_temp1') | float,
-          states('sensor.miner_outlet_temp2') | float,
-          states('sensor.miner_inlet_temp1') | float,
-          states('sensor.miner_inlet_temp2') | float
-        ] %}
-        {{ (temps | sum / temps | length) | round(1) }}
-      unit_of_measurement: "°C"
-      icon: "mdi:thermometer"
+      - name: "Miner Average Temperature"
+        state: >
+          {% set temps = [
+            states('sensor.miner_outlet_temp1') | float,
+            states('sensor.miner_outlet_temp2') | float,
+            states('sensor.miner_inlet_temp1') | float,
+            states('sensor.miner_inlet_temp2') | float
+          ] %}
+          {{ (temps | sum / temps | length) | round(1) }}
+        unit_of_measurement: "°C"
 
-    miner_maximum_fan_speed:
-      friendly_name: "Miner Maximum Fan Speed"
-      value_template: "{{ states.sensor.miner_fan_speed.attributes.all_fans | max }}"
-      unit_of_measurement: "RPM"
-      icon: "mdi:fan"
+      - name: "Miner Maximum Fan Speed"
+        state: "{{ states.sensor.miner_fan_speed.attributes.all_fans | max }}"
+        unit_of_measurement: "RPM"

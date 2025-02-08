@@ -672,20 +672,18 @@
 - id: miner_temperature_alert
   alias: Alert when miner temperatures are high
   trigger:
-    platform: or
-    conditions:
-      - condition: numeric_state
-        entity_id: sensor.miner_outlet_temp1
-        above: 55
-      - condition: numeric_state
-        entity_id: sensor.miner_outlet_temp2
-        above: 55
-      - condition: numeric_state
-        entity_id: sensor.miner_inlet_temp1
-        above: 55
-      - condition: numeric_state
-        entity_id: sensor.miner_inlet_temp2
-        above: 55
+    - platform: numeric_state
+      entity_id: sensor.miner_outlet_temp1
+      above: 55
+    - platform: numeric_state
+      entity_id: sensor.miner_outlet_temp2
+      above: 55
+    - platform: numeric_state
+      entity_id: sensor.miner_inlet_temp1
+      above: 55
+    - platform: numeric_state
+      entity_id: sensor.miner_inlet_temp2
+      above: 55
   action:
     service: notify.whatsapp
     data_template:
