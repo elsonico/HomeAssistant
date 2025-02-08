@@ -511,22 +511,27 @@
 - id: 28077b7f639644688b946f35ccf0127b
   alias: Reboot or Power Cycle Miner
   description: Reboot the miner on low hash rate, fallback to power cycle if needed
-  triggers:
-  - entity_id: sensor.powerpool_hashrate
-    to: '0'
-    for: 00:15:00
-    trigger: state
-  conditions: []
-  actions:
-  - target:
-      entity_id: switch.shellyplug_s_3ce90ee04b97
-    action: switch.turn_off
-    data: {}
-  - delay: 00:00:10
-  - target:
-      entity_id: switch.shellyplug_s_3ce90ee04b97
-    action: switch.turn_on
-    data: {}
+  trigger:
+    - platform: state
+      entity_id: sensor.powerpool_hashrate
+      to: '0.0'
+      for:
+        minutes: 15
+  condition:
+    - condition: numeric_state
+      entity_id: sensor.powerpool_hashrate
+      below: 0.1
+      for:
+        minutes: 5
+  action:
+    - service: switch.turn_off
+      target:
+        entity_id: switch.shellyplug_s_3ce90ee04b97
+    - delay:
+        seconds: 10
+    - service: switch.turn_on
+      target:
+        entity_id: switch.shellyplug_s_3ce90ee04b97
   mode: single
 - alias: Heater Control Based on Living Room Temperature
   description: Turn the heater on when temp is below 22°C and turn it off when above
