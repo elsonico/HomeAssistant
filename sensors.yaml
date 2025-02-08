@@ -1141,85 +1141,139 @@
           0
         {% endif %}
 
-# Base Sensors using REST
-- platform: rest
-  name: miner_hashrate
-  resource: file:///config/ha_states/sensor.miner_hashrate
-  value_template: "{{ value_json.state }}"
-  json_attributes_path: "$.attributes"
-  json_attributes:
-    - unit_of_measurement
-    - friendly_name
-    - ideal_hashrate
-    - efficiency
-    - serial_number
-  unit_of_measurement: "MH/s"
-  scan_interval: 60
-
-- platform: rest
-  name: miner_outlet_temp1
-  resource: file:///config/ha_states/sensor.miner_outlet_temp1
-  value_template: "{{ value_json.state }}"
-  json_attributes_path: "$.attributes"
-  json_attributes:
-    - unit_of_measurement
-    - friendly_name
-    - serial_number
-  unit_of_measurement: "°C"
-  scan_interval: 60
-
-- platform: rest
-  name: miner_outlet_temp2
-  resource: file:///config/ha_states/sensor.miner_outlet_temp2
-  value_template: "{{ value_json.state }}"
-  json_attributes_path: "$.attributes"
-  json_attributes:
-    - unit_of_measurement
-    - friendly_name
-    - serial_number
-  unit_of_measurement: "°C"
-  scan_interval: 60
-
-- platform: rest
-  name: miner_inlet_temp1
-  resource: file:///config/ha_states/sensor.miner_inlet_temp1
-  value_template: "{{ value_json.state }}"
-  json_attributes_path: "$.attributes"
-  json_attributes:
-    - unit_of_measurement
-    - friendly_name
-    - serial_number
-  unit_of_measurement: "°C"
-  scan_interval: 60
-
-- platform: rest
-  name: miner_inlet_temp2
-  resource: file:///config/ha_states/sensor.miner_inlet_temp2
-  value_template: "{{ value_json.state }}"
-  json_attributes_path: "$.attributes"
-  json_attributes:
-    - unit_of_measurement
-    - friendly_name
-    - serial_number
-  unit_of_measurement: "°C"
-  scan_interval: 60
-
-- platform: rest
-  name: miner_fan_speed
-  resource: file:///config/ha_states/sensor.miner_fan_speed
-  value_template: "{{ value_json.state }}"
-  json_attributes_path: "$.attributes"
-  json_attributes:
-    - unit_of_measurement
-    - friendly_name
-    - all_fans
-    - serial_number
-  unit_of_measurement: "RPM"
-  scan_interval: 60
-
-# Template Sensors
+# All sensors using template platform
 - platform: template
   sensors:
+    miner_hashrate:
+      friendly_name: "Miner Hashrate"
+      value_template: >-
+        {% set data = states('sensor.miner_hashrate_raw') %}
+        {% if data != 'unknown' %}
+          {% set json = data | from_json %}
+          {{ json.state }}
+        {% else %}
+          0
+        {% endif %}
+      unit_of_measurement: "MH/s"
+      attribute_templates:
+        ideal_hashrate: >-
+          {% set data = states('sensor.miner_hashrate_raw') %}
+          {% if data != 'unknown' %}
+            {% set json = data | from_json %}
+            {{ json.attributes.ideal_hashrate }}
+          {% endif %}
+        efficiency: >-
+          {% set data = states('sensor.miner_hashrate_raw') %}
+          {% if data != 'unknown' %}
+            {% set json = data | from_json %}
+            {{ json.attributes.efficiency }}
+          {% endif %}
+
+    miner_outlet_temp1:
+      friendly_name: "Miner Outlet Temperature 1"
+      value_template: >-
+        {% set data = states('sensor.miner_outlet_temp1_raw') %}
+        {% if data != 'unknown' %}
+          {% set json = data | from_json %}
+          {{ json.state }}
+        {% else %}
+          0
+        {% endif %}
+      unit_of_measurement: "°C"
+
+    miner_outlet_temp2:
+      friendly_name: "Miner Outlet Temperature 2"
+      value_template: >-
+        {% set data = states('sensor.miner_outlet_temp2_raw') %}
+        {% if data != 'unknown' %}
+          {% set json = data | from_json %}
+          {{ json.state }}
+        {% else %}
+          0
+        {% endif %}
+      unit_of_measurement: "°C"
+
+    miner_inlet_temp1:
+      friendly_name: "Miner Inlet Temperature 1"
+      value_template: >-
+        {% set data = states('sensor.miner_inlet_temp1_raw') %}
+        {% if data != 'unknown' %}
+          {% set json = data | from_json %}
+          {{ json.state }}
+        {% else %}
+          0
+        {% endif %}
+      unit_of_measurement: "°C"
+
+    miner_inlet_temp2:
+      friendly_name: "Miner Inlet Temperature 2"
+      value_template: >-
+        {% set data = states('sensor.miner_inlet_temp2_raw') %}
+        {% if data != 'unknown' %}
+          {% set json = data | from_json %}
+          {{ json.state }}
+        {% else %}
+          0
+        {% endif %}
+      unit_of_measurement: "°C"
+
+    miner_fan_speed:
+      friendly_name: "Miner Fan Speed"
+      value_template: >-
+        {% set data = states('sensor.miner_fan_speed_raw') %}
+        {% if data != 'unknown' %}
+          {% set json = data | from_json %}
+          {{ json.state }}
+        {% else %}
+          0
+        {% endif %}
+      unit_of_measurement: "RPM"
+      attribute_templates:
+        all_fans: >-
+          {% set data = states('sensor.miner_fan_speed_raw') %}
+          {% if data != 'unknown' %}
+            {% set json = data | from_json %}
+            {{ json.attributes.all_fans }}
+          {% endif %}
+
+    # Raw file sensors
+    miner_hashrate_raw:
+      friendly_name: "Miner Hashrate Raw"
+      value_template: >-
+        {% set path = '/config/ha_states/sensor.miner_hashrate' %}
+        {% if state_attr('sensor.miner_hashrate_raw', 'last_update') != now() %}
+          {% if states('sensor.miner_hashrate_raw') != read_file(path) %}
+            {{ read_file(path) }}
+          {% else %}
+            {{ states('sensor.miner_hashrate_raw') }}
+          {% endif %}
+        {% else %}
+          {{ states('sensor.miner_hashrate_raw') }}
+        {% endif %}
+      attribute_templates:
+        last_update: "{{ now() }}"
+
+    miner_outlet_temp1_raw:
+      friendly_name: "Miner Outlet Temperature 1 Raw"
+      value_template: "{{ read_file('/config/ha_states/sensor.miner_outlet_temp1') }}"
+
+    miner_outlet_temp2_raw:
+      friendly_name: "Miner Outlet Temperature 2 Raw"
+      value_template: "{{ read_file('/config/ha_states/sensor.miner_outlet_temp2') }}"
+
+    miner_inlet_temp1_raw:
+      friendly_name: "Miner Inlet Temperature 1 Raw"
+      value_template: "{{ read_file('/config/ha_states/sensor.miner_inlet_temp1') }}"
+
+    miner_inlet_temp2_raw:
+      friendly_name: "Miner Inlet Temperature 2 Raw"
+      value_template: "{{ read_file('/config/ha_states/sensor.miner_inlet_temp2') }}"
+
+    miner_fan_speed_raw:
+      friendly_name: "Miner Fan Speed Raw"
+      value_template: "{{ read_file('/config/ha_states/sensor.miner_fan_speed') }}"
+
+    # Keep existing template sensors
     miner_hashrate_efficiency:
       friendly_name: "Miner Hashrate Efficiency"
       value_template: >-
