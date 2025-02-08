@@ -1204,3 +1204,14 @@
           0
         {% endif %}
       unit_of_measurement: "RPM"
+
+
+    miner_hashrate_gh:
+      friendly_name: "Miner Hashrate GH/s"
+      unit_of_measurement: "GH/s"
+      value_template: >
+        {% if states('sensor.miner_hashrate') not in ['unknown', 'unavailable', '0'] %}
+          {{ (states('sensor.miner_hashrate') | float(0) / 1000) | round(2) }}
+        {% else %}
+          0
+        {% endif %}
