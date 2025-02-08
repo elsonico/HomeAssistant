@@ -200,7 +200,7 @@ def write_ha_sensors(temp_data: Dict[str, Any]) -> None:
         }
         with open(ha_state_path / "sensor.miner_hashrate", 'w') as f:
             json.dump(hashrate_data, f)
-        publish_to_mqtt("homeassistant/sensor/miner/hashrate", temp_data['hashrate'])
+        publish_to_mqtt("miner/hashrate", temp_data['hashrate'])
         
         # Write chip temperatures
         temp_names = ['outlet_temp1', 'outlet_temp2', 'inlet_temp1', 'inlet_temp2']
@@ -215,7 +215,7 @@ def write_ha_sensors(temp_data: Dict[str, Any]) -> None:
             }
             with open(ha_state_path / f"sensor.miner_{temp_names[i]}", 'w') as f:
                 json.dump(temp_data_sensor, f)
-            publish_to_mqtt(f"homeassistant/sensor/miner/{temp_names[i]}", temp)
+            publish_to_mqtt(f"miner/{temp_names[i]}", temp)
         
         # Write fan speeds
         fan_data = {
@@ -229,7 +229,7 @@ def write_ha_sensors(temp_data: Dict[str, Any]) -> None:
         }
         with open(ha_state_path / "sensor.miner_fan_speed", 'w') as f:
             json.dump(fan_data, f)
-        publish_to_mqtt("homeassistant/sensor/miner/fan_speed", temp_data['fan_speeds'][0] if temp_data['fan_speeds'] else 0)
+        publish_to_mqtt("miner/fan_speed", temp_data['fan_speeds'][0] if temp_data['fan_speeds'] else 0)
             
         logger.info("Successfully wrote sensor data for Home Assistant and MQTT")
         
