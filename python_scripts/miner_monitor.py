@@ -266,88 +266,21 @@ def format_temp(temp: float) -> str:
     return f"{temp:.1f}°C"
 
 def get_miner_data():
-    try:
-        logging.info("Requesting data from miner at %s", MINER_IP)
-        response = requests.get(f"http://{MINER_IP}/api/status")
-        if response.status_code == 200:
-            data = response.json()
-            
-            # Print raw data to console
-            logging.info("Raw miner data:")
-            logging.info(json.dumps(data, indent=2))
-            
-            processed_data = {
-                "hashrate": {
-                    "state": data["hashrate"],
-                    "attributes": {
-                        "unit_of_measurement": "MH/s",
-                        "friendly_name": "Miner Hashrate",
-                        "ideal_hashrate": 2160,
-                        "efficiency": f"{(data['hashrate'] / 2160 * 100):.1f}%",
-                        "serial_number": data.get("serial_number", "unknown")
-                    }
-                },
-                "outlet_temp1": {
-                    "state": data["temps"]["outlet1"],
-                    "attributes": {
-                        "unit_of_measurement": "°C",
-                        "friendly_name": "Miner Outlet Temperature 1",
-                        "serial_number": data.get("serial_number", "unknown")
-                    }
-                },
-                "outlet_temp2": {
-                    "state": data["temps"]["outlet2"],
-                    "attributes": {
-                        "unit_of_measurement": "°C",
-                        "friendly_name": "Miner Outlet Temperature 2",
-                        "serial_number": data.get("serial_number", "unknown")
-                    }
-                },
-                "inlet_temp1": {
-                    "state": data["temps"]["inlet1"],
-                    "attributes": {
-                        "unit_of_measurement": "°C",
-                        "friendly_name": "Miner Inlet Temperature 1",
-                        "serial_number": data.get("serial_number", "unknown")
-                    }
-                },
-                "inlet_temp2": {
-                    "state": data["temps"]["inlet2"],
-                    "attributes": {
-                        "unit_of_measurement": "°C",
-                        "friendly_name": "Miner Inlet Temperature 2",
-                        "serial_number": data.get("serial_number", "unknown")
-                    }
-                },
-                "fan_speed": {
-                    "state": data["fan_speed"]["average"],
-                    "attributes": {
-                        "unit_of_measurement": "RPM",
-                        "friendly_name": "Miner Fan Speed",
-                        "all_fans": data["fan_speed"]["all_fans"],
-                        "serial_number": data.get("serial_number", "unknown")
-                    }
-                }
-            }
-            
-            # Print processed data to console
-            logging.info("\nProcessed sensor data:")
-            for sensor, data in processed_data.items():
-                logging.info("%s: %s %s", 
-                           data["attributes"]["friendly_name"],
-                           data["state"],
-                           data["attributes"]["unit_of_measurement"])
-                if sensor == "hashrate":
-                    logging.info("Efficiency: %s", data["attributes"]["efficiency"])
-                elif sensor == "fan_speed":
-                    logging.info("All fans: %s", data["attributes"]["all_fans"])
-            
-            return processed_data
-        else:
-            logging.error("Error getting miner data: %s", response.status_code)
-            return None
-    except Exception as e:
-        logging.error("Exception while getting miner data: %s", e)
+    url = f"http://{secrets['miner_ip']}/cgi-bin/luci/admin/status/overview"
+    auth = (secrets['miner_username'], secrets['miner_password'])
+    
+    response = requests.get(url, auth=auth)
+    
+    if response.status_code == 200:
+        print(f"Hashrate: {response.json()['hashrate']} MH/s")
+        print(f"Outlet Temp 1: {response.json()['temps']['outlet1']}°C")
+        print(f"Outlet Temp 2: {response.json()['temps']['outlet2']}°C")
+        print(f"Inlet Temp 1: {response.json()['temps']['inlet1']}°C")
+        print(f"Inlet Temp 2: {response.json()['temps']['inlet2']}°C")
+        print(f"Fan Speed: {response.json()['fan_speed']['average']} RPM")
+        return response.json()
+    else:
+        print(f"Error: {response.status_code}")
         return None
 
 def publish_to_mqtt(topic, message):
@@ -363,11 +296,57 @@ def publish_to_mqtt(topic, message):
 
 if __name__ == "__main__":
     logging.info("Starting miner monitoring script")
-    miner_data = get_miner_data()
+    data = get_miner_data()
     
-    if miner_data:
-        # Publish all sensor data to MQTT
-        for sensor, data in miner_data.items():
-            publish_to_mqtt(MQTT_TOPICS[sensor], data)
+    if data:
+        # Publish to MQTT
+        publish_to_mqtt("miner/hashrate", {
+            "state": data["hashrate"],
+            "attributes": {
+                "unit_of_measurement": "MH/s",
+                "friendly_name": "Miner Hashrate"
+            }
+        })
+        
+        publish_to_mqtt("miner/outlet_temp1", {
+            "state": data["temps"]["outlet1"],
+            "attributes": {
+                "unit_of_measurement": "°C",
+                "friendly_name": "Miner Outlet Temperature 1"
+            }
+        })
+        
+        publish_to_mqtt("miner/outlet_temp2", {
+            "state": data["temps"]["outlet2"],
+            "attributes": {
+                "unit_of_measurement": "°C",
+                "friendly_name": "Miner Outlet Temperature 2"
+            }
+        })
+        
+        publish_to_mqtt("miner/inlet_temp1", {
+            "state": data["temps"]["inlet1"],
+            "attributes": {
+                "unit_of_measurement": "°C",
+                "friendly_name": "Miner Inlet Temperature 1"
+            }
+        })
+        
+        publish_to_mqtt("miner/inlet_temp2", {
+            "state": data["temps"]["inlet2"],
+            "attributes": {
+                "unit_of_measurement": "°C",
+                "friendly_name": "Miner Inlet Temperature 2"
+            }
+        })
+        
+        publish_to_mqtt("miner/fan_speed", {
+            "state": data["fan_speed"]["average"],
+            "attributes": {
+                "unit_of_measurement": "RPM",
+                "friendly_name": "Miner Fan Speed",
+                "all_fans": data["fan_speed"]["all_fans"]
+            }
+        })
     
     logging.info("Miner monitoring script finished")
