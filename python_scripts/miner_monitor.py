@@ -169,15 +169,15 @@ def get_miner_temperatures() -> Optional[Dict[str, Any]]:
     
     return None
 
-def publish_to_mqtt(topic: str, message: Dict[str, Any]) -> None:
+def publish_to_mqtt(topic: str, value: Any) -> None:
     """Publish data to MQTT broker"""
     try:
         client = mqtt.Client()
         client.username_pw_set(MQTT_USERNAME, MQTT_PASSWORD)
         client.connect(MQTT_BROKER, MQTT_PORT, 60)
-        client.publish(topic, json.dumps(message))
+        client.publish(topic, value)
         client.disconnect()
-        logger.info(f"Published to MQTT topic: {topic}")
+        logger.debug(f"Published {value} to MQTT topic: {topic}")
     except Exception as e:
         logger.error(f"Error publishing to MQTT: {str(e)}")
 
@@ -198,10 +198,9 @@ def write_ha_sensors(temp_data: Dict[str, Any]) -> None:
                 "serial_number": temp_data['sn']
             }
         }
-        
         with open(ha_state_path / "sensor.miner_hashrate", 'w') as f:
             json.dump(hashrate_data, f)
-        publish_to_mqtt("miner/hashrate", hashrate_data)
+        publish_to_mqtt("homeassistant/sensor/miner/hashrate", temp_data['hashrate'])
         
         # Write chip temperatures
         temp_names = ['outlet_temp1', 'outlet_temp2', 'inlet_temp1', 'inlet_temp2']
@@ -216,7 +215,7 @@ def write_ha_sensors(temp_data: Dict[str, Any]) -> None:
             }
             with open(ha_state_path / f"sensor.miner_{temp_names[i]}", 'w') as f:
                 json.dump(temp_data_sensor, f)
-            publish_to_mqtt(f"miner/{temp_names[i]}", temp_data_sensor)
+            publish_to_mqtt(f"homeassistant/sensor/miner/{temp_names[i]}", temp)
         
         # Write fan speeds
         fan_data = {
@@ -230,7 +229,7 @@ def write_ha_sensors(temp_data: Dict[str, Any]) -> None:
         }
         with open(ha_state_path / "sensor.miner_fan_speed", 'w') as f:
             json.dump(fan_data, f)
-        publish_to_mqtt("miner/fan_speed", fan_data)
+        publish_to_mqtt("homeassistant/sensor/miner/fan_speed", temp_data['fan_speeds'][0] if temp_data['fan_speeds'] else 0)
             
         logger.info("Successfully wrote sensor data for Home Assistant and MQTT")
         

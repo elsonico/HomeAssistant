@@ -1144,51 +1144,45 @@
 # MQTT Sensors for Miner Data
 - platform: mqtt
   name: "miner_hashrate"
-  state_topic: "miner/hashrate"
+  state_topic: "homeassistant/sensor/miner/hashrate"
   unit_of_measurement: "MH/s"
-  value_template: "{{ value_json.state }}"
-  json_attributes_topic: "miner/hashrate"
-  json_attributes_template: "{{ value_json.attributes | tojson }}"
+  device_class: "power"
+  state_class: "measurement"
 
 - platform: mqtt
   name: "miner_outlet_temp1"
-  state_topic: "miner/outlet_temp1"
+  state_topic: "homeassistant/sensor/miner/outlet_temp1"
   unit_of_measurement: "°C"
-  value_template: "{{ value_json.state }}"
-  json_attributes_topic: "miner/outlet_temp1"
-  json_attributes_template: "{{ value_json.attributes | tojson }}"
+  device_class: "temperature"
+  state_class: "measurement"
 
 - platform: mqtt
   name: "miner_outlet_temp2"
-  state_topic: "miner/outlet_temp2"
+  state_topic: "homeassistant/sensor/miner/outlet_temp2"
   unit_of_measurement: "°C"
-  value_template: "{{ value_json.state }}"
-  json_attributes_topic: "miner/outlet_temp2"
-  json_attributes_template: "{{ value_json.attributes | tojson }}"
+  device_class: "temperature"
+  state_class: "measurement"
 
 - platform: mqtt
   name: "miner_inlet_temp1"
-  state_topic: "miner/inlet_temp1"
+  state_topic: "homeassistant/sensor/miner/inlet_temp1"
   unit_of_measurement: "°C"
-  value_template: "{{ value_json.state }}"
-  json_attributes_topic: "miner/inlet_temp1"
-  json_attributes_template: "{{ value_json.attributes | tojson }}"
+  device_class: "temperature"
+  state_class: "measurement"
 
 - platform: mqtt
   name: "miner_inlet_temp2"
-  state_topic: "miner/inlet_temp2"
+  state_topic: "homeassistant/sensor/miner/inlet_temp2"
   unit_of_measurement: "°C"
-  value_template: "{{ value_json.state }}"
-  json_attributes_topic: "miner/inlet_temp2"
-  json_attributes_template: "{{ value_json.attributes | tojson }}"
+  device_class: "temperature"
+  state_class: "measurement"
 
 - platform: mqtt
   name: "miner_fan_speed"
-  state_topic: "miner/fan_speed"
+  state_topic: "homeassistant/sensor/miner/fan_speed"
   unit_of_measurement: "RPM"
-  value_template: "{{ value_json.state }}"
-  json_attributes_topic: "miner/fan_speed"
-  json_attributes_template: "{{ value_json.attributes | tojson }}"
+  device_class: "frequency"
+  state_class: "measurement"
 
 # Template sensors for calculations
 - platform: template
@@ -1215,6 +1209,7 @@
         {% endfor %}
         {{ temps | max if temps else 0 }}
       unit_of_measurement: "°C"
+      device_class: "temperature"
 
     miner_minimum_temperature:
       friendly_name: "Miner Minimum Temperature"
@@ -1228,6 +1223,7 @@
         {% endfor %}
         {{ temps | min if temps else 0 }}
       unit_of_measurement: "°C"
+      device_class: "temperature"
 
     miner_average_temperature:
       friendly_name: "Miner Average Temperature"
@@ -1241,6 +1237,7 @@
         {% endfor %}
         {{ (temps | sum / temps | length) | round(1) if temps else 0 }}
       unit_of_measurement: "°C"
+      device_class: "temperature"
 
     miner_maximum_fan_speed:
       friendly_name: "Miner Maximum Fan Speed"
