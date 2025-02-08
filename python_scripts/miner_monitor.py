@@ -169,26 +169,27 @@ def write_ha_sensors(temp_data: Dict[str, Any]) -> None:
                 "friendly_name": "Miner Hashrate",
                 "ideal_hashrate": temp_data['hashrate_ideal'],
                 "efficiency": f"{(temp_data['hashrate'] / temp_data['hashrate_ideal'] * 100):.1f}%",
-                "serial_number": temp_data['sn']
+                "serial_number": temp_data.get('sn', 'unknown')
             }
         }
-        
         with open(ha_state_path / "sensor.miner_hashrate", 'w') as f:
             json.dump(hashrate_data, f)
         
-        # Write chip temperatures
+        # Write temperatures
+        chip_temps = [float(t.replace('°C', '')) for t in temp_data['chip_temps']]
         temp_names = ['outlet_temp1', 'outlet_temp2', 'inlet_temp1', 'inlet_temp2']
-        for i, temp in enumerate(temp_data['chip_temps']):
-            temp_data = {
+        
+        for i, temp in enumerate(chip_temps):
+            sensor_data = {
                 "state": temp,
                 "attributes": {
                     "unit_of_measurement": "°C",
                     "friendly_name": f"Miner {temp_names[i].replace('_', ' ').title()}",
-                    "serial_number": temp_data['sn']
+                    "serial_number": temp_data.get('sn', 'unknown')
                 }
             }
             with open(ha_state_path / f"sensor.miner_{temp_names[i]}", 'w') as f:
-                json.dump(temp_data, f)
+                json.dump(sensor_data, f)
         
         # Write fan speeds
         fan_data = {
@@ -197,7 +198,7 @@ def write_ha_sensors(temp_data: Dict[str, Any]) -> None:
                 "unit_of_measurement": "RPM",
                 "friendly_name": "Miner Fan Speeds",
                 "all_fans": temp_data['fan_speeds'],
-                "serial_number": temp_data['sn']
+                "serial_number": temp_data.get('sn', 'unknown')
             }
         }
         with open(ha_state_path / "sensor.miner_fan_speed", 'w') as f:
