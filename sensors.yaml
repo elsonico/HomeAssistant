@@ -703,6 +703,8 @@
           {{ (states('sensor.binance_btc_2nd_balance') | float * 
               states('sensor.crypto_coin_value_btc') | float * 
               states('sensor.usd_eur') | float) | round(2) }}
+        {% else %}
+          0
         {% endif %}
 
     binance_doge_2nd_balance_in_eur:
@@ -1027,10 +1029,15 @@
     powerpool_balance_eur:
       friendly_name: "PowerPool Balance EUR"
       unit_of_measurement: "€"
-      value_template: >
-        {% set usd_balance = states('sensor.powerpool_usd_balance') | float %}
-        {% set usd_eur_rate = states('sensor.usd_eur') | float %}
-        {{ (usd_balance * usd_eur_rate) | round(2) }}
+      value_template: >-
+        {% if states('sensor.powerpool_usd_balance') not in ['unknown', 'unavailable']
+           and states('sensor.usd_eur') not in ['unknown', 'unavailable'] %}
+          {% set usd_balance = states('sensor.powerpool_usd_balance') | float(0) %}
+          {% set usd_eur_rate = states('sensor.usd_eur') | float(0) %}
+          {{ (usd_balance * usd_eur_rate) | round(2) }}
+        {% else %}
+          0
+        {% endif %}
 
     powerpool_expected_daily_rewards:
       friendly_name: "PowerPool Expected Daily Rewards"
