@@ -967,7 +967,7 @@
   resource: !secret powerpool_user_api_url
   value_template: "{{ value_json.data.hashrate.scrypt.hashrate | float }}"
   unit_of_measurement: "GH/s"
-  scan_interval: 300
+  scan_interval: 60
 
 - platform: rest         
   name: "PowerPool Rejection Rate"                                                                                                        
