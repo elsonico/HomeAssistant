@@ -33,16 +33,27 @@ logging.basicConfig(
 logger = logging.getLogger("miner_monitor")
 
 def load_secrets():
-    with open("/config/python_scripts/secrets.yaml", "r") as file:
-        return yaml.safe_load(file)
+    try:
+        with open("/config/python_scripts/secrets.yaml", "r") as file:
+            secrets = yaml.safe_load(file)
+            if 'miner_ip' not in secrets:
+                logging.error("miner_ip not found in secrets.yaml")
+                return None
+            return secrets
+    except Exception as e:
+        logging.error("Error loading secrets: %s", e)
+        return None
 
 secrets = load_secrets()
+if not secrets:
+    exit(1)
 
 # MQTT broker details
 MQTT_BROKER = secrets["mqtt_broker"]
 MQTT_PORT = 1883
 MQTT_USERNAME = secrets["mqtt_username"]
 MQTT_PASSWORD = secrets["mqtt_password"]
+MINER_IP = secrets["miner_ip"]
 
 # MQTT topics for miner data
 MQTT_TOPICS = {
@@ -256,11 +267,16 @@ def format_temp(temp: float) -> str:
 
 def get_miner_data():
     try:
-        # Your existing code to get miner data
-        response = requests.get(f"http://{secrets['miner_ip']}/api/status")
+        logging.info("Requesting data from miner at %s", MINER_IP)
+        response = requests.get(f"http://{MINER_IP}/api/status")
         if response.status_code == 200:
             data = response.json()
-            return {
+            
+            # Print raw data to console
+            logging.info("Raw miner data:")
+            logging.info(json.dumps(data, indent=2))
+            
+            processed_data = {
                 "hashrate": {
                     "state": data["hashrate"],
                     "attributes": {
@@ -313,6 +329,20 @@ def get_miner_data():
                     }
                 }
             }
+            
+            # Print processed data to console
+            logging.info("\nProcessed sensor data:")
+            for sensor, data in processed_data.items():
+                logging.info("%s: %s %s", 
+                           data["attributes"]["friendly_name"],
+                           data["state"],
+                           data["attributes"]["unit_of_measurement"])
+                if sensor == "hashrate":
+                    logging.info("Efficiency: %s", data["attributes"]["efficiency"])
+                elif sensor == "fan_speed":
+                    logging.info("All fans: %s", data["attributes"]["all_fans"])
+            
+            return processed_data
         else:
             logging.error("Error getting miner data: %s", response.status_code)
             return None
