@@ -1141,11 +1141,12 @@
           0
         {% endif %}
 
-# File Sensors using command platform
-- platform: command_line
+# Base Sensors using REST
+- platform: rest
   name: miner_hashrate
-  command: "cat /config/ha_states/sensor.miner_hashrate"
+  resource: file:///config/ha_states/sensor.miner_hashrate
   value_template: "{{ value_json.state }}"
+  json_attributes_path: "$.attributes"
   json_attributes:
     - unit_of_measurement
     - friendly_name
@@ -1155,10 +1156,11 @@
   unit_of_measurement: "MH/s"
   scan_interval: 60
 
-- platform: command_line
+- platform: rest
   name: miner_outlet_temp1
-  command: "cat /config/ha_states/sensor.miner_outlet_temp1"
+  resource: file:///config/ha_states/sensor.miner_outlet_temp1
   value_template: "{{ value_json.state }}"
+  json_attributes_path: "$.attributes"
   json_attributes:
     - unit_of_measurement
     - friendly_name
@@ -1166,10 +1168,11 @@
   unit_of_measurement: "°C"
   scan_interval: 60
 
-- platform: command_line
+- platform: rest
   name: miner_outlet_temp2
-  command: "cat /config/ha_states/sensor.miner_outlet_temp2"
+  resource: file:///config/ha_states/sensor.miner_outlet_temp2
   value_template: "{{ value_json.state }}"
+  json_attributes_path: "$.attributes"
   json_attributes:
     - unit_of_measurement
     - friendly_name
@@ -1177,10 +1180,11 @@
   unit_of_measurement: "°C"
   scan_interval: 60
 
-- platform: command_line
+- platform: rest
   name: miner_inlet_temp1
-  command: "cat /config/ha_states/sensor.miner_inlet_temp1"
+  resource: file:///config/ha_states/sensor.miner_inlet_temp1
   value_template: "{{ value_json.state }}"
+  json_attributes_path: "$.attributes"
   json_attributes:
     - unit_of_measurement
     - friendly_name
@@ -1188,10 +1192,11 @@
   unit_of_measurement: "°C"
   scan_interval: 60
 
-- platform: command_line
+- platform: rest
   name: miner_inlet_temp2
-  command: "cat /config/ha_states/sensor.miner_inlet_temp2"
+  resource: file:///config/ha_states/sensor.miner_inlet_temp2
   value_template: "{{ value_json.state }}"
+  json_attributes_path: "$.attributes"
   json_attributes:
     - unit_of_measurement
     - friendly_name
@@ -1199,10 +1204,11 @@
   unit_of_measurement: "°C"
   scan_interval: 60
 
-- platform: command_line
+- platform: rest
   name: miner_fan_speed
-  command: "cat /config/ha_states/sensor.miner_fan_speed"
+  resource: file:///config/ha_states/sensor.miner_fan_speed
   value_template: "{{ value_json.state }}"
+  json_attributes_path: "$.attributes"
   json_attributes:
     - unit_of_measurement
     - friendly_name
