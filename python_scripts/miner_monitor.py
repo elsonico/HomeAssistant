@@ -11,59 +11,29 @@ from typing import Optional, Dict, Any, List, Union
 from pathlib import Path
 import paho.mqtt.client as mqtt
 import yaml
-import time
 
 # Disable SSL warnings
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 # Configure logging
-LOG_MSG_FORMAT = '%(asctime)s,%(msecs)03d %(levelname)s [%(filename)s:%(lineno)d] - %(message)s'
-LOG_DATE_FORMAT = '%Y-%m-%dT%H:%M:%S'
-LOG_LEVEL = logging.INFO
-
 logging.basicConfig(
-    level=LOG_LEVEL,
-    format=LOG_MSG_FORMAT,
-    datefmt=LOG_DATE_FORMAT,
-    handlers=[
-        logging.StreamHandler()
-    ]
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s',
+    datefmt='%Y-%m-%d %H:%M:%S'
 )
-
-logger = logging.getLogger("miner_monitor")
+logger = logging.getLogger(__name__)
 
 def load_secrets():
-    try:
-        with open("/config/python_scripts/secrets.yaml", "r") as file:
-            secrets = yaml.safe_load(file)
-            if 'miner_ip' not in secrets:
-                logging.error("miner_ip not found in secrets.yaml")
-                return None
-            return secrets
-    except Exception as e:
-        logging.error("Error loading secrets: %s", e)
-        return None
+    with open("/config/python_scripts/secrets.yaml", "r") as file:
+        return yaml.safe_load(file)
 
 secrets = load_secrets()
-if not secrets:
-    exit(1)
 
-# MQTT broker details
+# MQTT configuration
 MQTT_BROKER = secrets["mqtt_broker"]
 MQTT_PORT = 1883
 MQTT_USERNAME = secrets["mqtt_username"]
 MQTT_PASSWORD = secrets["mqtt_password"]
-MINER_IP = secrets["miner_ip"]
-
-# MQTT topics for miner data
-MQTT_TOPICS = {
-    "hashrate": "miner/hashrate",
-    "outlet_temp1": "miner/outlet_temp1",
-    "outlet_temp2": "miner/outlet_temp2",
-    "inlet_temp1": "miner/inlet_temp1",
-    "inlet_temp2": "miner/inlet_temp2",
-    "fan_speed": "miner/fan_speed"
-}
 
 def parse_chip_temp(temp_str: str) -> Optional[float]:
     """Convert chip temperature from millidegrees to degrees"""
@@ -199,8 +169,20 @@ def get_miner_temperatures() -> Optional[Dict[str, Any]]:
     
     return None
 
+def publish_to_mqtt(topic: str, message: Dict[str, Any]) -> None:
+    """Publish data to MQTT broker"""
+    try:
+        client = mqtt.Client()
+        client.username_pw_set(MQTT_USERNAME, MQTT_PASSWORD)
+        client.connect(MQTT_BROKER, MQTT_PORT, 60)
+        client.publish(topic, json.dumps(message))
+        client.disconnect()
+        logger.info(f"Published to MQTT topic: {topic}")
+    except Exception as e:
+        logger.error(f"Error publishing to MQTT: {str(e)}")
+
 def write_ha_sensors(temp_data: Dict[str, Any]) -> None:
-    """Write sensor data for Home Assistant"""
+    """Write sensor data for Home Assistant and publish to MQTT"""
     try:
         ha_state_path = Path("/config/ha_states")
         ha_state_path.mkdir(parents=True, exist_ok=True)
@@ -213,34 +195,28 @@ def write_ha_sensors(temp_data: Dict[str, Any]) -> None:
                 "friendly_name": "Miner Hashrate",
                 "ideal_hashrate": temp_data['hashrate_ideal'],
                 "efficiency": f"{(temp_data['hashrate'] / temp_data['hashrate_ideal'] * 100):.1f}%",
-                "serial_number": temp_data.get('sn', 'unknown')
+                "serial_number": temp_data['sn']
             }
         }
+        
         with open(ha_state_path / "sensor.miner_hashrate", 'w') as f:
             json.dump(hashrate_data, f)
+        publish_to_mqtt("miner/hashrate", hashrate_data)
         
-        # Write temperatures
-        # Parse temperatures, handling both string and float inputs
-        chip_temps = []
-        for temp in temp_data['chip_temps']:
-            if isinstance(temp, str):
-                chip_temps.append(float(temp.replace('°C', '')))
-            else:
-                chip_temps.append(float(temp))
-                
+        # Write chip temperatures
         temp_names = ['outlet_temp1', 'outlet_temp2', 'inlet_temp1', 'inlet_temp2']
-        
-        for i, temp in enumerate(chip_temps):
-            sensor_data = {
+        for i, temp in enumerate(temp_data['chip_temps'][:4]):  # Limit to first 4 temperatures
+            temp_data_sensor = {
                 "state": temp,
                 "attributes": {
                     "unit_of_measurement": "°C",
                     "friendly_name": f"Miner {temp_names[i].replace('_', ' ').title()}",
-                    "serial_number": temp_data.get('sn', 'unknown')
+                    "serial_number": temp_data['sn']
                 }
             }
             with open(ha_state_path / f"sensor.miner_{temp_names[i]}", 'w') as f:
-                json.dump(sensor_data, f)
+                json.dump(temp_data_sensor, f)
+            publish_to_mqtt(f"miner/{temp_names[i]}", temp_data_sensor)
         
         # Write fan speeds
         fan_data = {
@@ -249,104 +225,49 @@ def write_ha_sensors(temp_data: Dict[str, Any]) -> None:
                 "unit_of_measurement": "RPM",
                 "friendly_name": "Miner Fan Speeds",
                 "all_fans": temp_data['fan_speeds'],
-                "serial_number": temp_data.get('sn', 'unknown')
+                "serial_number": temp_data['sn']
             }
         }
         with open(ha_state_path / "sensor.miner_fan_speed", 'w') as f:
             json.dump(fan_data, f)
+        publish_to_mqtt("miner/fan_speed", fan_data)
             
-        logger.info("Successfully wrote sensor data for Home Assistant")
+        logger.info("Successfully wrote sensor data for Home Assistant and MQTT")
         
     except Exception as e:
-        logger.error(f"Error writing Home Assistant sensor data: {str(e)}")
+        logger.error(f"Error writing sensor data: {str(e)}")
         logger.debug(f"Traceback: {traceback.format_exc()}")
 
 def format_temp(temp: float) -> str:
     """Format temperature with one decimal place"""
     return f"{temp:.1f}°C"
 
-def get_miner_data():
-    url = f"http://{secrets['miner_ip']}/cgi-bin/luci/admin/status/overview"
-    auth = (secrets['miner_username'], secrets['miner_password'])
-    
-    response = requests.get(url, auth=auth)
-    
-    if response.status_code == 200:
-        print(f"Hashrate: {response.json()['hashrate']} MH/s")
-        print(f"Outlet Temp 1: {response.json()['temps']['outlet1']}°C")
-        print(f"Outlet Temp 2: {response.json()['temps']['outlet2']}°C")
-        print(f"Inlet Temp 1: {response.json()['temps']['inlet1']}°C")
-        print(f"Inlet Temp 2: {response.json()['temps']['inlet2']}°C")
-        print(f"Fan Speed: {response.json()['fan_speed']['average']} RPM")
-        return response.json()
-    else:
-        print(f"Error: {response.status_code}")
-        return None
-
-def publish_to_mqtt(topic, message):
-    try:
-        client = mqtt.Client()
-        client.username_pw_set(MQTT_USERNAME, MQTT_PASSWORD)
-        client.connect(MQTT_BROKER, MQTT_PORT, 60)
-        client.publish(topic, json.dumps(message))
-        logging.info("Published to MQTT topic %s", topic)
-        client.disconnect()
-    except Exception as e:
-        logging.error("An error occurred while publishing to MQTT: %s", e)
-
 if __name__ == "__main__":
-    logging.info("Starting miner monitoring script")
-    data = get_miner_data()
-    
-    if data:
-        # Publish to MQTT
-        publish_to_mqtt("miner/hashrate", {
-            "state": data["hashrate"],
-            "attributes": {
-                "unit_of_measurement": "MH/s",
-                "friendly_name": "Miner Hashrate"
-            }
-        })
+    logger.info("Starting miner temperature monitoring")
+    temps = get_miner_temperatures()
+    if temps:
+        # Write data for Home Assistant and publish to MQTT
+        write_ha_sensors(temps)
         
-        publish_to_mqtt("miner/outlet_temp1", {
-            "state": data["temps"]["outlet1"],
-            "attributes": {
-                "unit_of_measurement": "°C",
-                "friendly_name": "Miner Outlet Temperature 1"
-            }
-        })
-        
-        publish_to_mqtt("miner/outlet_temp2", {
-            "state": data["temps"]["outlet2"],
-            "attributes": {
-                "unit_of_measurement": "°C",
-                "friendly_name": "Miner Outlet Temperature 2"
-            }
-        })
-        
-        publish_to_mqtt("miner/inlet_temp1", {
-            "state": data["temps"]["inlet1"],
-            "attributes": {
-                "unit_of_measurement": "°C",
-                "friendly_name": "Miner Inlet Temperature 1"
-            }
-        })
-        
-        publish_to_mqtt("miner/inlet_temp2", {
-            "state": data["temps"]["inlet2"],
-            "attributes": {
-                "unit_of_measurement": "°C",
-                "friendly_name": "Miner Inlet Temperature 2"
-            }
-        })
-        
-        publish_to_mqtt("miner/fan_speed", {
-            "state": data["fan_speed"]["average"],
-            "attributes": {
-                "unit_of_measurement": "RPM",
-                "friendly_name": "Miner Fan Speed",
-                "all_fans": data["fan_speed"]["all_fans"]
-            }
-        })
-    
-    logging.info("Miner monitoring script finished")
+        # Log detailed information
+        logger.info("\nMiner Information:")
+        logger.info(f"Serial Number: {temps['sn']}")
+        logger.info("\nTemperature Readings:")
+        logger.info(f"  Chip Temperatures: {[format_temp(t) for t in temps['chip_temps']]}")
+        logger.info(f"  PCB Temperatures: {temps['pcb_temps']}°C")
+        logger.info(f"  PIC Temperatures: {temps['pic_temps']}°C")
+        logger.info(f"  Min Temperature: {format_temp(temps['min_temperature'])}")
+        logger.info(f"  Max Temperature: {format_temp(temps['max_temperature'])}")
+        logger.info(f"  Average Temperature: {format_temp(temps['avg_temperature'])}")
+        logger.info(f"\nPerformance:")
+        logger.info(f"  Current Hashrate: {temps['hashrate']} {temps['hashrate_unit']}")
+        logger.info(f"  Ideal Hashrate: {temps['hashrate_ideal']} {temps['hashrate_unit']}")
+        if temps['hashrate_ideal'] > 0:
+            efficiency = (temps['hashrate'] / temps['hashrate_ideal'] * 100)
+            logger.info(f"  Efficiency: {efficiency:.1f}%")
+        logger.info(f"\nSystem Status:")
+        logger.info(f"  Chip State: {temps['chip_state']}")
+        logger.info(f"  Fan Speeds: {temps['fan_speeds']} RPM")
+        logger.info(f"  Timestamp: {datetime.fromtimestamp(temps['timestamp'])}")
+    else:
+        logger.error("Failed to get temperature readings")
