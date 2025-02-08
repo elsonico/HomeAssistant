@@ -1142,50 +1142,54 @@
           0
         {% endif %}
 
-- platform: file
-  name: miner_hashrate
-  file_path: /config/ha_states/sensor.miner_hashrate
-  value_template: "{{ value_json.state }}"
-  unit_of_measurement: "MH/s"
+# Miner File Sensors
+sensor:
+  - platform: file
+    name: miner_hashrate
+    file_path: /config/ha_states/sensor.miner_hashrate
+    value_template: "{{ value_json.state }}"
+    unit_of_measurement: "MH/s"
 
-- platform: file
-  name: miner_outlet_temp1
-  file_path: /config/ha_states/sensor.miner_outlet_temp1
-  value_template: "{{ value_json.state }}"
-  unit_of_measurement: "°C"
+  - platform: file
+    name: miner_outlet_temp1
+    file_path: /config/ha_states/sensor.miner_outlet_temp1
+    value_template: "{{ value_json.state }}"
+    unit_of_measurement: "°C"
 
-- platform: file
-  name: miner_outlet_temp2
-  file_path: /config/ha_states/sensor.miner_outlet_temp2
-  value_template: "{{ value_json.state }}"
-  unit_of_measurement: "°C"
+  - platform: file
+    name: miner_outlet_temp2
+    file_path: /config/ha_states/sensor.miner_outlet_temp2
+    value_template: "{{ value_json.state }}"
+    unit_of_measurement: "°C"
 
-- platform: file
-  name: miner_inlet_temp1
-  file_path: /config/ha_states/sensor.miner_inlet_temp1
-  value_template: "{{ value_json.state }}"
-  unit_of_measurement: "°C"
+  - platform: file
+    name: miner_inlet_temp1
+    file_path: /config/ha_states/sensor.miner_inlet_temp1
+    value_template: "{{ value_json.state }}"
+    unit_of_measurement: "°C"
 
-- platform: file
-  name: miner_inlet_temp2
-  file_path: /config/ha_states/sensor.miner_inlet_temp2
-  value_template: "{{ value_json.state }}"
-  unit_of_measurement: "°C"
+  - platform: file
+    name: miner_inlet_temp2
+    file_path: /config/ha_states/sensor.miner_inlet_temp2
+    value_template: "{{ value_json.state }}"
+    unit_of_measurement: "°C"
 
-- platform: file
-  name: miner_fan_speed
-  file_path: /config/ha_states/sensor.miner_fan_speed
-  value_template: "{{ value_json.state }}"
-  unit_of_measurement: "RPM"
+  - platform: file
+    name: miner_fan_speed
+    file_path: /config/ha_states/sensor.miner_fan_speed
+    value_template: "{{ value_json.state }}"
+    unit_of_measurement: "RPM"
 
-# Template Sensors for Miner
+# Template Sensors
 template:
   - sensor:
       - name: "Miner Hashrate Efficiency"
+        unique_id: miner_hashrate_efficiency
         state: "{{ states.sensor.miner_hashrate.attributes.efficiency | replace('%', '') | float }}"
         unit_of_measurement: "%"
 
       - name: "Miner Maximum Temperature"
+        unique_id: miner_maximum_temperature
         state: >
           {% set temps = [
             states('sensor.miner_outlet_temp1') | float,
@@ -1197,6 +1201,7 @@ template:
         unit_of_measurement: "°C"
 
       - name: "Miner Minimum Temperature"
+        unique_id: miner_minimum_temperature
         state: >
           {% set temps = [
             states('sensor.miner_outlet_temp1') | float,
@@ -1208,6 +1213,7 @@ template:
         unit_of_measurement: "°C"
 
       - name: "Miner Average Temperature"
+        unique_id: miner_average_temperature
         state: >
           {% set temps = [
             states('sensor.miner_outlet_temp1') | float,
@@ -1219,5 +1225,6 @@ template:
         unit_of_measurement: "°C"
 
       - name: "Miner Maximum Fan Speed"
+        unique_id: miner_maximum_fan_speed
         state: "{{ states.sensor.miner_fan_speed.attributes.all_fans | max }}"
         unit_of_measurement: "RPM"
