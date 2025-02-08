@@ -517,6 +517,10 @@
       to: '0.0'
       for:
         minutes: 15
+    - platform: homeassistant
+      event: start
+    - platform: time_pattern
+      minutes: "/15" 
   condition:
     - condition: numeric_state
       entity_id: sensor.powerpool_hashrate
