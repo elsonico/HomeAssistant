@@ -414,11 +414,13 @@ sensor:
     unit_of_measurement: "USD"
     unique_id: "cryptocoin_value_ada"
 
-  - name: "miner_hashrate"
-    state_topic: "homeassistant/sensor/miner/hashrate"
+  - name: "Miner Hashrate"
+    state_topic: "miner/hashrate"
+    value_template: "{{ value | float }}"
     unit_of_measurement: "MH/s"
-    device_class: "frequency"
+    device_class: "power"
     state_class: "measurement"
+    unique_id: "miner_hashrate"  
 
   - name: "Miner Hashrate Efficiency"
     state_topic: "miner/hashrate_efficiency"
