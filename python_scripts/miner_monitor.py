@@ -77,7 +77,7 @@ def get_miner_temperatures() -> Optional[Dict[str, Any]]:
             logger.error("Missing environment variables: MINERUSER or MINERPWD")
             raise ValueError("Missing MINERUSER or MINERPWD environment variables")
 
-        base_url = "http://192.168.0.161"
+        base_url = secrets["miner_url"]
         
         headers = {
             'Accept': 'application/json, text/plain, */*',
