@@ -14,5 +14,5 @@
 - name: whatsapp
   platform: wapi
   session: HomeAssistant #Set your own session
-  url: ${WAURL} #Set the url configured in the whatsapp-api docker
+  url: !secret waurl
   #token: #Optional - This token shoukd be equel to the token you set in the whatsapp-api configuration.
