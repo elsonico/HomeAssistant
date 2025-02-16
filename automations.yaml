@@ -486,54 +486,61 @@
   - delay:
       seconds: 5
   id: da1dd4c21a704b64a14d205c65f8da8b
-- alias: Turn Off Miner When Electricity Price Is High
+- id: 634d0fe360ec41c3ac1ea0f3473ad603
+  alias: Turn Off Miner When Electricity Price Is High
   description: Turns off the miner when electricity price goes above 33c/kWh
-  trigger:
-  - platform: numeric_state
-    entity_id: sensor.electricity_cost_in_cents_per_kwh
-    above: 33
-  action:
-  - service: switch.turn_off
-    target:
+  triggers:
+  - entity_id:
+    - sensor.electricity_cost_in_cents_per_kwh
+    above: 62
+    trigger: numeric_state
+  actions:
+  - target:
       entity_id: switch.shellyplug_s_3ce90ee04b97
-  id: 634d0fe360ec41c3ac1ea0f3473ad603
-- alias: Turn On Miner When Electricity Price Is Low
+    action: switch.turn_off
+    data: {}
+- id: 9c4564819e404cff95fcc447532bd19b
+  alias: Turn On Miner When Electricity Price Is Low
   description: Turns on the miner when electricity price goes below 33c/kWh
-  trigger:
-  - platform: numeric_state
-    entity_id: sensor.electricity_cost_in_cents_per_kwh
-    below: 33
-  action:
-  - service: switch.turn_on
-    target:
+  triggers:
+  - entity_id:
+    - sensor.electricity_cost_in_cents_per_kwh
+    below: 62
+    trigger: numeric_state
+  actions:
+  - target:
       entity_id: switch.shellyplug_s_3ce90ee04b97
-  id: 9c4564819e404cff95fcc447532bd19b
+    action: switch.turn_on
+    data: {}
 - id: 28077b7f639644688b946f35ccf0127b
   alias: Reboot or Power Cycle Miner
   description: Reboot the miner on low hash rate, fallback to power cycle if needed
-  trigger:
-    - platform: state
-      entity_id: sensor.powerpool_hashrate
-      to: '0.0'
-      for:
-        minutes: 15
-    - platform: homeassistant
-      event: start
-    - platform: time_pattern
-      minutes: "/15" 
-  condition:
-    - condition: numeric_state
-      entity_id: sensor.powerpool_hashrate
-      below: 0.1
-  action:
-    - service: switch.turn_off
-      target:
-        entity_id: switch.shellyplug_s_3ce90ee04b97
-    - delay:
-        seconds: 10
-    - service: switch.turn_on
-      target:
-        entity_id: switch.shellyplug_s_3ce90ee04b97
+  triggers:
+  - entity_id: sensor.miner_hashrate_gh
+    to: '0.0'
+    for:
+      minutes: 15
+    trigger: state
+  - minutes: /15
+    trigger: time_pattern
+  conditions:
+  - condition: numeric_state
+    entity_id: sensor.miner_hashrate_gh
+    below: 0.1
+  - condition: numeric_state
+    entity_id: sensor.electricity_cost_in_cents_per_kwh
+    below: 62
+  actions:
+  - target:
+      entity_id: switch.shellyplug_s_3ce90ee04b97
+    action: switch.turn_off
+    data: {}
+  - delay:
+      seconds: 10
+  - target:
+      entity_id: switch.shellyplug_s_3ce90ee04b97
+    action: switch.turn_on
+    data: {}
   mode: single
 - alias: Heater Control Based on Living Room Temperature
   description: Turn the heater on when temp is below 22°C and turn it off when above
@@ -607,62 +614,59 @@
   alias: Bedroom Temperature Control
   description: Control bedroom heating based on temperature between 9 AM and 7 PM
   trigger:
-    - platform: numeric_state
-      entity_id: sensor.temperature_bedroom
-      below: 20
-    - platform: numeric_state
-      entity_id: sensor.temperature_bedroom
-      above: 20
-    - platform: time_pattern
-      minutes: "/15"  # Check every 15 minutes
+  - platform: numeric_state
+    entity_id: sensor.temperature_bedroom
+    below: 20
+  - platform: numeric_state
+    entity_id: sensor.temperature_bedroom
+    above: 20
+  - platform: time_pattern
+    minutes: /15
   condition:
-    - condition: time
-      after: "09:00:00"
-      before: "19:00:00"
+  - condition: time
+    after: 09:00:00
+    before: '19:00:00'
   action:
-    - choose:
-        - conditions:
-            - condition: numeric_state
-              entity_id: sensor.temperature_bedroom
-              below: 20
-          sequence:
-            - service: climate.set_hvac_mode
-              target:
-                entity_id: climate.ac_12488762
-              data:
-                hvac_mode: heat
-            - service: climate.set_temperature
-              target:
-                entity_id: climate.ac_12488762
-              data:
-                temperature: 20
-        - conditions:
-            - condition: numeric_state
-              entity_id: sensor.temperature_bedroom
-              above: 21
-          sequence:
-            - service: climate.turn_off
-              target:
-                entity_id: climate.ac_12488762
+  - choose:
+    - conditions:
+      - condition: numeric_state
+        entity_id: sensor.temperature_bedroom
+        below: 20
+      sequence:
+      - service: climate.set_hvac_mode
+        target:
+          entity_id: climate.ac_12488762
+        data:
+          hvac_mode: heat
+      - service: climate.set_temperature
+        target:
+          entity_id: climate.ac_12488762
+        data:
+          temperature: 20
+    - conditions:
+      - condition: numeric_state
+        entity_id: sensor.temperature_bedroom
+        above: 21
+      sequence:
+      - service: climate.turn_off
+        target:
+          entity_id: climate.ac_12488762
   mode: single
-
 - id: run_miner_monitoring_on_start
   alias: Run miner monitoring on startup
   trigger:
     platform: homeassistant
     event: start
   action:
-    - delay: '30'  # Wait 30 seconds for all services to be ready
-    - service: shell_command.monitor_miner
-
+  - delay: '30'
+  - service: shell_command.monitor_miner
 - id: run_miner_monitoring
   alias: Run miner monitoring
   trigger:
     platform: time_pattern
-    minutes: "/5"
+    minutes: /5
   action:
     service: shell_command.monitor_miner
-
 - id: miner_hashrate_alert
   alias: Alert when miner hashrate is low
   trigger:
@@ -672,124 +676,90 @@
     for:
       minutes: 20
   condition:
-    - condition: template
-      value_template: "{{ states('sensor.miner_hashrate') not in ['unknown', 'unavailable'] }}"
+  - condition: template
+    value_template: '{{ states(''sensor.miner_hashrate'') not in [''unknown'', ''unavailable'']
+      }}'
   mode: single
   action:
     service: notify.whatsapp
     data:
-      title: "Miner Alert - Low Hashrate"
-      message: "Miner hashrate has dropped below 2000 MH/s (Current: {{ states('sensor.miner_hashrate') }} MH/s)"
-      target: "14164327184@c.us"
-
+      title: Miner Alert - Low Hashrate
+      message: 'Miner hashrate has dropped below 2000 MH/s (Current: {{ states(''sensor.miner_hashrate'')
+        }} MH/s)'
+      target: 14164327184@c.us
 - id: miner_temperature_alert
   alias: Alert when miner temperatures are high
   trigger:
     platform: numeric_state
     entity_id:
-      - sensor.miner_outlet_temperature_1
-      - sensor.miner_outlet_temperature_2
-      - sensor.miner_inlet_temperature_1
-      - sensor.miner_inlet_temperature_2
+    - sensor.miner_outlet_temperature_1
+    - sensor.miner_outlet_temperature_2
+    - sensor.miner_inlet_temperature_1
+    - sensor.miner_inlet_temperature_2
     above: 55
   condition:
-    - condition: template
-      value_template: >
-        {% set temps = namespace(high=false) %}
-        {% for sensor in [
-             'sensor.miner_outlet_temperature_1', 
-             'sensor.miner_outlet_temperature_2', 
-             'sensor.miner_inlet_temperature_1', 
-             'sensor.miner_inlet_temperature_2'
-           ] %}
-          {% if states(sensor) not in ['unknown', 'unavailable'] %}
-            {% if states(sensor) | float > 55 %}
-              {% set temps.high = true %}
-            {% endif %}
-          {% endif %}
-        {% endfor %}
-        {{ temps.high }}
+  - condition: template
+    value_template: "{% set temps = namespace(high=false) %} {% for sensor in [\n
+      \    'sensor.miner_outlet_temperature_1', \n     'sensor.miner_outlet_temperature_2',
+      \n     'sensor.miner_inlet_temperature_1', \n     'sensor.miner_inlet_temperature_2'\n
+      \  ] %}\n  {% if states(sensor) not in ['unknown', 'unavailable'] %}\n    {%
+      if states(sensor) | float > 55 %}\n      {% set temps.high = true %}\n    {%
+      endif %}\n  {% endif %}\n{% endfor %} {{ temps.high }}\n"
   mode: single
   action:
-    - service: persistent_notification.create
-      data_template:
-        title: "Debug: Miner Temperature Alert Triggered"
-        message: >-
-          Current temperatures:
-          Outlet 1: {{ states('sensor.miner_outlet_temperature_1') }}°C,
-          Outlet 2: {{ states('sensor.miner_outlet_temperature_2') }}°C,
-          Inlet 1: {{ states('sensor.miner_inlet_temperature_1') }}°C,
-          Inlet 2: {{ states('sensor.miner_inlet_temperature_2') }}°C
-    - service: notify.email_notify
-      data:
-        title: "Miner Alert - High Temperature"
-        message: >-
-          High temperature detected on your miner:
-          Outlet 1: {{ states('sensor.miner_outlet_temperature_1') }}°C,
-          Outlet 2: {{ states('sensor.miner_outlet_temperature_2') }}°C,
-          Inlet 1: {{ states('sensor.miner_inlet_temperature_1') }}°C,
-          Inlet 2: {{ states('sensor.miner_inlet_temperature_2') }}°C.
-          Please check your miner's cooling system.
-
+  - service: persistent_notification.create
+    data_template:
+      title: 'Debug: Miner Temperature Alert Triggered'
+      message: 'Current temperatures: Outlet 1: {{ states(''sensor.miner_outlet_temperature_1'')
+        }}°C, Outlet 2: {{ states(''sensor.miner_outlet_temperature_2'') }}°C, Inlet
+        1: {{ states(''sensor.miner_inlet_temperature_1'') }}°C, Inlet 2: {{ states(''sensor.miner_inlet_temperature_2'')
+        }}°C'
+  - service: notify.email_notify
+    data:
+      title: Miner Alert - High Temperature
+      message: 'High temperature detected on your miner: Outlet 1: {{ states(''sensor.miner_outlet_temperature_1'')
+        }}°C, Outlet 2: {{ states(''sensor.miner_outlet_temperature_2'') }}°C, Inlet
+        1: {{ states(''sensor.miner_inlet_temperature_1'') }}°C, Inlet 2: {{ states(''sensor.miner_inlet_temperature_2'')
+        }}°C. Please check your miner''s cooling system.'
 - id: miner_whats_app_temperature_alert
   alias: WhatsApp alert when miner temperatures are high
   trigger:
     platform: numeric_state
     entity_id:
-      - sensor.miner_outlet_temperature_1
-      - sensor.miner_outlet_temperature_2
-      - sensor.miner_inlet_temperature_1
-      - sensor.miner_inlet_temperature_2
+    - sensor.miner_outlet_temperature_1
+    - sensor.miner_outlet_temperature_2
+    - sensor.miner_inlet_temperature_1
+    - sensor.miner_inlet_temperature_2
     above: 55
   condition:
-    - condition: template
-      value_template: >
-        {% set temps = namespace(high=false) %}
-        {% for sensor in [
-             'sensor.miner_outlet_temperature_1', 
-             'sensor.miner_outlet_temperature_2', 
-             'sensor.miner_inlet_temperature_1', 
-             'sensor.miner_inlet_temperature_2'
-           ] %}
-          {% if states(sensor) not in ['unknown', 'unavailable'] %}
-            {% if states(sensor) | float > 55 %}
-              {% set temps.high = true %}
-            {% endif %}
-          {% endif %}
-        {% endfor %}
-        {{ temps.high }}
+  - condition: template
+    value_template: "{% set temps = namespace(high=false) %} {% for sensor in [\n
+      \    'sensor.miner_outlet_temperature_1', \n     'sensor.miner_outlet_temperature_2',
+      \n     'sensor.miner_inlet_temperature_1', \n     'sensor.miner_inlet_temperature_2'\n
+      \  ] %}\n  {% if states(sensor) not in ['unknown', 'unavailable'] %}\n    {%
+      if states(sensor) | float > 55 %}\n      {% set temps.high = true %}\n    {%
+      endif %}\n  {% endif %}\n{% endfor %} {{ temps.high }}\n"
   mode: single
   action:
-    - service: persistent_notification.create
-      data:
-        title: "Debug: Miner Temperature Alert Triggered"
-        message: >-
-          Current temperatures:
-          Outlet 1: {{ states('sensor.miner_outlet_temperature_1') }}°C,
-          Outlet 2: {{ states('sensor.miner_outlet_temperature_2') }}°C,
-          Inlet 1: {{ states('sensor.miner_inlet_temperature_1') }}°C,
-          Inlet 2: {{ states('sensor.miner_inlet_temperature_2') }}°C
-
-    - service: notify.email_notify
-      data:
-        title: "Miner Alert - High Temperature"
-        message: >-
-          High temperature detected on your miner:
-          Outlet 1: {{ states('sensor.miner_outlet_temperature_1') }}°C,
-          Outlet 2: {{ states('sensor.miner_outlet_temperature_2') }}°C,
-          Inlet 1: {{ states('sensor.miner_inlet_temperature_1') }}°C,
-          Inlet 2: {{ states('sensor.miner_inlet_temperature_2') }}°C.
-          Please check your miner's cooling system.
-
-    - service: notify.whatsapp
-      data:
-        title: "Miner Alert - High Temperature"
-        message: >-
-          High temperature detected on your miner:
-          Outlet 1: {{ states('sensor.miner_outlet_temperature_1') }}°C,
-          Outlet 2: {{ states('sensor.miner_outlet_temperature_2') }}°C,
-          Inlet 1: {{ states('sensor.miner_inlet_temperature_1') }}°C,
-          Inlet 2: {{ states('sensor.miner_inlet_temperature_2') }}°C.
-          Please check your miner's cooling system.
-        target: "14164327184@c.us"
-
+  - service: persistent_notification.create
+    data:
+      title: 'Debug: Miner Temperature Alert Triggered'
+      message: 'Current temperatures: Outlet 1: {{ states(''sensor.miner_outlet_temperature_1'')
+        }}°C, Outlet 2: {{ states(''sensor.miner_outlet_temperature_2'') }}°C, Inlet
+        1: {{ states(''sensor.miner_inlet_temperature_1'') }}°C, Inlet 2: {{ states(''sensor.miner_inlet_temperature_2'')
+        }}°C'
+  - service: notify.email_notify
+    data:
+      title: Miner Alert - High Temperature
+      message: 'High temperature detected on your miner: Outlet 1: {{ states(''sensor.miner_outlet_temperature_1'')
+        }}°C, Outlet 2: {{ states(''sensor.miner_outlet_temperature_2'') }}°C, Inlet
+        1: {{ states(''sensor.miner_inlet_temperature_1'') }}°C, Inlet 2: {{ states(''sensor.miner_inlet_temperature_2'')
+        }}°C. Please check your miner''s cooling system.'
+  - service: notify.whatsapp
+    data:
+      title: Miner Alert - High Temperature
+      message: 'High temperature detected on your miner: Outlet 1: {{ states(''sensor.miner_outlet_temperature_1'')
+        }}°C, Outlet 2: {{ states(''sensor.miner_outlet_temperature_2'') }}°C, Inlet
+        1: {{ states(''sensor.miner_inlet_temperature_1'') }}°C, Inlet 2: {{ states(''sensor.miner_inlet_temperature_2'')
+        }}°C. Please check your miner''s cooling system.'
+      target: 14164327184@c.us
