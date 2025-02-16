@@ -981,6 +981,34 @@
   unit_of_measurement: "BTC"
   scan_interval: 300
 
+
+- platform: rest         
+  name: "PowerPool DOGE Balance"                                                                                                        
+  resource: !secret powerpool_user_api_url
+  value_template: >
+    {% for balance in value_json.data.balances %}
+      {% if balance.coinTicker == 'DOGE' %}
+        {{ balance.balance | float }}
+        {% break %}
+      {% endif %}
+    {% endfor %}
+  unit_of_measurement: "DOGE"
+  scan_interval: 300
+
+
+- platform: rest         
+  name: "PowerPool LTC Balance"                                                                                                        
+  resource: !secret powerpool_user_api_url
+  value_template: >
+    {% for balance in value_json.data.balances %}
+      {% if balance.coinTicker == 'LTC' %}
+        {{ balance.balance | float }}
+        {% break %}
+      {% endif %}
+    {% endfor %}
+  unit_of_measurement: "LTC"
+  scan_interval: 300
+
 - platform: rest         
   name: "PowerPool USD Balance"                                                                                                        
   resource: !secret powerpool_user_api_url
