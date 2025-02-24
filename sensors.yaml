@@ -492,7 +492,8 @@
               states('sensor.binance_balance_total_eur') not in ['unknown', 'unavailable'] %}
           {{ (states('sensor.exodus_balance_total_eur') | float +
               states('sensor.kraken_balance_total_eur') | float +
-              states('sensor.binance_balance_total_eur') | float) | round(2) }}
+              states('sensor.binance_balance_total_eur') | float +
+              states('sensor.sol_balance_in_eur') | float(0)) | round(2) }}
         {% else %}
           {{ states('sensor.balance_total_eur') }}
         {% endif %}
@@ -504,7 +505,8 @@
               states('sensor.binance_balance_total_usd') not in ['unknown', 'unavailable'] %}
           {{ (states('sensor.exodus_balance_total_usd') | float +
               states('sensor.kraken_balance_total_usd') | float +
-              states('sensor.binance_balance_total_usd') | float) | round(2) }}
+              states('sensor.binance_balance_total_usd') | float +
+              (states('sensor.sol_balance_in_eur') | float(0) / states('sensor.usd_eur') | float(1))) | round(2) }}
         {% else %}
           {{ states('sensor.balance_total_usd') }}
         {% endif %}
@@ -516,7 +518,8 @@
               states('sensor.binance_balance_total_cad') not in ['unknown', 'unavailable'] %}
           {{ (states('sensor.exodus_balance_total_cad') | float +
               states('sensor.kraken_balance_total_cad') | float +
-              states('sensor.binance_balance_total_cad') | float) | round(2) }}
+              states('sensor.binance_balance_total_cad') | float +
+              (states('sensor.sol_balance_in_eur') | float(0) * states('sensor.eur_cad') | float(1))) | round(2) }}
         {% else %}
           {{ states('sensor.balance_total_cad') }}
         {% endif %}
@@ -1243,4 +1246,39 @@
           {{ (states('sensor.miner_hashrate') | float(0) / 1000) | round(2) }}
         {% else %}
           0
+        {% endif %}
+
+- platform: rest
+  name: Solana Price USD
+  resource: https://pro-api.coinmarketcap.com/v1/cryptocurrency/quotes/latest?id=5426&convert=USD
+  headers:
+    X-CMC_PRO_API_KEY: !secret coinmarketcap_api_key
+  value_template: "{{ value_json.data['5426'].quote.USD.price | float | round(3) }}"
+  unit_of_measurement: 'USD'
+  scan_interval: 3600  # Update every hour
+
+- platform: rest
+  name: Solana Price EUR
+  resource: https://pro-api.coinmarketcap.com/v1/cryptocurrency/quotes/latest?id=5426&convert=EUR
+  headers:
+    X-CMC_PRO_API_KEY: !secret coinmarketcap_api_key
+  value_template: "{{ value_json.data['5426'].quote.EUR.price | float | round(3) }}"
+  unit_of_measurement: 'EUR'
+  scan_interval: 3600  # Update every hour
+
+- platform: template
+  sensors:
+    eur_in_sol:
+      friendly_name: "EUR in SOL"
+      value_template: "{{ (1 / states('sensor.solana_price_eur') | float) | round(7) }}"
+      unit_of_measurement: 'SOL'
+
+    sol_balance_in_eur:
+      friendly_name: "SOL Balance (EUR)"
+      unit_of_measurement: '€'
+      value_template: >-
+        {% if states('sensor.balance_total_sol') not in ['unknown', 'unavailable'] 
+           and states('sensor.solana_price_eur') not in ['unknown', 'unavailable'] %}
+          {{ (states('sensor.balance_total_sol') | float * 
+              states('sensor.solana_price_eur') | float) | round(2) }}
         {% endif %}

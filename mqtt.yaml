@@ -168,6 +168,12 @@ sensor:
     unit_of_measurement: "EUR"
     unique_id: "exodus_balance_total_eur"
 
+  - name: "Exodus SOL Balance"
+    state_topic: "exodus/balance_sol"
+    value_template: "{{ value | float }}"
+    unit_of_measurement: "SOL"
+    unique_id: "exodus_balance_sol"
+
   - name: "Kraken LTC Balance"
     state_topic: "kraken/balance_ltc"
     value_template: "{{ value | float }}"
