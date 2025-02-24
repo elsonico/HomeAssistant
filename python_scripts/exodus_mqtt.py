@@ -24,6 +24,7 @@ MQTT_TOPICS = {
     "doge_balance": "exodus/balance_doge",
     "btc_balance": "exodus/balance_btc",
     "sol_balance": "exodus/balance_sol",
+    "sol_staked_balance": "exodus/balance_sol_staked",
     "total_usd": "exodus/balance_total_usd",
     "total_cad": "exodus/balance_total_cad",
     "total_eur": "exodus/balance_total_eur"
@@ -97,23 +98,53 @@ def publish_to_mqtt(topic, message):
     except Exception as err:
         logging.error(f"An error occurred while publishing to MQTT: {err}")
 
-# Add function to get SOL balance
-def get_sol_balance(address):
+# Modify the get_sol_balance function to include staked balance
+def get_sol_balances(address):
     try:
-        payload = {
+        # Get regular balance
+        regular_payload = {
             "jsonrpc": "2.0",
             "id": 1,
             "method": "getBalance",
             "params": [address]
         }
-        response = requests.post(SOL_API_URL, json=payload)
-        response.raise_for_status()
-        data = response.json()
-        balance_lamports = data.get('result', {}).get('value', 0)
-        return balance_lamports / 1e9  # Convert lamports to SOL
+        regular_response = requests.post(SOL_API_URL, json=regular_payload)
+        regular_response.raise_for_status()
+        regular_data = regular_response.json()
+        regular_balance = regular_data.get('result', {}).get('value', 0) / 1e9
+
+        # Get stake accounts
+        stake_payload = {
+            "jsonrpc": "2.0",
+            "id": 1,
+            "method": "getProgramAccounts",
+            "params": [
+                "Stake11111111111111111111111111111111111111",
+                {
+                    "filters": [
+                        {
+                            "memcmp": {
+                                "offset": 44,
+                                "bytes": address
+                            }
+                        }
+                    ]
+                }
+            ]
+        }
+        stake_response = requests.post(SOL_API_URL, json=stake_payload)
+        stake_response.raise_for_status()
+        stake_data = stake_response.json()
+        
+        staked_balance = sum(
+            account.get('account', {}).get('lamports', 0) 
+            for account in stake_data.get('result', [])
+        ) / 1e9
+
+        return regular_balance, staked_balance
     except Exception as err:
-        logging.error(f"An error occurred while fetching SOL balance for {address}: {err}")
-        return None
+        logging.error(f"An error occurred while fetching SOL balances for {address}: {err}")
+        return None, None
 
 if __name__ == "__main__":
     # Get wallet addresses from secrets
@@ -126,7 +157,7 @@ if __name__ == "__main__":
     ltc_balance = get_balance(LTC_API_URL, ltc_address)
     doge_balance = get_balance(DOGE_API_URL, doge_address)
     btc_balance = get_balance(BTC_API_URL, btc_address)
-    sol_balance = get_sol_balance(sol_address)
+    sol_balance, sol_staked_balance = get_sol_balances(sol_address)
 
     # Fetch prices and conversion rates
     ltc_price_usd, doge_price_usd, btc_price_usd, sol_price_usd = get_crypto_prices()
@@ -142,6 +173,8 @@ if __name__ == "__main__":
         total_usd += btc_balance * btc_price_usd
     if sol_balance is not None and sol_price_usd is not None:
         total_usd += sol_balance * sol_price_usd
+    if sol_staked_balance is not None and sol_price_usd is not None:
+        total_usd += sol_staked_balance * sol_price_usd
     if usd_to_cad is not None:
         total_cad = total_usd * usd_to_cad
     if usd_to_eur is not None:
@@ -156,6 +189,8 @@ if __name__ == "__main__":
         publish_to_mqtt(MQTT_TOPICS["btc_balance"], f"{btc_balance:.8f}")
     if sol_balance is not None:
         publish_to_mqtt(MQTT_TOPICS["sol_balance"], f"{sol_balance:.8f}")
+    if sol_staked_balance is not None:
+        publish_to_mqtt(MQTT_TOPICS["sol_staked_balance"], f"{sol_staked_balance:.8f}")
     if total_usd is not None:
         publish_to_mqtt(MQTT_TOPICS["total_usd"], f"{total_usd:.2f}")
     if total_cad is not None:

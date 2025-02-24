@@ -174,6 +174,12 @@ sensor:
     unit_of_measurement: "SOL"
     unique_id: "exodus_balance_sol"
 
+  - name: "Exodus SOL Staked Balance"
+    state_topic: "exodus/balance_sol_staked"
+    value_template: "{{ value | float }}"
+    unit_of_measurement: "SOL"
+    unique_id: "exodus_balance_sol_staked"
+
   - name: "Kraken LTC Balance"
     state_topic: "kraken/balance_ltc"
     value_template: "{{ value | float }}"
