@@ -1012,15 +1012,16 @@
 - platform: rest         
   name: "PowerPool USD Balance"                                                                                                        
   resource: !secret powerpool_user_api_url
-  value_template: >
+  value_template: >  
+    {% set total = namespace(sum=0) %}
     {% for balance in value_json.data.balances %}
-      {% if balance.coinTicker == 'BTC' %}
-        {{ balance.balanceUSD | float }}
-        {% break %}
-      {% endif %}
-    {% endfor %}
+      {% if balance.coinTicker in ['BTC', 'LTC', 'DOGE'] %}
+        {% set total.sum = total.sum + (balance.balanceUSD | float) %}
+      {% endif %}    
+    {% endfor %}     
+    {{ total.sum | round(2) }}
   unit_of_measurement: "USD"
-  scan_interval: 300
+  scan_interval: 300 
 
 - platform: rest         
   name: "PowerPool BTC Rewards"                                                                                                        
