@@ -515,32 +515,35 @@
 - id: 28077b7f639644688b946f35ccf0127b
   alias: Reboot or Power Cycle Miner
   description: Reboot the miner on low hash rate, fallback to power cycle if needed
-  triggers:
-  - entity_id: sensor.miner_hashrate_gh
-    to: '0.0'
-    for:
-      minutes: 15
-    trigger: state
-  - minutes: /15
-    trigger: time_pattern
-  conditions:
-  - condition: numeric_state
-    entity_id: sensor.miner_hashrate_gh
-    below: 0.1
-  - condition: numeric_state
-    entity_id: sensor.electricity_cost_in_cents_per_kwh
-    below: 62
-  actions:
-  - target:
-      entity_id: switch.shellyplug_s_3ce90ee04b97
-    action: switch.turn_off
-    data: {}
-  - delay:
-      seconds: 10
-  - target:
-      entity_id: switch.shellyplug_s_3ce90ee04b97
-    action: switch.turn_on
-    data: {}
+  trigger:
+    - platform: state
+      entity_id: sensor.miner_hashrate_gh
+      to: '0.0'
+      for: 
+        minutes: 15
+  condition:
+    - condition: numeric_state
+      entity_id: sensor.electricity_cost_in_cents_per_kwh
+      below: 62
+    - condition: not
+      conditions:
+        - condition: state
+          entity_id: sensor.miner_hashrate_gh
+          state: 'unavailable'
+        - condition: state
+          entity_id: sensor.miner_hashrate_gh
+          state: 'unknown'
+  action:
+    - target:
+        entity_id: switch.shellyplug_s_3ce90ee04b97
+      action: switch.turn_off
+      data: {}
+    - delay:
+        seconds: 10
+    - target:
+        entity_id: switch.shellyplug_s_3ce90ee04b97
+      action: switch.turn_on
+      data: {}
   mode: single
 - alias: Heater Control Based on Living Room Temperature
   description: Turn the heater on when temp is below 22°C and turn it off when above
