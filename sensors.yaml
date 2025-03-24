@@ -1056,17 +1056,22 @@
     powerpool_btc_balance_formatted:
       friendly_name: "Powerpool BTC Balance"
       unit_of_measurement: "BTC"
-      value_template: "{{ states('sensor.powerpool_btc_balance') | float | round(20) }}"
+      value_template: "{{ '%.20f' | format(states('sensor.powerpool_btc_balance') | float) }}"
 
     powerpool_doge_balance_formatted:
       friendly_name: "Powerpool DOGE Balance"
       unit_of_measurement: "DOGE"
-      value_template: "{{ states('sensor.powerpool_doge_balance') | float | round(10) }}"
+      value_template: "{{ '%.13f' | format(states('sensor.powerpool_doge_balance') | float) }}"
 
     powerpool_ltc_balance_formatted:
       friendly_name: "Powerpool LTC Balance"
       unit_of_measurement: "LTC"
-      value_template: "{{ states('sensor.powerpool_ltc_balance') | float | round(18) }}"
+      value_template: "{{ '%.18f' | format(states('sensor.powerpool_ltc_balance') | float) }}"
+
+    powerpool_rejection_rate_formatted:
+      friendly_name: "Rejection rate"
+      unit_of_measurement: "%"
+      value_template: "{{ '%.2f' | format(states('sensor.powerpool_rejection_rate') | float) }}"
 
     powerpool_balance_usd:
       friendly_name: "Balance in USD"
@@ -1075,10 +1080,11 @@
         {% set btc_balance = states('sensor.powerpool_btc_balance') | float(0) %}
         {% set doge_balance = states('sensor.powerpool_doge_balance') | float(0) %}
         {% set ltc_balance = states('sensor.powerpool_ltc_balance') | float(0) %}
-        {% set btc_price = states('sensor.powerpool_btc_price') | float(0) %}
-        {% set doge_price = states('sensor.powerpool_doge_price') | float(0) %}
-        {% set ltc_price = states('sensor.powerpool_ltc_price') | float(0) %}
-        {{ ((btc_balance * btc_price) + (doge_balance * doge_price) + (ltc_balance * ltc_price)) | round(2) }}
+        {% set btc_price = states('sensor.btc_price') | float(0) %}
+        {% set doge_price = states('sensor.doge_price') | float(0) %}
+        {% set ltc_price = states('sensor.ltc_price') | float(0) %}
+        {% set total = (btc_balance * btc_price) + (doge_balance * doge_price) + (ltc_balance * ltc_price) %}
+        {{ '%.1f' | format(total) if total > 0 else '0.0' }}
 
     powerpool_balance_eur:
       friendly_name: "Balance in EUR"
@@ -1086,7 +1092,8 @@
       value_template: >
         {% set usd_balance = states('sensor.powerpool_balance_usd') | float(0) %}
         {% set usd_eur = states('sensor.usd_eur') | float(1) %}
-        {{ (usd_balance * usd_eur) | round(2) }}
+        {% set total = usd_balance * usd_eur %}
+        {{ '%.1f' | format(total) if total > 0 else '0.0' }}
 
     powerpool_expected_daily_rewards:
       friendly_name: "Expected Daily Rewards"
