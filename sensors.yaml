@@ -960,14 +960,19 @@
 - platform: rest         
   name: "PowerPool Hashrate"                                                                                                        
   resource: !secret powerpool_user_api_url
-  value_template: "{{ value_json.data.hashrate.scrypt.hashrate | float }}"
+  value_template: "{{ value_json.elsonico.hashrate.scrypt.hashrate | float }}"
   unit_of_measurement: "GH/s"
   scan_interval: 300
 
 - platform: rest         
   name: "PowerPool Rejection Rate"                                                                                                        
   resource: !secret powerpool_user_api_url
-  value_template: "{{ value_json.data.workers[0].rejectedPercentage | float }}"
+  value_template: >
+    {% set worker = value_json.elsonico.workers.scrypt[0] %}
+    {% set invalid = worker.invalid_shares | float %}
+    {% set valid = worker.valid_shares | float %}
+    {% set total = invalid + valid %}
+    {{ ((invalid / total) * 100) if total > 0 else 0 | float | round(2) }}
   unit_of_measurement: "%"
   scan_interval: 300
 
@@ -975,7 +980,7 @@
   name: "PowerPool BTC Balance"                                                                                                        
   resource: !secret powerpool_user_api_url
   value_template: >
-    {% for balance in value_json.data.balances %}
+    {% for balance in value_json.elsonico.balances %}
       {% if balance.coinTicker == 'BTC' %}
         {{ balance.balance | float }}
         {% break %}
@@ -989,7 +994,7 @@
   name: "PowerPool DOGE Balance"                                                                                                        
   resource: !secret powerpool_user_api_url
   value_template: >
-    {% for balance in value_json.data.balances %}
+    {% for balance in value_json.elsonico.balances %}
       {% if balance.coinTicker == 'DOGE' %}
         {{ balance.balance | float }}
         {% break %}
@@ -1003,7 +1008,7 @@
   name: "PowerPool LTC Balance"                                                                                                        
   resource: !secret powerpool_user_api_url
   value_template: >
-    {% for balance in value_json.data.balances %}
+    {% for balance in value_json.elsonico.balances %}
       {% if balance.coinTicker == 'LTC' %}
         {{ balance.balance | float }}
         {% break %}
@@ -1014,29 +1019,36 @@
 
 - platform: rest         
   name: "PowerPool USD Balance"                                                                                                        
-  resource: !secret powerpool_user_api_url
+  resource: !secret powerpool_pool_api_url
   value_template: >  
+    {% set prices = value_json.prices %}
+    {% set balances = states | selectattr('entity_id', 'match', 'sensor.powerpool_.*_balance') | list %}
     {% set total = namespace(sum=0) %}
-    {% for balance in value_json.data.balances %}
-      {% if balance.coinTicker in ['BTC', 'LTC', 'DOGE'] %}
-        {% set total.sum = total.sum + (balance.balanceUSD | float) %}
+    {% for balance in balances %}
+      {% if 'BTC' in balance.entity_id %}
+        {% set total.sum = total.sum + (balance.state | float * prices.BTC | float) %}
+      {% elif 'LTC' in balance.entity_id %}
+        {% set total.sum = total.sum + (balance.state | float * prices.LTC | float) %}
+      {% elif 'DOGE' in balance.entity_id %}
+        {% set total.sum = total.sum + (balance.state | float * prices.DOGE | float) %}
       {% endif %}    
     {% endfor %}     
     {{ total.sum | round(2) }}
   unit_of_measurement: "USD"
   scan_interval: 300 
 
-- platform: rest         
-  name: "PowerPool BTC Rewards"                                                                                                        
-  resource: !secret powerpool_user_api_url
-  value_template: >
-    {% for reward in value_json.data.workers[0].totalRewards %}
-      {% if reward.coinTicker == 'BTC' %}
-        {{ reward.totalRewards | float }}
-        {% break %}
-      {% endif %}
-    {% endfor %}
-  unit_of_measurement: "BTC"
+- platform: rest     
+  name: "PowerPool Scrypt Average Pay Rate"
+  resource: !secret powerpool_pool_api_url
+  value_template: "{{ value_json.pools.scrypt.BTCaveragePayRate | float }}"
+  unit_of_measurement: "BTC/TH"
+  scan_interval: 300
+               
+- platform: rest     
+  name: "PowerPool Scrypt Current Pay Rate"
+  resource: !secret powerpool_pool_api_url
+  value_template: "{{ value_json.pools.scrypt.BTCpayRate | float }}"
+  unit_of_measurement: "BTC/TH"
   scan_interval: 300
 
 - platform: template
@@ -1108,68 +1120,6 @@
       value_template: >
         {% set hashrate = states('sensor.powerpool_hashrate') | float(0) %}
         {{ (hashrate * 1000) | round(0) }}
-
-# PowerPool REST sensors for pay rates
-- platform: rest     
-  name: "PowerPool Scrypt Average Pay Rate"
-  resource: !secret powerpool_pool_api_url
-  value_template: "{{ value_json.scrypt.BTCaveragePayRate | float }}"
-  unit_of_measurement: "BTC/TH"
-  scan_interval: 300
-               
-- platform: rest     
-  name: "PowerPool Scrypt Current Pay Rate"
-  resource: !secret powerpool_pool_api_url
-  value_template: "{{ value_json.scrypt.BTCpayRate | float }}"
-  unit_of_measurement: "BTC/TH"
-  scan_interval: 300
-
-- platform: template
-  sensors:
-    powerpool_expected_hourly_rewards:
-      friendly_name: "PowerPool Expected Hourly Rewards"
-      unit_of_measurement: "BTC"
-      value_template: >
-        {% set hashrate = states('sensor.powerpool_hashrate') | float(0) %}
-        {% set avg_payrate = states('sensor.powerpool_scrypt_average_pay_rate') | float(0) %}
-        {% if hashrate > 0 and avg_payrate > 0 %}
-          {% set hashrate_th = hashrate / 1000 %}
-          {% set hourly_rate = (avg_payrate * hashrate_th / 24) %}
-          {{ hourly_rate | round(8) }}
-        {% else %}
-          0
-        {% endif %}
-
-    powerpool_current_profitability:
-      friendly_name: "PowerPool Current Profitability"
-      unit_of_measurement: "BTC/TH/s"
-      value_template: >
-        {% set current_rate = states('sensor.powerpool_scrypt_current_pay_rate') | float(0) %}
-        {{ current_rate | round(4) }}
-
-    powerpool_average_profitability:
-      friendly_name: "PowerPool Average Profitability"
-      unit_of_measurement: "BTC/TH/s"
-      value_template: >
-        {% set avg_rate = states('sensor.powerpool_scrypt_average_pay_rate') | float(0) %}
-        {{ avg_rate | round(4) }}
-
-    powerpool_expected_hourly_rewards_eur:
-      friendly_name: "PowerPool Expected Hourly Rewards EUR"
-      unit_of_measurement: "€"
-      value_template: >
-        {% set hashrate = states('sensor.powerpool_hashrate') | float(0) %}
-        {% set avg_payrate = states('sensor.powerpool_scrypt_average_pay_rate') | float(0) %}
-        {% set btc_price = states('sensor.cryptoinfo_btc_price') | float(0) %}
-        {% set usd_eur = states('sensor.usd_eur') | float(0) %}
-        {% if hashrate > 0 and avg_payrate > 0 %}
-          {% set hashrate_th = hashrate / 1000 %}
-          {% set hourly_usd = avg_payrate * hashrate_th * btc_price / 24 %}
-          {% set hourly_eur = hourly_usd * usd_eur %}
-          {{ hourly_eur | round(2) }}
-        {% else %}
-          0
-        {% endif %}
 
 # Template sensors for calculations
 - platform: template
