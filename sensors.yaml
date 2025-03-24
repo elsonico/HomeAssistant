@@ -1232,3 +1232,75 @@
           {{ (states('sensor.balance_total_sol') | float * 
               states('sensor.solana_price_eur') | float) | round(2) }}
         {% endif %}
+
+# Add/modify these template sensors
+- platform: template
+  sensors:
+    powerpool_average_profitability:
+      friendly_name: "Average profitability"
+      unit_of_measurement: "BTC/TH/s"
+      value_template: >
+        {% set avg_payrate = states('sensor.powerpool_scrypt_average_pay_rate') | float(0) %}
+        {{ (avg_payrate) | round(4) }}
+
+    powerpool_current_profitability:
+      friendly_name: "Current profitability"
+      unit_of_measurement: "BTC/TH/s"
+      value_template: >
+        {% set current_payrate = states('sensor.powerpool_scrypt_current_pay_rate') | float(0) %}
+        {{ (current_payrate) | round(4) }}
+
+    # Modify existing PowerPool balance sensors to match the precision shown in the images
+    powerpool_btc_balance:
+      friendly_name: "Powerpool BTC Balance"
+      unit_of_measurement: "BTC"
+      value_template: >
+        {% if states('sensor.powerpool_btc_balance') not in ['unknown', 'unavailable'] %}
+          {{ states('sensor.powerpool_btc_balance') | float | round(8) }}
+        {% else %}
+          0
+        {% endif %}
+
+    powerpool_doge_balance:
+      friendly_name: "Powerpool DOGE Balance"
+      unit_of_measurement: "DOGE"
+      value_template: >
+        {% if states('sensor.powerpool_doge_balance') not in ['unknown', 'unavailable'] %}
+          {{ states('sensor.powerpool_doge_balance') | float | round(4) }}
+        {% else %}
+          0
+        {% endif %}
+
+    powerpool_ltc_balance:
+      friendly_name: "Powerpool LTC Balance"
+      unit_of_measurement: "LTC"
+      value_template: >
+        {% if states('sensor.powerpool_ltc_balance') not in ['unknown', 'unavailable'] %}
+          {{ states('sensor.powerpool_ltc_balance') | float | round(8) }}
+        {% else %}
+          0
+        {% endif %}
+
+    powerpool_balance_usd:
+      friendly_name: "PowerPool Balance USD"
+      unit_of_measurement: "USD"
+      value_template: >
+        {% if states('sensor.powerpool_usd_balance') not in ['unknown', 'unavailable'] %}
+          {{ states('sensor.powerpool_usd_balance') | float | round(2) }}
+        {% else %}
+          0
+        {% endif %}
+
+    powerpool_expected_daily_rewards:
+      friendly_name: "Expected Daily Rewards"
+      unit_of_measurement: "€"
+      value_template: >
+        {% set daily_rewards_eur = states('sensor.powerpool_expected_daily_rewards_eur') | float(0) %}
+        {{ daily_rewards_eur | round(2) }}
+
+    powerpool_expected_daily_profit:
+      friendly_name: "Expected Daily Profit"
+      unit_of_measurement: "€"
+      value_template: >
+        {% set profit = states('sensor.powerpool_expected_daily_profit') | float(0) %}
+        {{ profit | round(2) }}
