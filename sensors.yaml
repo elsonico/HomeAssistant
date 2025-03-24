@@ -1053,57 +1053,54 @@
 
 - platform: template
   sensors:
+    powerpool_btc_balance_formatted:
+      friendly_name: "Powerpool BTC Balance"
+      unit_of_measurement: "BTC"
+      value_template: "{{ states('sensor.powerpool_btc_balance') | float | round(20) }}"
+
+    powerpool_doge_balance_formatted:
+      friendly_name: "Powerpool DOGE Balance"
+      unit_of_measurement: "DOGE"
+      value_template: "{{ states('sensor.powerpool_doge_balance') | float | round(10) }}"
+
+    powerpool_ltc_balance_formatted:
+      friendly_name: "Powerpool LTC Balance"
+      unit_of_measurement: "LTC"
+      value_template: "{{ states('sensor.powerpool_ltc_balance') | float | round(18) }}"
+
+    powerpool_balance_usd:
+      friendly_name: "Balance in USD"
+      unit_of_measurement: "USD"
+      value_template: >
+        {% set btc_balance = states('sensor.powerpool_btc_balance') | float(0) %}
+        {% set doge_balance = states('sensor.powerpool_doge_balance') | float(0) %}
+        {% set ltc_balance = states('sensor.powerpool_ltc_balance') | float(0) %}
+        {% set btc_price = states('sensor.powerpool_btc_price') | float(0) %}
+        {% set doge_price = states('sensor.powerpool_doge_price') | float(0) %}
+        {% set ltc_price = states('sensor.powerpool_ltc_price') | float(0) %}
+        {{ ((btc_balance * btc_price) + (doge_balance * doge_price) + (ltc_balance * ltc_price)) | round(2) }}
+
     powerpool_balance_eur:
-      friendly_name: "PowerPool Balance EUR"
+      friendly_name: "Balance in EUR"
       unit_of_measurement: "€"
-      value_template: >-
-        {% if states('sensor.powerpool_usd_balance') not in ['unknown', 'unavailable']
-           and states('sensor.usd_eur') not in ['unknown', 'unavailable'] %}
-          {% set usd_balance = states('sensor.powerpool_usd_balance') | float(0) %}
-          {% set usd_eur_rate = states('sensor.usd_eur') | float(0) %}
-          {{ (usd_balance * usd_eur_rate) | round(2) }}
-        {% else %}
-          0
-        {% endif %}
+      value_template: >
+        {% set usd_balance = states('sensor.powerpool_balance_usd') | float(0) %}
+        {% set usd_eur = states('sensor.usd_eur') | float(1) %}
+        {{ (usd_balance * usd_eur) | round(2) }}
 
     powerpool_expected_daily_rewards:
-      friendly_name: "PowerPool Expected Daily Rewards"
-      unit_of_measurement: "BTC"
-      value_template: >
-        {% set hashrate = states('sensor.powerpool_hashrate') | float(0) %}
-        {% set avg_payrate = states('sensor.powerpool_scrypt_average_pay_rate') | float(0) %}
-        {% if hashrate > 0 and avg_payrate > 0 %}
-          {% set hashrate_th = hashrate / 1000 %}
-          {% set daily_rate = (avg_payrate * hashrate_th ) %}
-          {{ daily_rate | round(8) }}
-        {% else %}
-          0
-        {% endif %}
-
-    powerpool_expected_daily_rewards_eur:
-      friendly_name: "PowerPool Expected Daily Rewards EUR"
+      friendly_name: "Expected Daily Rewards"
       unit_of_measurement: "€"
       value_template: >
-        {% set hashrate = states('sensor.powerpool_hashrate') | float(0) %}
-        {% set avg_payrate = states('sensor.powerpool_scrypt_average_pay_rate') | float(0) %}
-        {% set btc_price = states('sensor.cryptoinfo_btc_price') | float(0) %}
-        {% set usd_eur = states('sensor.usd_eur') | float(0) %}
-        {% if hashrate > 0 and avg_payrate > 0 %}
-          {% set hashrate_th = hashrate / 1000 %}
-          {% set daily_usd = avg_payrate * hashrate_th * btc_price %}
-          {% set daily_eur = daily_usd * usd_eur %}
-          {{ daily_eur | round(2) }}
-        {% else %}
-          0
-        {% endif %}
+        {% set daily_rewards_eur = states('sensor.powerpool_expected_daily_rewards_eur') | float(0) %}
+        {{ daily_rewards_eur | round(2) }}
 
     powerpool_expected_daily_profit:
-      friendly_name: "PowerPool Expected Daily Profit"
+      friendly_name: "Expected Daily Profit"
       unit_of_measurement: "€"
       value_template: >
-        {% set expected_rewards = states('sensor.powerpool_expected_daily_rewards_eur') | float(0) %}
-        {% set energy_cost = states('sensor.shellyplug_s_3ce90ee04b97_energy_cost_daily') | float(0) %}
-        {{ (expected_rewards - energy_cost) | round(2) }}
+        {% set profit = states('sensor.powerpool_expected_daily_profit') | float(0) %}
+        {{ profit | round(2) }}
 
 - platform: template
   sensors:
