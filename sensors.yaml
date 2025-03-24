@@ -982,7 +982,7 @@
   value_template: >
     {% for balance in value_json.elsonico.balances %}
       {% if balance.coinTicker == 'BTC' %}
-        {{ '%.*f' % (20, balance.balance | float) }}
+        {{ (balance.balance | float) | round(6) }}
         {% break %}
       {% endif %}
     {% endfor %}
@@ -996,7 +996,7 @@
   value_template: >
     {% for balance in value_json.elsonico.balances %}
       {% if balance.coinTicker == 'DOGE' %}
-        {{ '%.*f' % (13, balance.balance | float) }}
+        {{ (balance.balance | float) | round(2) }}
         {% break %}
       {% endif %}
     {% endfor %}
@@ -1010,7 +1010,7 @@
   value_template: >
     {% for balance in value_json.elsonico.balances %}
       {% if balance.coinTicker == 'LTC' %}
-        {{ '%.*f' % (18, balance.balance | float) }}
+        {{ (balance.balance | float) | round(4) }}
         {% break %}
       {% endif %}
     {% endfor %}
