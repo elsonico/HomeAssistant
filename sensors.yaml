@@ -970,9 +970,10 @@
   value_template: >
     {% set worker = value_json.elsonico.workers.scrypt[0] %}
     {% set invalid = worker.invalid_shares | float %}
+    {% set stale = worker.stale_shares | float %}
     {% set valid = worker.valid_shares | float %}
-    {% set total = invalid + valid %}
-    {{ '{:.2f}'.format((invalid / total) * 100) if total > 0 else '0.00' }}
+    {% set total = invalid + valid + stale %}
+    {{ '{:.2f}'.format(((invalid + stale) / total) * 100) if total > 0 else '0.00' }}
   unit_of_measurement: "%"
   scan_interval: 300
 
@@ -1258,7 +1259,7 @@
       unit_of_measurement: "BTC"
       value_template: >
         {% if states('sensor.powerpool_btc_balance') not in ['unknown', 'unavailable'] %}
-          {{ states('sensor.powerpool_btc_balance') | float | round(8) }}
+          {{ states('sensor.powerpool_btc_balance') | float | round(10) }}
         {% else %}
           0
         {% endif %}
@@ -1278,7 +1279,7 @@
       unit_of_measurement: "LTC"
       value_template: >
         {% if states('sensor.powerpool_ltc_balance') not in ['unknown', 'unavailable'] %}
-          {{ states('sensor.powerpool_ltc_balance') | float | round(8) }}
+          {{ states('sensor.powerpool_ltc_balance') | float | round(10) }}
         {% else %}
           0
         {% endif %}
