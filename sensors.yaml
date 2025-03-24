@@ -1056,17 +1056,17 @@
     powerpool_btc_balance_formatted:
       friendly_name: "Powerpool BTC Balance"
       unit_of_measurement: "BTC"
-      value_template: "{{ '%.20f' | format(states('sensor.powerpool_btc_balance') | float) }}"
+      value_template: "{{ '%.6f' | format(states('sensor.powerpool_btc_balance') | float) }}"
 
     powerpool_doge_balance_formatted:
       friendly_name: "Powerpool DOGE Balance"
       unit_of_measurement: "DOGE"
-      value_template: "{{ '%.13f' | format(states('sensor.powerpool_doge_balance') | float) }}"
+      value_template: "{{ '%.2f' | format(states('sensor.powerpool_doge_balance') | float) }}"
 
     powerpool_ltc_balance_formatted:
       friendly_name: "Powerpool LTC Balance"
       unit_of_measurement: "LTC"
-      value_template: "{{ '%.18f' | format(states('sensor.powerpool_ltc_balance') | float) }}"
+      value_template: "{{ '%.4f' | format(states('sensor.powerpool_ltc_balance') | float) }}"
 
     powerpool_rejection_rate_formatted:
       friendly_name: "Rejection rate"
