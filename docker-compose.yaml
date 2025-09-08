@@ -1,4 +1,3 @@
-version: '3'
 services:
   homeassistant:
     container_name: home-assistant
@@ -27,5 +26,6 @@ services:
       - WAURL=${WAURL}
       - MINERUSER=${MINERUSER}
       - MINERPWD=${MINERPWD}
+      - NODE_ENDPOINT=${NODE_ENDPOINT}
     restart: unless-stopped
     network_mode: host
