@@ -7,3 +7,6 @@ publish_litewallet_balance: "/usr/local/bin/python3 /config/python_scripts/litew
 publish_fetch_crypto_currency: "/usr/local/bin/python3 /config/python_scripts/fetch_crypto_values_and_currencies.py"
 monitor_miner: "/usr/local/bin/python3 /config/python_scripts/miner_monitor.py"
 create_states_dir: "mkdir -p /config/ha_states"
+miner_overclock: "/usr/local/bin/python3 /config/python_scripts/miner_modes.py --overclockmode"
+miner_normal: "/usr/local/bin/python3 /config/python_scripts/miner_modes.py --normalmode"
+miner_powersave: "/usr/local/bin/python3 /config/python_scripts/miner_modes.py --powersavemode"
