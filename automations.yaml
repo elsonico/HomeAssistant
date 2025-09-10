@@ -492,7 +492,7 @@
   triggers:
   - entity_id:
     - sensor.electricity_cost_in_cents_per_kwh
-    above: 62
+    above: 30
     trigger: numeric_state
   actions:
   - target:
@@ -505,7 +505,7 @@
   triggers:
   - entity_id:
     - sensor.electricity_cost_in_cents_per_kwh
-    below: 62
+    below: 30
     trigger: numeric_state
   actions:
   - target:
@@ -546,32 +546,35 @@
     data: {}
   mode: single
 - id: miner_switch_to_powersavemode
-  alias: Switch Miner to Powersave Mode when price over 30c/kWh
-  description: Switch the miner when electricity price goes above 30c/kWh
+  alias: Switch Miner to Powersave Mode when price over 20c/kWh
+  description: Switch the miner when electricity price goes above 20c/kWh
   triggers:
   - entity_id:
     - sensor.electricity_cost_in_cents_per_kwh
-    above: 30
+    above: 20
     trigger: numeric_state
   actions:
-  - service: shell_command.miner_powersave
+  - action: shell_command.miner_powersave
+    data: {}
   - delay:
       seconds: 5
 - id: miner_switch_to_normalmode
-  alias: Switch Miner to Normal Mode when price below 30c/kWh
-  description: Switch the miner to normal mode when electricity price goes below 30c/kWh
+  alias: Switch Miner to Normal Mode when price below 20c/kWh
+  description: Switch the miner to normal mode when electricity price goes below 20c/kWh
   triggers:
   - entity_id:
     - sensor.electricity_cost_in_cents_per_kwh
-    below: 30
+    below: 20
     trigger: numeric_state
   actions:
-  - service: shell_command.miner_normal
+  - action: shell_command.miner_normal
+    data: {}
   - delay:
       seconds: 5
 - id: miner_switch_to_overclockemode
   alias: Switch Miner to Overclock Mode when price below 10c/kWh
-  description: Switch the miner to overclock mode when electricity price goes below 10c/kWh
+  description: Switch the miner to overclock mode when electricity price goes below
+    10c/kWh
   triggers:
   - entity_id:
     - sensor.electricity_cost_in_cents_per_kwh
@@ -815,13 +818,13 @@
     action: notify.whatsapp
   mode: single
 - id: update_miner_mode
-  alias: "Update Miner Mode"
-  description: "Periodically update miner work mode via MQTT"
+  alias: Update Miner Mode
+  description: Periodically update miner work mode via MQTT
   trigger:
-    - platform: time_pattern
-      minutes: "/10"  # Every 5 minutes
-    - platform: homeassistant
-      event: start
+  - platform: time_pattern
+    minutes: /5
+  - platform: homeassistant
+    event: start
   action:
-    - service: shell_command.update_miner_mode
+  - service: shell_command.update_miner_mode
   mode: single

@@ -80,11 +80,6 @@
         raw_today: "{{ state_attr('sensor.nordpool_kwh_fi_eur_3_10_0255', 'raw_today') }}"
         raw_tomorrow: "{{ state_attr('sensor.nordpool_kwh_fi_eur_3_10_0255', 'raw_tomorrow') }}"
 
-- platform: rest
-  resource: http://ip.jsontest.com
-  name: External IP
-  value_template: '{{ value_json.ip }}'
-
 # BTC Price USD
 - platform: cryptoinfo_advanced
   id: "BTC Price"
@@ -1303,13 +1298,6 @@
         {% set daily_rewards_eur = states('sensor.powerpool_expected_daily_rewards_eur') | float(0) %}
         {{ daily_rewards_eur | round(2) }}
 
-    powerpool_expected_daily_profit:
-      friendly_name: "Expected Daily Profit"
-      unit_of_measurement: "€"
-      value_template: >
-        {% set profit = states('sensor.powerpool_expected_daily_profit') | float(0) %}
-        {{ profit | round(2) }}
-
     powerpool_expected_hourly_rewards_eur:
       friendly_name: "Expected Hourly Rewards"
       unit_of_measurement: "€"
@@ -1318,7 +1306,7 @@
         {% set payrate = states('sensor.powerpool_scrypt_average_pay_rate') | float(0) %}
         {% set btc_price = states('sensor.btc_price') | float(0) %}
         {% set eur_rate = 1 / states('sensor.usd_eur') | float(1) %}
-        {{ '{:.2f}'.format((hashrate * payrate * btc_price * eur_rate) / 24) }}
+        {{ ((hashrate * payrate * btc_price * eur_rate) / 24) | round(2) }}
 
     powerpool_expected_daily_profit:
       friendly_name: "Expected Daily Profit"
@@ -1326,4 +1314,4 @@
       value_template: >
         {% set daily_rewards = states('sensor.powerpool_expected_daily_rewards') | float(0) %}
         {% set power_cost = states('sensor.miner_daily_power_cost') | float(0) %}
-        {{ '{:.1f}'.format(daily_rewards - power_cost) }}
+        {{ (daily_rewards - power_cost) | round(1) }}
