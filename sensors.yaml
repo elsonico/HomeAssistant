@@ -1315,3 +1315,32 @@
         {% set daily_rewards = states('sensor.powerpool_expected_daily_rewards') | float(0) %}
         {% set power_cost = states('sensor.miner_daily_power_cost') | float(0) %}
         {{ (daily_rewards - power_cost) | round(1) }}
+
+- platform: template
+  sensors:
+    mining_daily_cost:
+      friendly_name: "Mining Daily Cost"
+      unit_of_measurement: "€"
+      value_template: >
+        {% set power_w = states('sensor.shellyplug_s_3ce90ee04b97_energy') | float(0) %}
+        {% set rate_cents = states('sensor.electricity_cost_in_cents_per_kwh') | float(0) %}
+        {{ ((power_w / 1000) * 24 * (rate_cents / 100)) | round(2) }}
+      icon_template: mdi:currency-eur
+
+    mining_hourly_cost:
+      friendly_name: "Mining Hourly Cost"
+      unit_of_measurement: "€"
+      value_template: >
+        {% set power_w = states('sensor.shellyplug_s_3ce90ee04b97_energy') | float(0) %}
+        {% set rate_cents = states('sensor.electricity_cost_in_cents_per_kwh') | float(0) %}
+        {{ ((power_w / 1000) * (rate_cents / 100)) | round(4) }}
+      icon_template: mdi:currency-eur
+
+    mining_monthly_cost:
+      friendly_name: "Mining Monthly Cost"
+      unit_of_measurement: "€"
+      value_template: >
+        {% set power_w = states('sensor.shellyplug_s_3ce90ee04b97_energy') | float(0) %}
+        {% set rate_cents = states('sensor.electricity_cost_in_cents_per_kwh') | float(0) %}
+        {{ ((power_w / 1000) * 24 * 30 * (rate_cents / 100)) | round(2) }}
+      icon_template: mdi:currency-eur

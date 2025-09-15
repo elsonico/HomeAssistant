@@ -4,6 +4,7 @@ publish_binance2_balance: "/usr/local/bin/python3 /config/python_scripts/get_bin
 publish_exodus_balance: "/usr/local/bin/python3 /config/python_scripts/exodus_mqtt.py"
 publish_kraken_balance: "/usr/local/bin/python3 /config/python_scripts/kraken_balance.py"
 publish_litewallet_balance: "/usr/local/bin/python3 /config/python_scripts/litewallet_balance.py"
+publish_bitvoinwallet_balance: "/usr/local/bin/python3 /config/python_scripts/btcwallet_balance.py"
 publish_fetch_crypto_currency: "/usr/local/bin/python3 /config/python_scripts/fetch_crypto_values_and_currencies.py"
 monitor_miner: "/usr/local/bin/python3 /config/python_scripts/miner_monitor.py"
 create_states_dir: "mkdir -p /config/ha_states"
