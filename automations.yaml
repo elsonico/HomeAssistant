@@ -475,6 +475,17 @@
   - delay:
       seconds: 5
   id: 9315a4cde0fb4eda89d920463ff30e0f
+- alias: Publish Bitcoinwallet Balance
+  trigger:
+  - platform: time_pattern
+    minutes: '0'
+  - platform: homeassistant
+    event: start
+  action:
+  - service: shell_command.publish_bitvoinwallet_balance
+  - delay:
+      seconds: 5
+  id: 9315a4cde1fb4eda99d920463ff30e1e
 - alias: Fetch Crypto Values
   trigger:
   - platform: time_pattern
