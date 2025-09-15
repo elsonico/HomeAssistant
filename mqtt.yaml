@@ -246,6 +246,30 @@ sensor:
     unit_of_measurement: "EUR"
     unique_id: "litewallet_balance_total_eur"
 
+  - name: "BTC wallet BTC Balance"
+    state_topic: "bitcoinwallet/balance_btc"
+    value_template: "{{ value | float }}"
+    unit_of_measurement: "LTC"
+    unique_id: "btcwallet_balance_btc"
+
+  - name: "BTC wallet Total Balance CAD"
+    state_topic: "bitcoinwallet/balance_total_cad"
+    value_template: "{{ value | float }}"
+    unit_of_measurement: "CAD"
+    unique_id: "btcwallet_balance_total_cad"
+
+  - name: "BTC wallet Balance Total USD"
+    state_topic: "bitcoinwallet/balance_total_usd"
+    value_template: "{{ value | float }}"
+    unit_of_measurement: "USD"
+    unique_id: "btcwallet_balance_total_usd"
+
+  - name: "BTC wallet Balance Total EUR"
+    state_topic: "bitcoinwallet/balance_total_eur"
+    value_template: "{{ value | float }}"
+    unit_of_measurement: "EUR"
+    unique_id: "btcwallet_balance_total_eur"
+
   - name: "Crypto Coin Value LTC"
     state_topic: "cryptocoin/value_ltc"
     value_template: "{{ value | float }}"
