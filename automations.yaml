@@ -583,28 +583,28 @@
   - delay:
       seconds: 5
 - id: miner_switch_to_overclockemode
-  alias: Switch Miner to Overclock Mode when price below 10c/kWh
+  alias: Switch Miner to Overclock Mode when price below 5c/kWh
   description: Switch the miner to overclock mode when electricity price goes below
-    10c/kWh
+    5c/kWh
   triggers:
   - entity_id:
     - sensor.electricity_cost_in_cents_per_kwh
-    below: 10
+    below: 5
     trigger: numeric_state
   actions:
-  - service: shell_command.miner_overclock
+  - action: shell_command.miner_overclock
   - delay:
       seconds: 5
 - id: miner_switch_to_normal_from_overclock
-  alias: Switch Miner to Normal Mode from Overclock Mode when price above 10c/kWh
-  description: Switch the miner to normal mode when electricity price goes above 10c/kWh
+  alias: Switch Miner to Normal Mode from Overclock Mode when price above 5c/kWh
+  description: Switch the miner to normal mode when electricity price goes above 5c/kWh
   triggers:
   - entity_id:
     - sensor.electricity_cost_in_cents_per_kwh
-    above: 10
+    above: 5
     trigger: numeric_state
   actions:
-  - service: shell_command.miner_normal
+  - action: shell_command.miner_normal
   - delay:
       seconds: 5
 - alias: Heater Control Based on Living Room Temperature
