@@ -818,6 +818,18 @@
         {% set transfer_cost = transfer_night if now.hour >= 22 or now.hour < 7 else transfer_day %}
         {{ (spot_price + electricity_tax + transfer_cost) | round(4) }}
 
+    electricity_cost_in_cents_per_kwh_averaged:
+      friendly_name: "Electricity Cost in Cents Per kWh (Averaged)"
+      unit_of_measurement: "c/kWh"
+      value_template: >
+        {% set spot_price = (states('sensor.energy_spot_average_price') | float(0)) %}
+        {% set electricity_tax = 2.83 %}
+        {% set transfer_day = 2.62 %}
+        {% set transfer_night = 1.37 %}
+        {% set now = now() %}
+        {% set transfer_cost = transfer_night if now.hour >= 22 or now.hour < 7 else transfer_day %}
+        {{ (spot_price + electricity_tax + transfer_cost) | round(4) }}
+
 - platform: rest
   name: Litecoinpool Market Data
   resource: !secret litecoinpool_api_url

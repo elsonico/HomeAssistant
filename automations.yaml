@@ -502,7 +502,7 @@
   description: Turns off the miner when electricity price goes above 33c/kWh
   triggers:
   - entity_id:
-    - sensor.electricity_cost_in_cents_per_kwh
+    - sensor.electricity_cost_in_cents_per_kwh_averaged
     above: 30
     trigger: numeric_state
   actions:
@@ -515,7 +515,7 @@
   description: Turns on the miner when electricity price goes below 33c/kWh
   triggers:
   - entity_id:
-    - sensor.electricity_cost_in_cents_per_kwh
+    - sensor.electricity_cost_in_cents_per_kwh_averaged
     below: 30
     trigger: numeric_state
   actions:
@@ -534,7 +534,7 @@
       minutes: 15
   condition:
   - condition: numeric_state
-    entity_id: sensor.electricity_cost_in_cents_per_kwh
+    entity_id: sensor.electricity_cost_in_cents_per_kwh_averaged
     below: 62
   - condition: not
     conditions:
@@ -561,7 +561,7 @@
   description: Switch the miner when electricity price goes above 20c/kWh
   triggers:
   - entity_id:
-    - sensor.electricity_cost_in_cents_per_kwh
+    - sensor.electricity_cost_in_cents_per_kwh_averaged
     above: 20
     trigger: numeric_state
   actions:
@@ -574,7 +574,7 @@
   description: Switch the miner to normal mode when electricity price goes below 20c/kWh
   triggers:
   - entity_id:
-    - sensor.electricity_cost_in_cents_per_kwh
+    - sensor.electricity_cost_in_cents_per_kwh_averaged
     below: 20
     trigger: numeric_state
   actions:
@@ -588,7 +588,7 @@
     5c/kWh
   triggers:
   - entity_id:
-    - sensor.electricity_cost_in_cents_per_kwh
+    - sensor.electricity_cost_in_cents_per_kwh_averaged
     below: 5
     trigger: numeric_state
   actions:
@@ -600,7 +600,7 @@
   description: Switch the miner to normal mode when electricity price goes above 5c/kWh
   triggers:
   - entity_id:
-    - sensor.electricity_cost_in_cents_per_kwh
+    - sensor.electricity_cost_in_cents_per_kwh_averaged
     above: 5
     trigger: numeric_state
   actions:
