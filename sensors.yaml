@@ -819,16 +819,15 @@
         {{ (spot_price + electricity_tax + transfer_cost) | round(4) }}
 
     electricity_cost_in_cents_per_kwh_averaged:
-      friendly_name: "Electricity Cost in Cents Per kWh (Averaged)"
+      friendly_name: "Electricity Cost in Cents Per kWh (1h avg)"
       unit_of_measurement: "c/kWh"
       value_template: >
-        {% set spot_price = (states('sensor.energy_spot_average_price') | float(0)) %}
-        {% set electricity_tax = 2.83 %}
-        {% set transfer_day = 2.62 %}
-        {% set transfer_night = 1.37 %}
-        {% set now = now() %}
-        {% set transfer_cost = transfer_night if now.hour >= 22 or now.hour < 7 else transfer_day %}
-        {{ (spot_price + electricity_tax + transfer_cost) | round(4) }}
+        {% set mean = state_attr('sensor.electricity_cost_in_cents_per_kwh_stats_1h', 'mean') %}
+        {% if mean is not none %}
+          {{ (mean | float(0)) | round(4) }}
+        {% else %}
+          {{ states('sensor.electricity_cost_in_cents_per_kwh') | float(0) }}
+        {% endif %}
 
 - platform: rest
   name: Litecoinpool Market Data
@@ -839,6 +838,14 @@
   json_attributes:
     - user
     - market
+
+# Hourly statistics for electricity cost (c/kWh)
+- platform: statistics
+  name: Electricity Cost In Cents Per kWh Stats (1h)
+  entity_id: sensor.electricity_cost_in_cents_per_kwh
+  max_age:
+    hours: 1
+  precision: 4
 
 - platform: template
   sensors:
